@@ -1,0 +1,167 @@
+I am uploading a PDF design file. You must recreate the web application exactly as shown in the PDF.
+
+The project name is:
+
+Event Agency Management Lite
+
+IMPORTANT:
+Match the layout, structure, spacing, colors, and UI elements exactly as shown in the uploaded PDF.
+
+Tech Stack Requirements:
+- Pure HTML
+- CSS
+- Vanilla JavaScript
+- No frameworks
+- No backend
+- Use LocalStorage for storing data
+- Fully functional navigation between pages
+
+Project File Structure:
+
+/index.html              (Dashboard)
+/vendors.html            (Vendors list)
+/vendor-details.html     (Vendor products)
+/venues.html             (Venues list)
+/venue-details.html      (Venue booking options)
+/clients.html            (Clients list)
+/client-details.html     (Client details + planned services)
+/budget.html             (Budget planner)
+/style.css
+/script.js
+
+GLOBAL LAYOUT (ALL PAGES):
+- Dark blue fixed sidebar on left
+- Sidebar contains:
+  - Dashboard
+  - Vendors
+  - Venues
+  - Clients
+  - Budget Planner
+- Sidebar icons next to text
+- Active page highlighted
+- Top navbar:
+  - Search input
+  - Notification bell icon
+  - Profile avatar with dropdown
+
+UI STYLE:
+- Clean SaaS dashboard style
+- Rounded cards
+- Soft box shadows
+- Light grey background for main area
+- White content cards
+- Colored stat cards on dashboard (blue, green, orange, purple)
+- Status badges with colors:
+    Confirmed (green)
+    Lead (blue)
+    Completed (grey)
+    Pending (yellow)
+    On Track (green text)
+
+PAGE REQUIREMENTS:
+
+1) Dashboard (index.html)
+- 4 stat cards:
+    Total Vendors
+    Total Venues
+    Active Leads
+    Upcoming Events
+- Recent Activity table
+- Revenue Overview chart area
+- Revenue summary cards (This Month / Total Revenue)
+
+2) Vendors Page
+- Table columns:
+    Name
+    Category
+    Contact
+    Notes
+    View button
+- Add Vendor button (top right)
+
+3) Vendor Details Page
+- Breadcrumb navigation
+- Vendor name and details at top
+- Products table:
+    Product Name
+    Price
+    Description
+    Edit
+    Delete
+- Add Product button
+
+4) Venues Page
+- Table columns:
+    Name
+    Location
+    Capacity
+    Base Rental Price
+    Extra Charges
+    Notes
+    View button
+- Add Venue button
+
+5) Venue Details Page
+- Venue info section at top
+- Booking Options table:
+    Option Name
+    Price
+    Description
+    Edit
+    Delete
+- Add Booking Option button
+
+6) Clients Page
+- Table columns:
+    Client Name
+    Event Date
+    Event Type
+    Budget
+    Status
+    View button
+- Add Client button
+
+7) Client Details Page
+- Client contact info
+- Notes section
+- Planned Services table:
+    Vendor
+    Service/Product
+    Cost
+    Edit
+    Delete
+- Total cost display
+
+8) Budget Planner Page
+- Client dropdown selector at top
+- Budget summary:
+    Budget
+    Spent
+    Balance
+    Status
+- Pie chart style breakdown section
+- Expense Details table:
+    Category
+    Item
+    Cost
+    Paid badge
+    Edit
+    Delete
+- Total amount at bottom
+
+FUNCTIONAL REQUIREMENTS:
+- All pages connected properly via navigation
+- View buttons redirect to correct detail pages
+- Data stored in LocalStorage
+- Budget auto-calculates totals
+- Status updates dynamically
+- Clean modular JavaScript
+
+DO NOT:
+- Add extra features not shown in the PDF
+- Change layout design
+- Change color structure
+- Overcomplicate logic
+
+Goal:
+Create a fully working frontend prototype that matches the uploaded PDF design exactly and feels like a real SaaS dashboard.
