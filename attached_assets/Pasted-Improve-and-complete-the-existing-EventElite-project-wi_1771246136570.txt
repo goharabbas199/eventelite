@@ -1,0 +1,213 @@
+Improve and complete the existing EventElite project without changing the UI design.
+
+IMPORTANT:
+Do NOT redesign layout.
+Do NOT change colors.
+Only improve functionality and fix missing logic.
+
+========================
+1) ADD LOGIN SYSTEM
+========================
+
+Create:
+- login.html
+
+Login Requirements:
+- Email + Password fields
+- Simple hardcoded admin login:
+    Email: admin@eventelite.com
+    Password: admin123
+- Store login state in LocalStorage
+- Redirect to dashboard after login
+- Prevent access to dashboard pages if not logged in
+- If not logged in → redirect to login.html
+- Add Logout button in sidebar or navbar
+- Logout clears login state and redirects to login page
+
+========================
+2) MAKE DASHBOARD CARDS CLICKABLE
+========================
+
+Stat cards on dashboard must redirect properly:
+
+- Total Vendors → vendors.html
+- Available Venues → venues.html
+- Active Clients → clients.html
+- Upcoming Events → budget.html
+
+Add click event listeners.
+Add hover cursor pointer.
+
+========================
+3) FIX NAVIGATION
+========================
+
+- Ensure all sidebar links work properly.
+- Highlight active sidebar item based on current page.
+- Prevent broken routes.
+- Ensure breadcrumb navigation works.
+
+========================
+4) IMPLEMENT FULL CRUD FUNCTIONALITY
+========================
+
+For ALL modules:
+
+VENDORS:
+- Add vendor
+- Delete vendor
+- Edit vendor
+- View vendor details
+- Each vendor can have multiple products
+- Delete product
+- Edit product
+
+VENUES:
+- Add venue
+- Delete venue
+- Edit venue
+- View venue details
+- Each venue can have multiple booking options
+- Delete booking option
+- Edit booking option
+
+CLIENTS:
+- Add client
+- Delete client
+- Edit client
+- View client details
+- Delete planned services
+
+BUDGET:
+- Add expense
+- Delete expense
+- Edit expense
+- Auto calculate totals
+- Auto update balance
+- Auto update status (On Track / Over Budget)
+
+Each delete action must:
+- Show confirmation popup
+- Update LocalStorage
+- Re-render UI immediately
+
+========================
+5) REMOVE STATIC HARDCODED TABLE ROWS
+========================
+
+- All tables must render dynamically from LocalStorage arrays.
+- No hardcoded HTML rows.
+- Create reusable render functions:
+
+    renderVendors()
+    renderVenues()
+    renderClients()
+    renderBudget()
+    renderProducts()
+    renderBookingOptions()
+
+========================
+6) FIX SEARCH FUNCTION (FULLY WORKING)
+========================
+
+Search bar must work dynamically.
+
+Requirements:
+
+- Real-time filtering while typing
+- Case insensitive
+- Works per page:
+
+    Vendors → search name & category
+    Venues → search name & location
+    Clients → search name & event type
+    Budget → search expense item
+
+- No page reload
+- If no results → show “No results found”
+- Add clear (X) button inside search field
+
+Implementation:
+- Detect current page
+- Filter existing data arrays
+- Re-render filtered results
+
+========================
+7) IMPROVE DATA STRUCTURE
+========================
+
+Use structured LocalStorage format:
+
+vendors = [
+  {
+    id,
+    name,
+    category,
+    contact,
+    notes,
+    products: []
+  }
+]
+
+venues = [
+  {
+    id,
+    name,
+    location,
+    capacity,
+    basePrice,
+    extraCharges,
+    bookingOptions: []
+  }
+]
+
+clients = [
+  {
+    id,
+    name,
+    eventDate,
+    eventType,
+    budget,
+    status,
+    services: []
+  }
+]
+
+expenses = [
+  {
+    id,
+    clientId,
+    vendorId,
+    productName,
+    cost,
+    paid
+  }
+]
+
+========================
+8) CLEAN CODE STRUCTURE
+========================
+
+- Refactor script.js into modular sections
+- Avoid duplicated logic
+- Use reusable helper functions
+- Add comments
+- Keep everything expandable
+- Use event delegation where needed
+
+========================
+9) ENSURE RESPONSIVENESS
+========================
+
+- Sidebar responsive
+- Tables scroll properly
+- Search works on all screen sizes
+
+========================
+GOAL
+========================
+
+Convert the current UI prototype into a fully working functional MVP SaaS dashboard with proper data handling and clean structure.
+
+Do not redesign.
+Only enhance functionality and fix all broken behaviors.
