@@ -1,7 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api, buildUrl } from "@shared/routes";
-import { z } from "zod";
 import type { InsertVendor, InsertVendorProduct } from "@shared/schema";
+
+/* ===============================
+   Vendors
+================================ */
 
 export function useVendors() {
   return useQuery({
@@ -60,24 +63,108 @@ export function useDeleteVendor() {
   });
 }
 
+/* ===============================
+   Vendor Products
+================================ */
+
 export function useCreateVendorProduct() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ vendorId, ...data }: { vendorId: number } & Omit<InsertVendorProduct, "vendorId">) => {
+    mutationFn: async ({
+      vendorId,
+      ...data
+    }: { vendorId: number } & Omit<InsertVendorProduct, "vendorId">) => {
       const url = buildUrl(api.vendorProducts.create.path, { vendorId });
-      // Coerce price to string if it comes as number from form
-      const payload = { ...data, price: String(data.price) };
-      
+
+      const payload = {
+        ...data,
+        price: String(data.price),
+      };
+
       const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
+
       if (!res.ok) throw new Error("Failed to create product");
+
       return api.vendorProducts.create.responses[201].parse(await res.json());
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: [api.vendors.get.path, variables.vendorId] });
+      queryClient.invalidateQueries({
+        queryKey: [api.vendors.get.path, variables.vendorId],
+      });
+    },
+  });
+}
+
+/* NEW: Delete Product */
+
+export function useDeleteVendorProduct() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      vendorId,
+      productId,
+    }: {
+      vendorId: number;
+      productId: number;
+    }) => {
+      const url = buildUrl(api.vendorProducts.delete.path, {
+        vendorId,
+        productId,
+      });
+
+      const res = await fetch(url, { method: "DELETE" });
+
+      if (!res.ok) throw new Error("Failed to delete product");
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: [api.vendors.get.path, variables.vendorId],
+      });
+    },
+  });
+}
+
+/* NEW: Update Product */
+
+export function useUpdateVendorProduct() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      vendorId,
+      productId,
+      ...data
+    }: {
+      vendorId: number;
+      productId: number;
+    } & Omit<InsertVendorProduct, "vendorId">) => {
+      const url = buildUrl(api.vendorProducts.update.path, {
+        vendorId,
+        productId,
+      });
+
+      const res = await fetch(url, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...data,
+          price: String(data.price),
+        }),
+      });
+
+      if (!res.ok) throw new Error("Failed to update product");
+
+      return await res.json();
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: [api.vendors.get.path, variables.vendorId],
+      });
     },
   });
 }

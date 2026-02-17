@@ -1,10 +1,20 @@
 import { db } from "./db";
 import {
-  vendors, vendorProducts, venues, bookingOptions, clients, plannedServices, expenses,
-  type InsertVendor, type InsertVendorProduct,
-  type InsertVenue, type InsertBookingOption,
-  type InsertClient, type InsertPlannedService,
-  type InsertExpense
+  vendors,
+  vendorProducts,
+  venues,
+  bookingOptions,
+  venueImages,
+  clients,
+  plannedServices,
+  expenses,
+  type InsertVendor,
+  type InsertVendorProduct,
+  type InsertVenue,
+  type InsertBookingOption,
+  type InsertClient,
+  type InsertPlannedService,
+  type InsertExpense,
 } from "@shared/schema";
 import { eq, desc } from "drizzle-orm";
 
@@ -25,6 +35,9 @@ export interface IStorage {
   createBookingOption(option: InsertBookingOption): Promise<any>;
   deleteBookingOption(id: number): Promise<void>;
 
+  // ✅ NEW
+  addVenueImages(venueId: number, images: string[]): Promise<void>;
+
   // Clients
   getClients(): Promise<any[]>;
   getClient(id: number): Promise<any | undefined>;
@@ -42,16 +55,21 @@ export interface IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
-  // Vendors
+  // ================= VENDORS =================
+
   async getVendors() {
     return await db.select().from(vendors).orderBy(desc(vendors.createdAt));
   }
-  
+
   async getVendor(id: number) {
     const vendor = await db.select().from(vendors).where(eq(vendors.id, id));
     if (!vendor.length) return undefined;
-    
-    const products = await db.select().from(vendorProducts).where(eq(vendorProducts.vendorId, id));
+
+    const products = await db
+      .select()
+      .from(vendorProducts)
+      .where(eq(vendorProducts.vendorId, id));
+
     return { ...vendor[0], products };
   }
 
@@ -66,7 +84,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createVendorProduct(product: InsertVendorProduct) {
-    const [newProduct] = await db.insert(vendorProducts).values(product).returning();
+    const [newProduct] = await db
+      .insert(vendorProducts)
+      .values(product)
+      .returning();
     return newProduct;
   }
 
@@ -74,7 +95,8 @@ export class DatabaseStorage implements IStorage {
     await db.delete(vendorProducts).where(eq(vendorProducts.id, id));
   }
 
-  // Venues
+  // ================= VENUES =================
+
   async getVenues() {
     return await db.select().from(venues).orderBy(desc(venues.createdAt));
   }
@@ -83,8 +105,17 @@ export class DatabaseStorage implements IStorage {
     const venue = await db.select().from(venues).where(eq(venues.id, id));
     if (!venue.length) return undefined;
 
-    const options = await db.select().from(bookingOptions).where(eq(bookingOptions.venueId, id));
-    return { ...venue[0], options };
+    const options = await db
+      .select()
+      .from(bookingOptions)
+      .where(eq(bookingOptions.venueId, id));
+
+    const images = await db
+      .select()
+      .from(venueImages)
+      .where(eq(venueImages.venueId, id));
+
+    return { ...venue[0], options, images };
   }
 
   async createVenue(insertVenue: InsertVenue) {
@@ -93,12 +124,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteVenue(id: number) {
+    await db.delete(venueImages).where(eq(venueImages.venueId, id));
     await db.delete(bookingOptions).where(eq(bookingOptions.venueId, id));
     await db.delete(venues).where(eq(venues.id, id));
   }
 
   async createBookingOption(option: InsertBookingOption) {
-    const [newOption] = await db.insert(bookingOptions).values(option).returning();
+    const [newOption] = await db
+      .insert(bookingOptions)
+      .values(option)
+      .returning();
     return newOption;
   }
 
@@ -106,7 +141,20 @@ export class DatabaseStorage implements IStorage {
     await db.delete(bookingOptions).where(eq(bookingOptions.id, id));
   }
 
-  // Clients
+  // ✅ NEW — Save gallery images
+  async addVenueImages(venueId: number, images: string[]) {
+    if (!images.length) return;
+
+    await db.insert(venueImages).values(
+      images.map((url) => ({
+        venueId,
+        imageUrl: url,
+      })),
+    );
+  }
+
+  // ================= CLIENTS =================
+
   async getClients() {
     return await db.select().from(clients).orderBy(desc(clients.createdAt));
   }
@@ -115,9 +163,16 @@ export class DatabaseStorage implements IStorage {
     const client = await db.select().from(clients).where(eq(clients.id, id));
     if (!client.length) return undefined;
 
-    const services = await db.select().from(plannedServices).where(eq(plannedServices.clientId, id));
-    const clientExpenses = await db.select().from(expenses).where(eq(expenses.clientId, id));
-    
+    const services = await db
+      .select()
+      .from(plannedServices)
+      .where(eq(plannedServices.clientId, id));
+
+    const clientExpenses = await db
+      .select()
+      .from(expenses)
+      .where(eq(expenses.clientId, id));
+
     return { ...client[0], services, expenses: clientExpenses };
   }
 
@@ -125,9 +180,13 @@ export class DatabaseStorage implements IStorage {
     const [client] = await db.insert(clients).values(insertClient).returning();
     return client;
   }
-  
+
   async updateClient(id: number, updates: Partial<InsertClient>) {
-    const [updated] = await db.update(clients).set(updates).where(eq(clients.id, id)).returning();
+    const [updated] = await db
+      .update(clients)
+      .set(updates)
+      .where(eq(clients.id, id))
+      .returning();
     return updated;
   }
 
@@ -138,7 +197,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createPlannedService(service: InsertPlannedService) {
-    const [newService] = await db.insert(plannedServices).values(service).returning();
+    const [newService] = await db
+      .insert(plannedServices)
+      .values(service)
+      .returning();
     return newService;
   }
 
@@ -146,18 +208,30 @@ export class DatabaseStorage implements IStorage {
     await db.delete(plannedServices).where(eq(plannedServices.id, id));
   }
 
-  // Expenses
+  // ================= EXPENSES =================
+
   async getExpenses(clientId: number) {
-    return await db.select().from(expenses).where(eq(expenses.clientId, clientId)).orderBy(desc(expenses.createdAt));
+    return await db
+      .select()
+      .from(expenses)
+      .where(eq(expenses.clientId, clientId))
+      .orderBy(desc(expenses.createdAt));
   }
 
   async createExpense(insertExpense: InsertExpense) {
-    const [expense] = await db.insert(expenses).values(insertExpense).returning();
+    const [expense] = await db
+      .insert(expenses)
+      .values(insertExpense)
+      .returning();
     return expense;
   }
-  
+
   async updateExpense(id: number, updates: Partial<InsertExpense>) {
-    const [updated] = await db.update(expenses).set(updates).where(eq(expenses.id, id)).returning();
+    const [updated] = await db
+      .update(expenses)
+      .set(updates)
+      .where(eq(expenses.id, id))
+      .returning();
     return updated;
   }
 

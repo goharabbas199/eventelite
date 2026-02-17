@@ -1,0 +1,1 @@
+ALTER TABLE "vendor_products" ALTER COLUMN "price" SET DATA TYPE text;

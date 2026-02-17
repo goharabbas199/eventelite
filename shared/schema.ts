@@ -1,9 +1,20 @@
-import { pgTable, text, serial, integer, boolean, timestamp, numeric, date } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  serial,
+  integer,
+  boolean,
+  timestamp,
+  numeric,
+} from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { relations } from "drizzle-orm";
 
-// === Vendors ===
+// ======================================================
+// ===================== VENDORS ========================
+// ======================================================
+
 export const vendors = pgTable("vendors", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
@@ -15,9 +26,9 @@ export const vendors = pgTable("vendors", {
 
 export const vendorProducts = pgTable("vendor_products", {
   id: serial("id").primaryKey(),
-  vendorId: integer("vendor_id").notNull(), // FK handled in app logic or assumed
+  vendorId: integer("vendor_id").notNull(),
   name: text("name").notNull(),
-  price: numeric("price").notNull(),
+  price: text("price").notNull(),
   description: text("description"),
 });
 
@@ -32,18 +43,40 @@ export const vendorProductsRelations = relations(vendorProducts, ({ one }) => ({
   }),
 }));
 
-// === Venues ===
+// ======================================================
+// ====================== VENUES ========================
+// ======================================================
+
 export const venues = pgTable("venues", {
   id: serial("id").primaryKey(),
+
   name: text("name").notNull(),
   location: text("location").notNull(),
+
   capacity: integer("capacity").notNull(),
   basePrice: numeric("base_price").notNull(),
-  extraCharges: text("extra_charges"), // Description of extras
+
+  extraCharges: text("extra_charges"),
   notes: text("notes"),
+
+  // SaaS-level fields
+  googleMapsLink: text("google_maps_link"),
+  mainImage: text("main_image"), // Cover image (Cloudinary URL later)
+  bookingPhone: text("booking_phone"),
+  bookingEmail: text("booking_email"),
+  venueType: text("venue_type"), // Indoor / Outdoor / Both
+
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Multiple gallery images per venue
+export const venueImages = pgTable("venue_images", {
+  id: serial("id").primaryKey(),
+  venueId: integer("venue_id").notNull(),
+  imageUrl: text("image_url").notNull(),
+});
+
+// Booking options
 export const bookingOptions = pgTable("booking_options", {
   id: serial("id").primaryKey(),
   venueId: integer("venue_id").notNull(),
@@ -54,6 +87,14 @@ export const bookingOptions = pgTable("booking_options", {
 
 export const venuesRelations = relations(venues, ({ many }) => ({
   options: many(bookingOptions),
+  images: many(venueImages),
+}));
+
+export const venueImagesRelations = relations(venueImages, ({ one }) => ({
+  venue: one(venues, {
+    fields: [venueImages.venueId],
+    references: [venues.id],
+  }),
 }));
 
 export const bookingOptionsRelations = relations(bookingOptions, ({ one }) => ({
@@ -63,7 +104,10 @@ export const bookingOptionsRelations = relations(bookingOptions, ({ one }) => ({
   }),
 }));
 
-// === Clients ===
+// ======================================================
+// ====================== CLIENTS =======================
+// ======================================================
+
 export const clients = pgTable("clients", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
@@ -72,7 +116,7 @@ export const clients = pgTable("clients", {
   eventDate: timestamp("event_date").notNull(),
   eventType: text("event_type").notNull(),
   budget: numeric("budget").notNull(),
-  status: text("status").notNull(), // 'Lead', 'Confirmed', 'Completed', 'Pending'
+  status: text("status").notNull(),
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -80,7 +124,7 @@ export const clients = pgTable("clients", {
 export const plannedServices = pgTable("planned_services", {
   id: serial("id").primaryKey(),
   clientId: integer("client_id").notNull(),
-  vendorId: integer("vendor_id"), // Optional link to vendor
+  vendorId: integer("vendor_id"),
   serviceName: text("service_name").notNull(),
   cost: numeric("cost").notNull(),
   notes: text("notes"),
@@ -90,17 +134,20 @@ export const clientsRelations = relations(clients, ({ many }) => ({
   services: many(plannedServices),
 }));
 
-export const plannedServicesRelations = relations(plannedServices, ({ one }) => ({
-  client: one(clients, {
-    fields: [plannedServices.clientId],
-    references: [clients.id],
+export const plannedServicesRelations = relations(
+  plannedServices,
+  ({ one }) => ({
+    client: one(clients, {
+      fields: [plannedServices.clientId],
+      references: [clients.id],
+    }),
   }),
-}));
+);
 
+// ======================================================
+// ====================== EXPENSES ======================
+// ======================================================
 
-// === Budget/Expenses ===
-// Often linked to a specific client/event, but can be general for the agency too.
-// Based on "Budget Planner Page - Client dropdown selector", expenses belong to clients.
 export const expenses = pgTable("expenses", {
   id: serial("id").primaryKey(),
   clientId: integer("client_id").notNull(),
@@ -118,24 +165,67 @@ export const expensesRelations = relations(expenses, ({ one }) => ({
   }),
 }));
 
-// === Schemas ===
-export const insertVendorSchema = createInsertSchema(vendors).omit({ id: true, createdAt: true });
-export const insertVendorProductSchema = createInsertSchema(vendorProducts).omit({ id: true });
-export const insertVenueSchema = createInsertSchema(venues).omit({ id: true, createdAt: true });
-export const insertBookingOptionSchema = createInsertSchema(bookingOptions).omit({ id: true });
-export const insertClientSchema = createInsertSchema(clients).omit({ id: true, createdAt: true });
-export const insertPlannedServiceSchema = createInsertSchema(plannedServices).omit({ id: true });
-export const insertExpenseSchema = createInsertSchema(expenses).omit({ id: true, createdAt: true });
+// ======================================================
+// ======================= SCHEMAS ======================
+// ======================================================
 
-// === Types ===
+export const insertVendorSchema = createInsertSchema(vendors).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertVendorProductSchema = createInsertSchema(
+  vendorProducts,
+).omit({ id: true });
+
+export const insertVenueSchema = createInsertSchema(venues).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertVenueImageSchema = createInsertSchema(venueImages).omit({
+  id: true,
+});
+
+export const insertBookingOptionSchema = createInsertSchema(
+  bookingOptions,
+).omit({ id: true });
+
+export const insertClientSchema = createInsertSchema(clients).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertPlannedServiceSchema = createInsertSchema(
+  plannedServices,
+).omit({ id: true });
+
+export const insertExpenseSchema = createInsertSchema(expenses).omit({
+  id: true,
+  createdAt: true,
+});
+
+// ======================================================
+// ======================== TYPES =======================
+// ======================================================
+
 export type Vendor = typeof vendors.$inferSelect;
 export type InsertVendor = z.infer<typeof insertVendorSchema>;
+
 export type VendorProduct = typeof vendorProducts.$inferSelect;
+
 export type Venue = typeof venues.$inferSelect;
 export type InsertVenue = z.infer<typeof insertVenueSchema>;
+
+export type VenueImage = typeof venueImages.$inferSelect;
+export type InsertVenueImage = z.infer<typeof insertVenueImageSchema>;
+
 export type BookingOption = typeof bookingOptions.$inferSelect;
+
 export type Client = typeof clients.$inferSelect;
 export type InsertClient = z.infer<typeof insertClientSchema>;
+
 export type PlannedService = typeof plannedServices.$inferSelect;
+
 export type Expense = typeof expenses.$inferSelect;
 export type InsertExpense = z.infer<typeof insertExpenseSchema>;
