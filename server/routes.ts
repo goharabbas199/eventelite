@@ -4,14 +4,15 @@ import { storage } from "./storage";
 import { api } from "@shared/routes";
 import { z } from "zod";
 import cloudinary from "./cloudinary";
+import multer from "multer";
+
+const upload = multer({ storage: multer.memoryStorage() });
 
 export async function registerRoutes(
   httpServer: Server,
   app: Express,
 ): Promise<Server> {
-  // ======================================================
   // ===================== VENDORS ========================
-  // ======================================================
 
   app.get(api.vendors.list.path, async (_req, res) => {
     const vendors = await storage.getVendors();
@@ -27,7 +28,6 @@ export async function registerRoutes(
       if (err instanceof z.ZodError) {
         return res.status(400).json({ message: err.errors[0].message });
       }
-      console.error("Create vendor error:", err);
       res.status(500).json({ message: "Failed to create vendor" });
     }
   });
@@ -43,9 +43,7 @@ export async function registerRoutes(
     res.status(204).end();
   });
 
-  // ======================================================
   // ====================== VENUES ========================
-  // ======================================================
 
   app.get(api.venues.list.path, async (_req, res) => {
     const venues = await storage.getVenues();
@@ -54,14 +52,20 @@ export async function registerRoutes(
 
   app.post(api.venues.create.path, async (req, res) => {
     try {
-      const input = api.venues.create.input.parse(req.body);
+      const { images = [], ...venueData } = req.body;
+
+      const input = api.venues.create.input.parse(venueData);
       const venue = await storage.createVenue(input);
+
+      if (Array.isArray(images) && images.length > 0) {
+        await storage.addVenueImages(venue.id, images);
+      }
+
       res.status(201).json(venue);
     } catch (err) {
       if (err instanceof z.ZodError) {
         return res.status(400).json({ message: err.errors[0].message });
       }
-      console.error("Create venue error:", err);
       res.status(500).json({ message: "Failed to create venue" });
     }
   });
@@ -72,65 +76,109 @@ export async function registerRoutes(
     res.json(venue);
   });
 
+  // ✅ NEW: UPDATE MAIN IMAGE
+  app.patch("/api/venues/:id/main-image", async (req, res) => {
+    try {
+      const venueId = Number(req.params.id);
+      const { mainImage } = req.body;
+
+      if (!mainImage) {
+        return res.status(400).json({ message: "Main image URL required" });
+      }
+
+      const updated = await storage.updateVenueMainImage(venueId, mainImage);
+
+      res.json(updated);
+    } catch (err) {
+      console.error("Update main image error:", err);
+      res.status(500).json({ message: "Failed to update main image" });
+    }
+  });
+
   app.delete(api.venues.delete.path, async (req, res) => {
     await storage.deleteVenue(Number(req.params.id));
     res.status(204).end();
   });
-
-  // ======================================================
-  // ============ BACKEND CLOUDINARY UPLOAD ==============
-  // ======================================================
-
-  app.post("/api/upload", async (req, res) => {
+  // ✅ ADD GALLERY IMAGE
+  app.post("/api/venues/:id/images", async (req, res) => {
     try {
-      const { image } = req.body;
-
-      if (!image) {
-        return res.status(400).json({ message: "No image provided" });
-      }
-
-      console.log("Uploading to Cloudinary...");
-      console.log("Cloud name:", process.env.CLOUDINARY_CLOUD_NAME);
-      console.log("API key exists:", !!process.env.CLOUDINARY_API_KEY);
-      console.log("API secret exists:", !!process.env.CLOUDINARY_API_SECRET);
-
-      const uploaded = await cloudinary.uploader.upload(image, {
-        folder: "eventelite",
-      });
-
-      console.log("Upload success:", uploaded.secure_url);
-
-      res.json({ url: uploaded.secure_url });
-    } catch (error: any) {
-      console.error("Cloudinary FULL error:");
-      console.error(error);
-
-      res.status(500).json({
-        message: "Upload failed",
-        cloudinaryError: error?.message || error,
-      });
-    }
-  });
-
-  // ======================================================
-  // ============ VENUE IMAGE MANAGEMENT =================
-  // ======================================================
-
-  app.post("/api/venues/:venueId/images", async (req, res) => {
-    try {
-      const venueId = Number(req.params.venueId);
+      const venueId = Number(req.params.id);
       const { imageUrl } = req.body;
 
       if (!imageUrl) {
-        return res.status(400).json({ message: "Image URL is required" });
+        return res.status(400).json({ message: "Image URL required" });
       }
 
       await storage.addVenueImages(venueId, [imageUrl]);
 
       res.status(201).json({ success: true });
     } catch (err) {
-      console.error("Add venue image error:", err);
-      res.status(500).json({ message: "Failed to add image" });
+      console.error("Add gallery image error:", err);
+      res.status(500).json({ message: "Failed to add gallery image" });
+    }
+  });
+  // DELETE GALLERY IMAGE
+  app.delete("/api/venue-images/:id", async (req, res) => {
+    try {
+      await storage.deleteVenueImage(Number(req.params.id));
+      res.status(204).end();
+    } catch (err) {
+      console.error("Delete image error:", err);
+      res.status(500).json({ message: "Failed to delete image" });
+    }
+  });
+
+  // ================= BOOKING OPTIONS ====================
+
+  app.post(api.bookingOptions.create.path, async (req, res) => {
+    try {
+      const venueId = Number(req.params.venueId);
+
+      const input = api.bookingOptions.create.input.parse({
+        ...req.body,
+        venueId,
+        price: String(req.body.price),
+      });
+
+      const option = await storage.createBookingOption(input);
+
+      res.status(201).json(option);
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ message: err.errors[0].message });
+      }
+
+      console.error("Create booking option error:", err);
+      res.status(500).json({ message: "Failed to create booking option" });
+    }
+  });
+
+  app.delete(api.bookingOptions.delete.path, async (req, res) => {
+    await storage.deleteBookingOption(Number(req.params.id));
+    res.status(204).end();
+  });
+
+  // ================= CLOUDINARY UPLOAD ==================
+
+  app.post("/api/upload", upload.single("image"), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No image provided" });
+      }
+
+      const base64Image = `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`;
+
+      const uploaded = await cloudinary.uploader.upload(base64Image, {
+        folder: "eventelite",
+      });
+
+      res.json({ url: uploaded.secure_url });
+    } catch (error: any) {
+      console.error("Cloudinary upload error:", error);
+      res.status(500).json({
+        message: "Upload failed",
+        cloudinaryError: error?.message || error,
+      });
     }
   });
 

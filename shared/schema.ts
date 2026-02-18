@@ -49,39 +49,36 @@ export const vendorProductsRelations = relations(vendorProducts, ({ one }) => ({
 
 export const venues = pgTable("venues", {
   id: serial("id").primaryKey(),
-
   name: text("name").notNull(),
   location: text("location").notNull(),
-
   capacity: integer("capacity").notNull(),
   basePrice: numeric("base_price").notNull(),
-
   extraCharges: text("extra_charges"),
   notes: text("notes"),
-
-  // SaaS-level fields
   googleMapsLink: text("google_maps_link"),
-  mainImage: text("main_image"), // Cover image (Cloudinary URL later)
+  mainImage: text("main_image"),
   bookingPhone: text("booking_phone"),
   bookingEmail: text("booking_email"),
-  venueType: text("venue_type"), // Indoor / Outdoor / Both
-
+  venueType: text("venue_type"),
+  contactName: text("contact_name"),
+  contactPhone: text("contact_phone"),
+  contactEmail: text("contact_email"),
+  note: text("note"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// Multiple gallery images per venue
 export const venueImages = pgTable("venue_images", {
   id: serial("id").primaryKey(),
   venueId: integer("venue_id").notNull(),
   imageUrl: text("image_url").notNull(),
 });
 
-// Booking options
 export const bookingOptions = pgTable("booking_options", {
   id: serial("id").primaryKey(),
   venueId: integer("venue_id").notNull(),
   name: text("name").notNull(),
   price: numeric("price").notNull(),
+  currency: text("currency").default("USD"),
   description: text("description"),
 });
 
@@ -115,7 +112,10 @@ export const clients = pgTable("clients", {
   phone: text("phone").notNull(),
   eventDate: timestamp("event_date").notNull(),
   eventType: text("event_type").notNull(),
-  budget: numeric("budget").notNull(),
+
+  // ✅ FIXED — budget is now optional
+  budget: numeric("budget"),
+
   status: text("status").notNull(),
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow(),
@@ -191,10 +191,21 @@ export const insertBookingOptionSchema = createInsertSchema(
   bookingOptions,
 ).omit({ id: true });
 
-export const insertClientSchema = createInsertSchema(clients).omit({
-  id: true,
-  createdAt: true,
-});
+// ✅ FIXED CLIENT INSERT SCHEMA
+export const insertClientSchema = createInsertSchema(clients)
+  .omit({
+    id: true,
+    createdAt: true,
+  })
+  .extend({
+    budget: z
+      .union([z.string(), z.number()])
+      .optional()
+      .transform((val) => {
+        if (val === "" || val === undefined) return null;
+        return String(val);
+      }),
+  });
 
 export const insertPlannedServiceSchema = createInsertSchema(
   plannedServices,

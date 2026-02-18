@@ -1,0 +1,1 @@
+ALTER TABLE "booking_options" ADD COLUMN "currency" text DEFAULT 'USD';

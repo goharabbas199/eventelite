@@ -29,6 +29,20 @@
       "when": 1771313862676,
       "tag": "0003_short_rattler",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1771399900602,
+      "tag": "0004_brave_patriot",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1771415106927,
+      "tag": "0005_lying_miek",
+      "breakpoints": true
     }
   ]
 }

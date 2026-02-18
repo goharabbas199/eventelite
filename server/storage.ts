@@ -32,11 +32,11 @@ export interface IStorage {
   getVenue(id: number): Promise<any | undefined>;
   createVenue(venue: InsertVenue): Promise<any>;
   deleteVenue(id: number): Promise<void>;
+  updateVenueMainImage(id: number, mainImage: string): Promise<any>;
   createBookingOption(option: InsertBookingOption): Promise<any>;
   deleteBookingOption(id: number): Promise<void>;
-
-  // ✅ NEW
   addVenueImages(venueId: number, images: string[]): Promise<void>;
+  deleteVenueImage(id: number): Promise<void>;
 
   // Clients
   getClients(): Promise<any[]>;
@@ -58,7 +58,7 @@ export class DatabaseStorage implements IStorage {
   // ================= VENDORS =================
 
   async getVendors() {
-    return await db.select().from(vendors).orderBy(desc(vendors.createdAt));
+    return db.select().from(vendors).orderBy(desc(vendors.createdAt));
   }
 
   async getVendor(id: number) {
@@ -70,7 +70,10 @@ export class DatabaseStorage implements IStorage {
       .from(vendorProducts)
       .where(eq(vendorProducts.vendorId, id));
 
-    return { ...vendor[0], products };
+    return {
+      ...vendor[0],
+      products: products ?? [],
+    };
   }
 
   async createVendor(insertVendor: InsertVendor) {
@@ -98,7 +101,7 @@ export class DatabaseStorage implements IStorage {
   // ================= VENUES =================
 
   async getVenues() {
-    return await db.select().from(venues).orderBy(desc(venues.createdAt));
+    return db.select().from(venues).orderBy(desc(venues.createdAt));
   }
 
   async getVenue(id: number) {
@@ -108,14 +111,20 @@ export class DatabaseStorage implements IStorage {
     const options = await db
       .select()
       .from(bookingOptions)
-      .where(eq(bookingOptions.venueId, id));
+      .where(eq(bookingOptions.venueId, id))
+      .orderBy(desc(bookingOptions.id));
 
     const images = await db
       .select()
       .from(venueImages)
-      .where(eq(venueImages.venueId, id));
+      .where(eq(venueImages.venueId, id))
+      .orderBy(desc(venueImages.id));
 
-    return { ...venue[0], options, images };
+    return {
+      ...venue[0],
+      options: options ?? [],
+      images: images ?? [],
+    };
   }
 
   async createVenue(insertVenue: InsertVenue) {
@@ -129,11 +138,28 @@ export class DatabaseStorage implements IStorage {
     await db.delete(venues).where(eq(venues.id, id));
   }
 
+  async updateVenueMainImage(id: number, mainImage: string) {
+    const [updated] = await db
+      .update(venues)
+      .set({ mainImage })
+      .where(eq(venues.id, id))
+      .returning();
+
+    return updated;
+  }
+
   async createBookingOption(option: InsertBookingOption) {
     const [newOption] = await db
       .insert(bookingOptions)
-      .values(option)
+      .values({
+        venueId: option.venueId,
+        name: option.name,
+        description: option.description || "",
+        price: String(option.price),
+        currency: option.currency || "USD",
+      })
       .returning();
+
     return newOption;
   }
 
@@ -141,9 +167,8 @@ export class DatabaseStorage implements IStorage {
     await db.delete(bookingOptions).where(eq(bookingOptions.id, id));
   }
 
-  // ✅ NEW — Save gallery images
   async addVenueImages(venueId: number, images: string[]) {
-    if (!images.length) return;
+    if (!images?.length) return;
 
     await db.insert(venueImages).values(
       images.map((url) => ({
@@ -153,10 +178,14 @@ export class DatabaseStorage implements IStorage {
     );
   }
 
+  async deleteVenueImage(id: number) {
+    await db.delete(venueImages).where(eq(venueImages.id, id));
+  }
+
   // ================= CLIENTS =================
 
   async getClients() {
-    return await db.select().from(clients).orderBy(desc(clients.createdAt));
+    return db.select().from(clients).orderBy(desc(clients.createdAt));
   }
 
   async getClient(id: number) {
@@ -173,7 +202,11 @@ export class DatabaseStorage implements IStorage {
       .from(expenses)
       .where(eq(expenses.clientId, id));
 
-    return { ...client[0], services, expenses: clientExpenses };
+    return {
+      ...client[0],
+      services: services ?? [],
+      expenses: clientExpenses ?? [],
+    };
   }
 
   async createClient(insertClient: InsertClient) {
@@ -211,7 +244,7 @@ export class DatabaseStorage implements IStorage {
   // ================= EXPENSES =================
 
   async getExpenses(clientId: number) {
-    return await db
+    return db
       .select()
       .from(expenses)
       .where(eq(expenses.clientId, clientId))

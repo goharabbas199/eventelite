@@ -5,6 +5,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Form,
@@ -27,6 +28,9 @@ const venueFormSchema = z.object({
   location: z.string().min(1, "Location is required"),
   capacity: z.number().min(1),
   basePrice: z.number().min(0),
+
+  bookingPhone: z.string().optional(),
+  bookingEmail: z.string().email("Invalid email").optional().or(z.literal("")),
   notes: z.string().optional(),
   extraCharges: z.string().optional(),
 });
@@ -48,13 +52,15 @@ export default function CreateVenue() {
       location: "",
       capacity: 0,
       basePrice: 0,
+      bookingPhone: "",
+      bookingEmail: "",
       notes: "",
       extraCharges: "",
     },
   });
 
   /* ===============================
-     BACKEND UPLOAD (FORMDATA)
+     IMAGE UPLOAD
   ================================= */
 
   const uploadToBackend = async (file: File) => {
@@ -142,6 +148,8 @@ export default function CreateVenue() {
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="space-y-6"
               >
+                {/* BASIC INFO */}
+
                 <FormField
                   control={form.control}
                   name="name"
@@ -180,6 +188,7 @@ export default function CreateVenue() {
                         <FormControl>
                           <Input
                             type="number"
+                            value={field.value}
                             onChange={(e) =>
                               field.onChange(Number(e.target.value))
                             }
@@ -200,6 +209,7 @@ export default function CreateVenue() {
                           <Input
                             type="number"
                             step="0.01"
+                            value={field.value}
                             onChange={(e) =>
                               field.onChange(Number(e.target.value))
                             }
@@ -210,6 +220,60 @@ export default function CreateVenue() {
                     )}
                   />
                 </div>
+
+                {/* BOOKING CONTACT INFO */}
+
+                <div className="grid grid-cols-2 gap-6">
+                  <FormField
+                    control={form.control}
+                    name="bookingPhone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Booking Phone</FormLabel>
+                        <FormControl>
+                          <Input placeholder="+971..." {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="bookingEmail"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Booking Email</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="email"
+                            placeholder="booking@email.com"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* GENERAL NOTES */}
+
+                <FormField
+                  control={form.control}
+                  name="notes"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>General Notes</FormLabel>
+                      <FormControl>
+                        <Textarea rows={4} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* IMAGE UPLOAD */}
 
                 <div>
                   <FormLabel>Upload Venue Images</FormLabel>
