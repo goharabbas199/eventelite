@@ -135,15 +135,20 @@ function CreateClientForm({ onSuccess }: { onSuccess: () => void }) {
       },
       {
         onSuccess: (newClient) => {
+          console.log("Client created successfully:", newClient);
           onSuccess();
           setLocation(`/clients/${newClient.id}`);
+        },
+        onError: (error) => {
+          console.error("Failed to create client:", error);
+          alert(`Error: ${error.message}`);
         },
       },
     );
   };
 
   return (
-    <div className="space-y-4">
+    <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
       <div className="space-y-2">
         <label className="text-sm font-medium">Name *</label>
         <Input
@@ -151,6 +156,7 @@ function CreateClientForm({ onSuccess }: { onSuccess: () => void }) {
           data-testid="input-client-name"
           value={formData.name}
           onChange={(e) => handleChange("name", e.target.value)}
+          required
         />
       </div>
 
@@ -232,13 +238,13 @@ function CreateClientForm({ onSuccess }: { onSuccess: () => void }) {
       </div>
 
       <Button 
-        onClick={handleSubmit} 
+        type="submit"
         className="w-full" 
         disabled={isPending}
         data-testid="button-create-client"
       >
         {isPending ? "Creating..." : "Create Client"}
       </Button>
-    </div>
+    </form>
   );
 }
