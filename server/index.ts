@@ -65,7 +65,6 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  console.log("Current dirname:", import.meta.dirname);
   await registerRoutes(httpServer, app);
 
   // Seed data
