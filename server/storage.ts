@@ -19,7 +19,6 @@ import {
 import { eq, desc } from "drizzle-orm";
 
 export interface IStorage {
-  // Vendors
   getVendors(): Promise<any[]>;
   getVendor(id: number): Promise<any | undefined>;
   createVendor(vendor: InsertVendor): Promise<any>;
@@ -27,7 +26,6 @@ export interface IStorage {
   createVendorProduct(product: InsertVendorProduct): Promise<any>;
   deleteVendorProduct(id: number): Promise<void>;
 
-  // Venues
   getVenues(): Promise<any[]>;
   getVenue(id: number): Promise<any | undefined>;
   createVenue(venue: InsertVenue): Promise<any>;
@@ -38,7 +36,6 @@ export interface IStorage {
   addVenueImages(venueId: number, images: string[]): Promise<void>;
   deleteVenueImage(id: number): Promise<void>;
 
-  // Clients
   getClients(): Promise<any[]>;
   getClient(id: number): Promise<any | undefined>;
   createClient(client: InsertClient): Promise<any>;
@@ -47,7 +44,6 @@ export interface IStorage {
   createPlannedService(service: InsertPlannedService): Promise<any>;
   deletePlannedService(id: number): Promise<void>;
 
-  // Expenses
   getExpenses(clientId: number): Promise<any[]>;
   createExpense(expense: InsertExpense): Promise<any>;
   updateExpense(id: number, updates: Partial<InsertExpense>): Promise<any>;
@@ -55,8 +51,6 @@ export interface IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
-  // ================= VENDORS =================
-
   async getVendors() {
     return db.select().from(vendors).orderBy(desc(vendors.createdAt));
   }
@@ -97,8 +91,6 @@ export class DatabaseStorage implements IStorage {
   async deleteVendorProduct(id: number) {
     await db.delete(vendorProducts).where(eq(vendorProducts.id, id));
   }
-
-  // ================= VENUES =================
 
   async getVenues() {
     return db.select().from(venues).orderBy(desc(venues.createdAt));
@@ -144,7 +136,6 @@ export class DatabaseStorage implements IStorage {
       .set({ mainImage })
       .where(eq(venues.id, id))
       .returning();
-
     return updated;
   }
 
@@ -181,8 +172,6 @@ export class DatabaseStorage implements IStorage {
   async deleteVenueImage(id: number) {
     await db.delete(venueImages).where(eq(venueImages.id, id));
   }
-
-  // ================= CLIENTS =================
 
   async getClients() {
     return db.select().from(clients).orderBy(desc(clients.createdAt));
@@ -230,18 +219,39 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createPlannedService(service: InsertPlannedService) {
+    const clientId = Number(service.clientId);
+
+    if (isNaN(clientId)) {
+      throw new Error("Invalid clientId received in createPlannedService");
+    }
+
+    const vendorId =
+      service.vendorId !== undefined && service.vendorId !== null
+        ? Number(service.vendorId)
+        : null;
+
+    const costValue =
+      service.cost !== undefined && service.cost !== null
+        ? String(service.cost)
+        : "0";
+
     const [newService] = await db
       .insert(plannedServices)
-      .values(service)
+      .values({
+        clientId,
+        vendorId,
+        serviceName: service.serviceName,
+        cost: costValue,
+        notes: service.notes ?? null,
+      })
       .returning();
+
     return newService;
   }
 
   async deletePlannedService(id: number) {
     await db.delete(plannedServices).where(eq(plannedServices.id, id));
   }
-
-  // ================= EXPENSES =================
 
   async getExpenses(clientId: number) {
     return db

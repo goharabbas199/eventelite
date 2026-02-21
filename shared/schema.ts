@@ -63,7 +63,6 @@ export const venues = pgTable("venues", {
   contactName: text("contact_name"),
   contactPhone: text("contact_phone"),
   contactEmail: text("contact_email"),
-  note: text("note"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -87,37 +86,34 @@ export const venuesRelations = relations(venues, ({ many }) => ({
   images: many(venueImages),
 }));
 
-export const venueImagesRelations = relations(venueImages, ({ one }) => ({
-  venue: one(venues, {
-    fields: [venueImages.venueId],
-    references: [venues.id],
-  }),
-}));
-
-export const bookingOptionsRelations = relations(bookingOptions, ({ one }) => ({
-  venue: one(venues, {
-    fields: [bookingOptions.venueId],
-    references: [venues.id],
-  }),
-}));
-
 // ======================================================
 // ====================== CLIENTS =======================
 // ======================================================
 
 export const clients = pgTable("clients", {
   id: serial("id").primaryKey(),
+
   name: text("name").notNull(),
   email: text("email").notNull(),
   phone: text("phone").notNull(),
+
   eventDate: timestamp("event_date").notNull(),
   eventType: text("event_type").notNull(),
 
-  // ✅ FIXED — budget is now optional
+  // NEW
+  guestCount: integer("guest_count"),
+
+  venueId: integer("venue_id"), // ✅ ADD THIS
+
+  // Optional
   budget: numeric("budget"),
 
   status: text("status").notNull(),
-  notes: text("notes"),
+
+  // NEW
+  clientNotes: text("client_notes"),
+  internalNotes: text("internal_notes"),
+
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -169,6 +165,48 @@ export const expensesRelations = relations(expenses, ({ one }) => ({
 // ======================= SCHEMAS ======================
 // ======================================================
 
+export const insertClientSchema = createInsertSchema(clients)
+  .omit({
+    id: true,
+    createdAt: true,
+  })
+  .extend({
+    budget: z
+      .union([z.string(), z.number()])
+      .optional()
+      .transform((val) => {
+        if (val === "" || val === undefined) return null;
+        return String(val);
+      }),
+
+    guestCount: z
+      .union([z.string(), z.number()])
+      .optional()
+      .transform((val) => {
+        if (val === "" || val === undefined) return null;
+        return Number(val);
+      }),
+  });
+export const insertPlannedServiceSchema = createInsertSchema(
+  plannedServices,
+).omit({ id: true });
+
+export const insertExpenseSchema = createInsertSchema(expenses).omit({
+  id: true,
+  createdAt: true,
+});
+
+// ======================================================
+// ======================== TYPES =======================
+// ======================================================
+
+export type Client = typeof clients.$inferSelect;
+export type InsertClient = z.infer<typeof insertClientSchema>;
+
+export type PlannedService = typeof plannedServices.$inferSelect;
+export type Expense = typeof expenses.$inferSelect;
+export type InsertExpense = z.infer<typeof insertExpenseSchema>;
+
 export const insertVendorSchema = createInsertSchema(vendors).omit({
   id: true,
   createdAt: true,
@@ -190,53 +228,3 @@ export const insertVenueImageSchema = createInsertSchema(venueImages).omit({
 export const insertBookingOptionSchema = createInsertSchema(
   bookingOptions,
 ).omit({ id: true });
-
-// ✅ FIXED CLIENT INSERT SCHEMA
-export const insertClientSchema = createInsertSchema(clients)
-  .omit({
-    id: true,
-    createdAt: true,
-  })
-  .extend({
-    budget: z
-      .union([z.string(), z.number()])
-      .optional()
-      .transform((val) => {
-        if (val === "" || val === undefined) return null;
-        return String(val);
-      }),
-  });
-
-export const insertPlannedServiceSchema = createInsertSchema(
-  plannedServices,
-).omit({ id: true });
-
-export const insertExpenseSchema = createInsertSchema(expenses).omit({
-  id: true,
-  createdAt: true,
-});
-
-// ======================================================
-// ======================== TYPES =======================
-// ======================================================
-
-export type Vendor = typeof vendors.$inferSelect;
-export type InsertVendor = z.infer<typeof insertVendorSchema>;
-
-export type VendorProduct = typeof vendorProducts.$inferSelect;
-
-export type Venue = typeof venues.$inferSelect;
-export type InsertVenue = z.infer<typeof insertVenueSchema>;
-
-export type VenueImage = typeof venueImages.$inferSelect;
-export type InsertVenueImage = z.infer<typeof insertVenueImageSchema>;
-
-export type BookingOption = typeof bookingOptions.$inferSelect;
-
-export type Client = typeof clients.$inferSelect;
-export type InsertClient = z.infer<typeof insertClientSchema>;
-
-export type PlannedService = typeof plannedServices.$inferSelect;
-
-export type Expense = typeof expenses.$inferSelect;
-export type InsertExpense = z.infer<typeof insertExpenseSchema>;

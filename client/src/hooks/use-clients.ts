@@ -23,6 +23,7 @@ export function useClient(id: number) {
     queryFn: async () => {
       const url = buildUrl(api.clients.get.path, { id });
       const res = await fetch(url);
+
       if (res.status === 404) return null;
       if (!res.ok) throw new Error("Failed to fetch client");
 
@@ -45,10 +46,9 @@ export function useCreateClient() {
     mutationFn: async (data: InsertClient) => {
       const payload: any = {
         ...data,
-        eventDate: new Date(data.eventDate).toISOString(),
+        eventDate: new Date(data.eventDate),
       };
 
-      // ✅ Only send budget if it exists
       if (data.budget !== undefined && data.budget !== null) {
         payload.budget = String(data.budget);
       }
@@ -86,13 +86,16 @@ export function useUpdateClient() {
       const url = buildUrl(api.clients.update.path, { id });
 
       const payload: any = { ...data };
+      if (data.venueId !== undefined) {
+        payload.venueId = data.venueId;
+      }
 
       if (data.budget !== undefined && data.budget !== null) {
         payload.budget = String(data.budget);
       }
 
       if (data.eventDate) {
-        payload.eventDate = new Date(data.eventDate).toISOString();
+        payload.eventDate = new Date(data.eventDate);
       }
 
       const res = await fetch(url, {
@@ -129,12 +132,24 @@ export function useCreatePlannedService() {
       clientId,
       ...data
     }: { clientId: number } & Omit<InsertPlannedService, "clientId">) => {
-      const url = buildUrl(api.plannedServices.create.path, { clientId });
+      // 🔥 FORCE SAFE NUMBER
+      const safeClientId = Number(clientId);
+
+      if (isNaN(safeClientId)) {
+        throw new Error("Client ID is invalid");
+      }
+
+      const url = buildUrl(api.plannedServices.create.path, {
+        clientId: safeClientId,
+      });
 
       const payload = {
         ...data,
         cost: String(data.cost),
-        vendorId: data.vendorId ? Number(data.vendorId) : undefined,
+        vendorId:
+          data.vendorId !== undefined && data.vendorId !== null
+            ? Number(data.vendorId)
+            : undefined,
       };
 
       const res = await fetch(url, {
@@ -143,14 +158,17 @@ export function useCreatePlannedService() {
         body: JSON.stringify(payload),
       });
 
-      if (!res.ok) throw new Error("Failed to create service");
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(errorText || "Failed to create service");
+      }
 
       return api.plannedServices.create.responses[201].parse(await res.json());
     },
 
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
-        queryKey: [api.clients.get.path, variables.clientId],
+        queryKey: [api.clients.get.path, Number(variables.clientId)],
       });
     },
   });

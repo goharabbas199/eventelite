@@ -167,7 +167,14 @@ export async function registerRoutes(
 
   app.post(api.clients.create.path, async (req, res) => {
     try {
-      const input = api.clients.create.input.parse(req.body);
+      const body = {
+        ...req.body,
+        // ✅ Convert string to real Date before Zod validation
+        eventDate: new Date(req.body.eventDate),
+      };
+
+      const input = api.clients.create.input.parse(body);
+
       const client = await storage.createClient(input);
       res.status(201).json(client);
     } catch (err) {
@@ -187,7 +194,14 @@ export async function registerRoutes(
 
   app.patch(api.clients.update.path, async (req, res) => {
     try {
-      const input = api.clients.update.input.parse(req.body);
+      const body: any = { ...req.body };
+
+      if (body.eventDate) {
+        body.eventDate = new Date(body.eventDate);
+      }
+
+      const input = api.clients.update.input.parse(body);
+
       const client = await storage.updateClient(Number(req.params.id), input);
       res.json(client);
     } catch (err) {
@@ -208,23 +222,39 @@ export async function registerRoutes(
   app.post(api.plannedServices.create.path, async (req, res) => {
     try {
       const clientId = Number(req.params.clientId);
-      const input = api.plannedServices.create.input.parse({
+
+      if (isNaN(clientId)) {
+        return res.status(400).json({
+          message: "Invalid clientId in route params",
+        });
+      }
+
+      // 🔥 FORCE clientId into body BEFORE validation
+      const bodyWithClient = {
         ...req.body,
         clientId,
+      };
+
+      const input = api.plannedServices.create.input.parse(bodyWithClient);
+
+      const service = await storage.createPlannedService({
+        ...input,
+        clientId, // 🔥 force again for safety
       });
-      const service = await storage.createPlannedService(input);
+
       res.status(201).json(service);
     } catch (err) {
       if (err instanceof z.ZodError) {
         return res.status(400).json({ message: err.errors[0].message });
       }
-      res.status(500).json({ message: "Failed to create service" });
-    }
-  });
 
-  app.delete(api.plannedServices.delete.path, async (req, res) => {
-    await storage.deletePlannedService(Number(req.params.id));
-    res.status(204).end();
+      console.error("Create service error:", err);
+
+      res.status(500).json({
+        message:
+          err instanceof Error ? err.message : "Failed to create service",
+      });
+    }
   });
 
   // ===================== EXPENSES ========================
