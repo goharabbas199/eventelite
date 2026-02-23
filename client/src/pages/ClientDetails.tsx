@@ -5,6 +5,7 @@ import {
   useClient,
   useCreatePlannedService,
   useUpdateClient,
+  useDeletePlannedService, // ✅ ADD THIS
 } from "@/hooks/use-clients";
 import { useVendors } from "@/hooks/use-vendors";
 import { useVenues } from "@/hooks/use-venues";
@@ -19,7 +20,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ArrowLeft, Plus, Calendar, Mail, Phone, Users } from "lucide-react";
+import {
+  ArrowLeft,
+  Plus,
+  Calendar,
+  Mail,
+  Phone,
+  Users,
+  Trash2,
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -60,6 +69,7 @@ export default function ClientDetails() {
   const { data: client, isLoading } = useClient(id);
   const { data: venues } = useVenues();
   const updateClient = useUpdateClient();
+  const deleteService = useDeletePlannedService();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -197,6 +207,7 @@ export default function ClientDetails() {
                     <TableHead className="pl-6">Service</TableHead>
                     <TableHead>Cost</TableHead>
                     <TableHead>Notes</TableHead>
+                    <TableHead className="text-right pr-6">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -215,11 +226,27 @@ export default function ClientDetails() {
                       <TableCell className="font-medium pl-6">
                         {service.serviceName}
                       </TableCell>
+
                       <TableCell>
                         ${Number(service.cost).toLocaleString()}
                       </TableCell>
+
                       <TableCell className="text-slate-500">
                         {service.notes || "-"}
+                      </TableCell>
+
+                      <TableCell className="text-right pr-6">
+                        <button
+                          onClick={() =>
+                            deleteService.mutate({
+                              clientId: client.id,
+                              serviceId: service.id,
+                            })
+                          }
+                          className="text-red-500 hover:text-red-700 transition"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                       </TableCell>
                     </TableRow>
                   ))}

@@ -251,3 +251,32 @@ export function useUpdateExpense() {
     },
   });
 }
+
+// ================= DELETE PLANNED SERVICE =================
+
+export function useDeletePlannedService() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      clientId,
+      serviceId,
+    }: {
+      clientId: number;
+      serviceId: number;
+    }) => {
+      const res = await fetch(`/api/planned-services/${serviceId}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) throw new Error("Failed to delete service");
+    },
+
+    onSuccess: (_, variables) => {
+      // IMPORTANT: must match useClient queryKey
+      queryClient.invalidateQueries({
+        queryKey: [api.clients.get.path, variables.clientId],
+      });
+    },
+  });
+}

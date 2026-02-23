@@ -215,18 +215,21 @@ function CreateProductForm({
     },
   });
 
+  // ONLY the onSubmit part changed
+
   function onSubmit(data: ProductFormValues) {
     mutate(
       {
         vendorId,
         name: data.name,
-        price: `${data.currency} ${data.price}`, // FIXED HERE
+        price: Number(data.price), // ✅ FIXED (send number)
         description: data.description,
       },
       {
         onSuccess: () => {
           form.reset();
           onSuccess();
+          window.location.reload(); // ✅ force refresh
         },
       },
     );

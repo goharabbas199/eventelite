@@ -43,6 +43,36 @@ export async function registerRoutes(
     res.status(204).end();
   });
 
+  // ================= VENDOR PRODUCTS =================
+
+  app.post("/api/vendors/:vendorId/products", async (req, res) => {
+    try {
+      const vendorId = Number(req.params.vendorId);
+
+      const productData = {
+        ...req.body,
+        vendorId,
+      };
+
+      const product = await storage.createVendorProduct(productData);
+
+      res.status(201).json(product);
+    } catch (error) {
+      console.error("Create vendor product error:", error);
+      res.status(500).json({ message: "Failed to create vendor product" });
+    }
+  });
+
+  app.delete("/api/vendor-products/:id", async (req, res) => {
+    try {
+      await storage.deleteVendorProduct(Number(req.params.id));
+      res.status(204).end();
+    } catch (error) {
+      console.error("Delete vendor product error:", error);
+      res.status(500).json({ message: "Failed to delete vendor product" });
+    }
+  });
+
   // ====================== VENUES ========================
 
   app.get(api.venues.list.path, async (_req, res) => {
@@ -219,6 +249,7 @@ export async function registerRoutes(
 
   // ================= PLANNED SERVICES ====================
 
+  // CREATE PLANNED SERVICE
   app.post(api.plannedServices.create.path, async (req, res) => {
     try {
       const clientId = Number(req.params.clientId);
@@ -229,7 +260,6 @@ export async function registerRoutes(
         });
       }
 
-      // 🔥 FORCE clientId into body BEFORE validation
       const bodyWithClient = {
         ...req.body,
         clientId,
@@ -239,7 +269,7 @@ export async function registerRoutes(
 
       const service = await storage.createPlannedService({
         ...input,
-        clientId, // 🔥 force again for safety
+        clientId,
       });
 
       res.status(201).json(service);
@@ -254,6 +284,26 @@ export async function registerRoutes(
         message:
           err instanceof Error ? err.message : "Failed to create service",
       });
+    }
+  });
+
+  // DELETE PLANNED SERVICE
+  app.delete("/api/planned-services/:id", async (req, res) => {
+    try {
+      const serviceId = Number(req.params.id);
+
+      if (isNaN(serviceId)) {
+        return res.status(400).json({
+          message: "Invalid service id",
+        });
+      }
+
+      await storage.deletePlannedService(serviceId);
+
+      res.status(204).end();
+    } catch (err) {
+      console.error("Delete planned service error:", err);
+      res.status(500).json({ message: "Failed to delete service" });
     }
   });
 

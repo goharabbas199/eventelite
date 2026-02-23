@@ -19,12 +19,14 @@ export function useVendors() {
 
 export function useVendor(id: number) {
   return useQuery({
-    queryKey: [api.vendors.get.path, id],
+    queryKey: ["vendor", id], // ✅ SIMPLE KEY
     queryFn: async () => {
       const url = buildUrl(api.vendors.get.path, { id });
       const res = await fetch(url);
+
       if (res.status === 404) return null;
       if (!res.ok) throw new Error("Failed to fetch vendor");
+
       return api.vendors.get.responses[200].parse(await res.json());
     },
     enabled: !!id,
@@ -69,6 +71,7 @@ export function useDeleteVendor() {
 
 export function useCreateVendorProduct() {
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async ({
       vendorId,
@@ -76,24 +79,24 @@ export function useCreateVendorProduct() {
     }: { vendorId: number } & Omit<InsertVendorProduct, "vendorId">) => {
       const url = buildUrl(api.vendorProducts.create.path, { vendorId });
 
-      const payload = {
-        ...data,
-        price: String(data.price),
-      };
-
       const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(data),
       });
 
-      if (!res.ok) throw new Error("Failed to create product");
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error("Create product failed:", errorText);
+        throw new Error("Failed to create product");
+      }
 
-      return api.vendorProducts.create.responses[201].parse(await res.json());
+      return await res.json();
     },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: [api.vendors.get.path, variables.vendorId],
+
+    onSuccess: async (_, variables) => {
+      await queryClient.refetchQueries({
+        queryKey: ["vendor", variables.vendorId],
       });
     },
   });
@@ -112,18 +115,17 @@ export function useDeleteVendorProduct() {
       vendorId: number;
       productId: number;
     }) => {
-      const url = buildUrl(api.vendorProducts.delete.path, {
-        vendorId,
-        productId,
+      const res = await fetch(`/api/vendor-products/${productId}`, {
+        method: "DELETE",
       });
-
-      const res = await fetch(url, { method: "DELETE" });
 
       if (!res.ok) throw new Error("Failed to delete product");
     },
+
     onSuccess: (_, variables) => {
+      // ✅ This MUST match useVendor queryKey
       queryClient.invalidateQueries({
-        queryKey: [api.vendors.get.path, variables.vendorId],
+        queryKey: ["vendor", variables.vendorId],
       });
     },
   });

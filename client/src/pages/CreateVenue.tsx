@@ -50,8 +50,8 @@ export default function CreateVenue() {
     defaultValues: {
       name: "",
       location: "",
-      capacity: 0,
-      basePrice: 0,
+      capacity: undefined,
+      basePrice: undefined,
       bookingPhone: "",
       bookingEmail: "",
       notes: "",
@@ -188,9 +188,13 @@ export default function CreateVenue() {
                         <FormControl>
                           <Input
                             type="number"
-                            value={field.value}
+                            value={field.value ?? ""}
                             onChange={(e) =>
-                              field.onChange(Number(e.target.value))
+                              field.onChange(
+                                e.target.value === ""
+                                  ? undefined
+                                  : Number(e.target.value),
+                              )
                             }
                           />
                         </FormControl>
@@ -209,9 +213,13 @@ export default function CreateVenue() {
                           <Input
                             type="number"
                             step="0.01"
-                            value={field.value}
+                            value={field.value ?? ""}
                             onChange={(e) =>
-                              field.onChange(Number(e.target.value))
+                              field.onChange(
+                                e.target.value === ""
+                                  ? undefined
+                                  : Number(e.target.value),
+                              )
                             }
                           />
                         </FormControl>
