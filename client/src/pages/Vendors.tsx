@@ -1,9 +1,9 @@
 import { Layout } from "@/components/Layout";
 import { useVendors, useDeleteVendor } from "@/hooks/use-vendors";
 import { Button } from "@/components/ui/button";
-import { Plus, Search, Trash2, Phone, Mail } from "lucide-react";
+import { Plus, Search, Trash2, Phone, Mail, Eye } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import {
   Dialog,
   DialogContent,
@@ -22,12 +22,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+const ITEMS_PER_PAGE = 5;
+
 export default function Vendors() {
   const { data: vendors, isLoading } = useVendors();
   const deleteVendor = useDeleteVendor();
+  const [, navigate] = useLocation();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
 
   const categories = useMemo(() => {
     if (!vendors) return [];
@@ -45,6 +49,12 @@ export default function Vendors() {
 
       return matchesSearch && matchesCategory;
     }) || [];
+
+  const totalPages = Math.ceil(filteredVendors.length / ITEMS_PER_PAGE);
+  const paginatedVendors = filteredVendors.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE,
+  );
 
   const getCategoryColor = (category: string) => {
     const colors = [
@@ -74,13 +84,19 @@ export default function Vendors() {
                 placeholder="Search vendors..."
                 className="pl-9 bg-white"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setCurrentPage(1);
+                }}
               />
             </div>
 
             <Select
               value={selectedCategory}
-              onValueChange={setSelectedCategory}
+              onValueChange={(val) => {
+                setSelectedCategory(val);
+                setCurrentPage(1);
+              }}
             >
               <SelectTrigger className="w-full sm:w-52 bg-white">
                 <SelectValue placeholder="Filter by category" />
@@ -112,66 +128,102 @@ export default function Vendors() {
             No vendors found.
           </div>
         ) : (
-          <div className="space-y-3">
-            {filteredVendors.map((vendor) => {
+          <div className="space-y-2">
+            {/* Sticky Header */}
+            <div className="grid grid-cols-12 text-xs font-semibold text-muted-foreground px-4 pb-2 sticky top-0 bg-white z-10">
+              <div className="col-span-3">Vendor</div>
+              <div className="col-span-2">Category</div>
+              <div className="col-span-3">Contact</div>
+              <div className="col-span-3">Notes</div>
+              <div className="col-span-1 text-right">Actions</div>
+            </div>
+
+            {paginatedVendors.map((vendor) => {
               const [phonePart, emailPart] = vendor.contact?.split("|") || [];
 
               return (
                 <div
                   key={vendor.id}
-                  className="bg-white border border-slate-300 rounded-lg px-4 py-3 shadow-sm hover:shadow-md transition"
+                  onClick={() => navigate(`/vendors/${vendor.id}`)}
+                  className="grid grid-cols-12 items-center bg-white border border-slate-300 rounded-lg px-4 py-3 shadow-sm hover:shadow-md hover:bg-slate-50 transition text-sm cursor-pointer"
                 >
-                  <div className="flex items-center justify-between">
-                    {/* LEFT */}
-                    <div className="flex items-center gap-6 flex-wrap">
-                      <div className="flex items-center gap-3">
-                        <h3 className="font-semibold text-sm text-slate-900">
-                          {vendor.name}
-                        </h3>
-                        <Badge
-                          className={`${getCategoryColor(
-                            vendor.category,
-                          )} text-xs px-2 py-0.5`}
-                        >
-                          {vendor.category}
-                        </Badge>
+                  <div className="col-span-3 font-medium text-slate-900">
+                    {vendor.name}
+                  </div>
+
+                  <div className="col-span-2">
+                    <Badge
+                      className={`${getCategoryColor(
+                        vendor.category,
+                      )} text-xs px-2 py-0.5`}
+                    >
+                      {vendor.category}
+                    </Badge>
+                  </div>
+
+                  <div className="col-span-3 space-y-1 text-xs text-muted-foreground">
+                    {phonePart && (
+                      <div className="flex items-center gap-1">
+                        <Phone className="w-3 h-3" />
+                        {phonePart.replace("Phone:", "").trim()}
                       </div>
+                    )}
+                    {emailPart && (
+                      <div className="flex items-center gap-1">
+                        <Mail className="w-3 h-3" />
+                        {emailPart.replace("Email:", "").trim()}
+                      </div>
+                    )}
+                  </div>
 
-                      {phonePart && (
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <Phone className="w-3 h-3" />
-                          {phonePart.replace("Phone:", "").trim()}
-                        </div>
-                      )}
+                  <div className="col-span-3 text-xs text-slate-500 leading-relaxed break-words line-clamp-2">
+                    {vendor.notes || "-"}
+                  </div>
 
-                      {emailPart && (
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <Mail className="w-3 h-3" />
-                          {emailPart.replace("Email:", "").trim()}
-                        </div>
-                      )}
-                    </div>
+                  <div
+                    className="col-span-1 flex justify-end gap-2"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Link href={`/vendors/${vendor.id}`}>
+                      <Button variant="ghost" size="icon">
+                        <Eye className="w-4 h-4" />
+                      </Button>
+                    </Link>
 
-                    {/* RIGHT */}
-                    <div className="flex items-center gap-2">
-                      <Link href={`/vendors/${vendor.id}`}>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="h-8 text-xs px-3"
-                        >
-                          View
-                        </Button>
-                      </Link>
-
-                      <DeleteVendorDialog
-                        onDelete={() => deleteVendor.mutate(vendor.id)}
-                      />
-                    </div>
+                    <DeleteVendorDialog
+                      onDelete={() => deleteVendor.mutate(vendor.id)}
+                    />
                   </div>
                 </div>
               );
             })}
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex justify-end gap-2 pt-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage((p) => p - 1)}
+                >
+                  Prev
+                </Button>
+
+                <div className="text-sm px-3 py-1">
+                  Page {currentPage} of {totalPages}
+                </div>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage((p) => p + 1)}
+                >
+                  Next
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -179,7 +231,7 @@ export default function Vendors() {
   );
 }
 
-/* ================= DELETE DIALOG ================= */
+/* Delete Dialog */
 
 function DeleteVendorDialog({ onDelete }: { onDelete: () => void }) {
   const [open, setOpen] = useState(false);
@@ -187,9 +239,8 @@ function DeleteVendorDialog({ onDelete }: { onDelete: () => void }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="destructive" size="sm" className="h-8 text-xs px-3">
-          <Trash2 className="w-3 h-3 mr-1" />
-          Delete
+        <Button variant="ghost" size="icon">
+          <Trash2 className="w-4 h-4 text-red-500" />
         </Button>
       </DialogTrigger>
 
