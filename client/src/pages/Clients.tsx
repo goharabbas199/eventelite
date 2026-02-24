@@ -22,14 +22,54 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { useState } from "react";
-import { format } from "date-fns";
+import { format, differenceInDays } from "date-fns";
 import { useLocation } from "wouter";
+
+function getPriority(eventDate: Date) {
+  const today = new Date();
+  const daysLeft = differenceInDays(eventDate, today);
+
+  if (daysLeft < 0) {
+    return {
+      label: "Overdue",
+      color: "bg-gray-500",
+      text: `${Math.abs(daysLeft)} days ago`,
+      level: "Overdue",
+    };
+  }
+
+  if (daysLeft <= 7) {
+    return {
+      label: "High",
+      color: "bg-red-500",
+      text: `${daysLeft} days left`,
+      level: "High",
+    };
+  }
+
+  if (daysLeft <= 30) {
+    return {
+      label: "Medium",
+      color: "bg-yellow-500",
+      text: `${daysLeft} days left`,
+      level: "Medium",
+    };
+  }
+
+  return {
+    label: "Low",
+    color: "bg-green-500",
+    text: `${daysLeft} days left`,
+    level: "Low",
+  };
+}
 
 export default function Clients() {
   const { data: clients } = useClients();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [filter, setFilter] = useState("All");
   const [, setLocation] = useLocation();
 
   const handleDelete = async () => {
@@ -51,9 +91,28 @@ export default function Clients() {
     }
   };
 
+  const filteredClients = clients
+    ?.filter((client) => {
+      const priority = getPriority(new Date(client.eventDate));
+      if (filter === "All") return true;
+      return priority.level === filter;
+    })
+    ?.sort((a, b) => {
+      const priorityOrder: Record<string, number> = {
+        Overdue: 0,
+        High: 1,
+        Medium: 2,
+        Low: 3,
+      };
+
+      const aPriority = getPriority(new Date(a.eventDate)).level;
+      const bPriority = getPriority(new Date(b.eventDate)).level;
+
+      return priorityOrder[aPriority] - priorityOrder[bPriority];
+    });
+
   return (
     <Layout title="Clients">
-      {/* CREATE CLIENT DIALOG */}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
           <Button>
@@ -70,7 +129,6 @@ export default function Clients() {
         </DialogContent>
       </Dialog>
 
-      {/* DELETE CONFIRMATION DIALOG */}
       <Dialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <DialogContent>
           <DialogHeader>
@@ -86,7 +144,6 @@ export default function Clients() {
             <Button variant="outline" onClick={() => setDeleteId(null)}>
               Cancel
             </Button>
-
             <Button variant="destructive" onClick={handleDelete}>
               Delete
             </Button>
@@ -95,8 +152,20 @@ export default function Clients() {
       </Dialog>
 
       <Card className="mt-6">
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Client List</CardTitle>
+
+          <select
+            className="border rounded-md px-3 py-2 text-sm bg-background"
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+          >
+            <option value="All">All</option>
+            <option value="High">High (0–7 days)</option>
+            <option value="Medium">Medium (8–30 days)</option>
+            <option value="Low">Low (31+ days)</option>
+            <option value="Overdue">Overdue</option>
+          </select>
         </CardHeader>
 
         <CardContent>
@@ -105,6 +174,7 @@ export default function Clients() {
               <TableRow>
                 <TableHead>Name</TableHead>
                 <TableHead>Date</TableHead>
+                <TableHead>Priority</TableHead>
                 <TableHead>Type</TableHead>
                 <TableHead>Budget</TableHead>
                 <TableHead>Status</TableHead>
@@ -113,46 +183,61 @@ export default function Clients() {
             </TableHeader>
 
             <TableBody>
-              {clients?.map((client) => (
-                <TableRow key={client.id}>
-                  <TableCell className="font-medium">{client.name}</TableCell>
+              {filteredClients?.map((client) => {
+                const priority = getPriority(new Date(client.eventDate));
 
-                  <TableCell>
-                    {format(new Date(client.eventDate), "MMM dd, yyyy")}
-                  </TableCell>
+                return (
+                  <TableRow key={client.id}>
+                    <TableCell className="font-medium">{client.name}</TableCell>
 
-                  <TableCell>{client.eventType}</TableCell>
+                    <TableCell>
+                      {format(new Date(client.eventDate), "MMM dd, yyyy")}
+                    </TableCell>
 
-                  <TableCell>
-                    {client.budget
-                      ? `$${Number(client.budget).toLocaleString()}`
-                      : "-"}
-                  </TableCell>
+                    <TableCell>
+                      <div className="flex flex-col gap-1">
+                        <span
+                          className={`text-white text-xs px-2 py-1 rounded-md w-fit ${priority.color}`}
+                        >
+                          {priority.label}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {priority.text}
+                        </span>
+                      </div>
+                    </TableCell>
 
-                  <TableCell>{client.status}</TableCell>
+                    <TableCell>{client.eventType}</TableCell>
 
-                  <TableCell className="flex gap-2 justify-center">
-                    {/* VIEW */}
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setLocation(`/clients/${client.id}`)}
-                    >
-                      <Eye className="w-4 h-4" />
-                    </Button>
+                    <TableCell>
+                      {client.budget
+                        ? `$${Number(client.budget).toLocaleString()}`
+                        : "-"}
+                    </TableCell>
 
-                    {/* DELETE */}
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setDeleteId(client.id)}
-                      className="text-red-500 hover:text-red-600"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
+                    <TableCell>{client.status}</TableCell>
+
+                    <TableCell className="flex gap-2 justify-center">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setLocation(`/clients/${client.id}`)}
+                      >
+                        <Eye className="w-4 h-4" />
+                      </Button>
+
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setDeleteId(client.id)}
+                        className="text-red-500 hover:text-red-600"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </CardContent>

@@ -92,6 +92,9 @@ export default function ClientDetails() {
 
   const budget = client.budget ? Number(client.budget) : 0;
   const remaining = budget - totalCost;
+  const profit = remaining;
+  const profitPercentage =
+    budget > 0 ? ((profit / budget) * 100).toFixed(1) : "0";
 
   return (
     <Layout title="Client Profile">
@@ -295,15 +298,27 @@ export default function ClientDetails() {
                   </span>
                 </div>
 
-                <div className="flex justify-between pt-2">
-                  <span className="text-sm text-slate-500">Remaining</span>
-                  <span
-                    className={`font-bold text-lg ${
-                      remaining < 0 ? "text-red-500" : "text-emerald-600"
-                    }`}
-                  >
-                    ${remaining.toLocaleString()}
+                <div className="flex justify-between pt-2 border-t">
+                  <span className="text-sm text-slate-500">Total Cost</span>
+                  <span className="font-bold text-lg text-blue-700">
+                    ${totalCost.toLocaleString()}
                   </span>
+                </div>
+
+                <div className="flex justify-between pt-2">
+                  <span className="text-sm text-slate-500">Profit / Loss</span>
+                  <div className="text-right">
+                    <span
+                      className={`font-bold text-lg ${
+                        profit < 0 ? "text-red-500" : "text-emerald-600"
+                      }`}
+                    >
+                      ${profit.toLocaleString()}
+                    </span>
+                    <div className="text-xs text-slate-400">
+                      {profitPercentage}% margin
+                    </div>
+                  </div>
                 </div>
               </div>
             </CardContent>
