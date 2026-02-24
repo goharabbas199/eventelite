@@ -1,6 +1,14 @@
+import { useMemo, useState, useEffect } from "react";
 import { Layout } from "@/components/Layout";
 import { StatsCard } from "@/components/StatsCard";
-import { Users, Store, MapPin, Calendar, TrendingUp } from "lucide-react";
+import {
+  Users,
+  Store,
+  MapPin,
+  DollarSign,
+  TrendingUp,
+  Wallet,
+} from "lucide-react";
 import { useClients } from "@/hooks/use-clients";
 import { useVendors } from "@/hooks/use-vendors";
 import { useVenues } from "@/hooks/use-venues";
@@ -15,231 +23,316 @@ import {
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { useLocation } from "wouter";
+import { buildUrl, api } from "@shared/routes";
 
 export default function Dashboard() {
   const { data: clients, isLoading: loadingClients } = useClients();
   const { data: vendors, isLoading: loadingVendors } = useVendors();
   const { data: venues, isLoading: loadingVenues } = useVenues();
-
   const [, navigate] = useLocation();
 
-  const activeLeads =
-    clients?.filter((c) => c.status === "Lead" || c.status === "Confirmed")
+  const [range, setRange] = useState<"month" | "6months" | "year">("year");
+  const [totalExpenses, setTotalExpenses] = useState(0);
+
+  // Revenue
+  const totalRevenue = useMemo(() => {
+    if (!clients) return 0;
+    return clients.reduce(
+      (sum: number, c: any) => sum + Number(c.budget || 0),
+      0,
+    );
+  }, [clients]);
+
+  // Expenses
+  useEffect(() => {
+    if (!clients || clients.length === 0) return;
+
+    async function calculateExpenses() {
+      let total = 0;
+
+      await Promise.all(
+        clients.map(async (client: any) => {
+          const url = buildUrl(api.clients.get.path, { id: client.id });
+          const res = await fetch(url);
+          if (!res.ok) return;
+
+          const fullClient = await res.json();
+
+          const planned =
+            fullClient.services?.reduce(
+              (sum: number, s: any) => sum + Number(s.cost || 0),
+              0,
+            ) || 0;
+
+          const expenses =
+            fullClient.expenses?.reduce(
+              (sum: number, e: any) => sum + Number(e.cost || 0),
+              0,
+            ) || 0;
+
+          total += planned + expenses;
+        }),
+      );
+
+      setTotalExpenses(total);
+    }
+
+    calculateExpenses();
+  }, [clients]);
+
+  const netProfit = totalRevenue - totalExpenses;
+
+  const activeClients =
+    clients?.filter((c: any) => c.status === "Lead" || c.status === "Confirmed")
       .length || 0;
 
-  const upcomingEvents =
-    clients?.filter((c) => new Date(c.eventDate) > new Date()).length || 0;
+  const upcomingEventsList = useMemo(() => {
+    if (!clients) return [];
 
-  const data = [
-    { name: "Jan", revenue: 4000 },
-    { name: "Feb", revenue: 3000 },
-    { name: "Mar", revenue: 2000 },
-    { name: "Apr", revenue: 2780 },
-    { name: "May", revenue: 1890 },
-    { name: "Jun", revenue: 2390 },
-    { name: "Jul", revenue: 3490 },
-  ];
+    return clients
+      .filter((c: any) => new Date(c.eventDate) > new Date())
+      .sort(
+        (a: any, b: any) =>
+          new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime(),
+      )
+      .slice(0, 5);
+  }, [clients]);
+
+  const revenueData = useMemo(() => {
+    if (!clients) return [];
+
+    const now = new Date();
+    const months: Record<string, number> = {};
+
+    clients.forEach((client: any) => {
+      const date = new Date(client.eventDate);
+      const diffMonths =
+        (now.getFullYear() - date.getFullYear()) * 12 +
+        (now.getMonth() - date.getMonth());
+
+      if (
+        (range === "month" && diffMonths <= 1) ||
+        (range === "6months" && diffMonths <= 6) ||
+        range === "year"
+      ) {
+        const key = date.toLocaleString("default", { month: "short" });
+        months[key] = (months[key] || 0) + Number(client.budget || 0);
+      }
+    });
+
+    return Object.entries(months).map(([name, revenue]) => ({
+      name,
+      revenue,
+    }));
+  }, [clients, range]);
 
   if (loadingClients || loadingVendors || loadingVenues) {
     return (
       <Layout title="Dashboard">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[1, 2, 3, 4].map((i) => (
-            <Skeleton key={i} className="h-32 rounded-xl" />
-          ))}
-        </div>
-        <Skeleton className="h-96 w-full mt-8 rounded-xl" />
+        <Skeleton className="h-32 w-full" />
       </Layout>
     );
   }
 
   return (
     <Layout title="Overview">
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div
-          onClick={() => navigate("/vendors")}
-          className="cursor-pointer transition-transform hover:scale-[1.02]"
-        >
-          <StatsCard
-            title="Total Vendors"
-            value={vendors?.length || 0}
-            icon={Store}
-            color="blue"
-            trend="12%"
-          />
+      <div className="bg-slate-50 min-h-screen p-6 rounded-xl">
+        <h2 className="text-lg font-semibold text-slate-800 mb-4">
+          Operations
+        </h2>
+        {/* OPERATIONAL ROW */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 gap-6">
+          <div
+            onClick={() => navigate("/vendors")}
+            className="cursor-pointer transition-all duration-200 hover:-translate-y-1 hover:shadow-md"
+          >
+            <StatsCard
+              title="Total Vendors"
+              value={vendors?.length || 0}
+              icon={Store}
+              color="purple"
+            />
+          </div>
+
+          <div
+            onClick={() => navigate("/venues")}
+            className="cursor-pointer transition-all duration-200 hover:-translate-y-1 hover:shadow-md"
+          >
+            <StatsCard
+              title="Total Venues"
+              value={venues?.length || 0}
+              icon={MapPin}
+              color="blue"
+            />
+          </div>
+
+          <div
+            onClick={() => navigate("/clients")}
+            className="cursor-pointer transition-all duration-200 hover:-translate-y-1 hover:shadow-md"
+          >
+            <StatsCard
+              title="Active Clients"
+              value={activeClients}
+              icon={Users}
+              color="green"
+            />
+          </div>
         </div>
 
-        <div
-          onClick={() => navigate("/venues")}
-          className="cursor-pointer transition-transform hover:scale-[1.02]"
-        >
+        <h2 className="text-lg font-semibold text-slate-800 mt-10 mb-4">
+          Financial Overview
+        </h2>
+        {/* FINANCIAL ROW */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-8">
           <StatsCard
-            title="Available Venues"
-            value={venues?.length || 0}
-            icon={MapPin}
-            color="purple"
-            trend="5%"
-          />
-        </div>
-
-        <div
-          onClick={() => navigate("/clients")}
-          className="cursor-pointer transition-transform hover:scale-[1.02]"
-        >
-          <StatsCard
-            title="Active Clients"
-            value={activeLeads}
-            icon={Users}
+            title="Total Revenue"
+            value={`$${totalRevenue.toLocaleString()}`}
+            icon={DollarSign}
             color="green"
-            trend="8%"
           />
-        </div>
-
-        <div
-          onClick={() => navigate("/budget")}
-          className="cursor-pointer transition-transform hover:scale-[1.02]"
-        >
           <StatsCard
-            title="Upcoming Events"
-            value={upcomingEvents}
-            icon={Calendar}
+            title="Total Expenses"
+            value={`$${totalExpenses.toLocaleString()}`}
+            icon={Wallet}
             color="orange"
           />
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
-        {/* Revenue Chart */}
-        <div className="lg:col-span-2">
-          <Card className="border-none shadow-md">
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <span>Revenue Overview</span>
-                <div className="flex items-center text-sm font-normal text-muted-foreground bg-slate-100 px-3 py-1 rounded-full">
-                  <TrendingUp className="w-4 h-4 mr-2 text-emerald-500" />
-                  +12.5% vs last month
-                </div>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[350px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={data}>
-                    <defs>
-                      <linearGradient
-                        id="colorRevenue"
-                        x1="0"
-                        y1="0"
-                        x2="0"
-                        y2="1"
-                      >
-                        <stop
-                          offset="5%"
-                          stopColor="#3b82f6"
-                          stopOpacity={0.3}
-                        />
-                        <stop
-                          offset="95%"
-                          stopColor="#3b82f6"
-                          stopOpacity={0}
-                        />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid
-                      strokeDasharray="3 3"
-                      vertical={false}
-                      stroke="#e2e8f0"
-                    />
-                    <XAxis
-                      dataKey="name"
-                      axisLine={false}
-                      tickLine={false}
-                      tick={{ fill: "#64748b", fontSize: 12 }}
-                      dy={10}
-                    />
-                    <YAxis
-                      axisLine={false}
-                      tickLine={false}
-                      tick={{ fill: "#64748b", fontSize: 12 }}
-                      tickFormatter={(value) => `$${value}`}
-                    />
-                    <Tooltip
-                      contentStyle={{
-                        borderRadius: "8px",
-                        border: "none",
-                        boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-                      }}
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="revenue"
-                      stroke="#3b82f6"
-                      strokeWidth={3}
-                      fillOpacity={1}
-                      fill="url(#colorRevenue)"
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
+          <StatsCard
+            title="Net Profit"
+            value={`$${netProfit.toLocaleString()}`}
+            icon={TrendingUp}
+            color={netProfit >= 0 ? "green" : "red"}
+          />
         </div>
 
-        {/* Recent Clients */}
-        <div className="lg:col-span-1">
-          <Card className="border-none shadow-md h-full">
-            <CardHeader>
-              <CardTitle>Recent Clients</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {clients?.slice(0, 5).map((client) => (
-                  <div
-                    key={client.id}
-                    onClick={() => navigate(`/clients/${client.id}`)}
-                    className="flex items-center justify-between group cursor-pointer hover:bg-slate-100 p-3 rounded-lg transition"
+        {/* CHART + UPCOMING SIDE BY SIDE */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-10">
+          {/* Revenue Chart - 2/3 */}
+          <div className="lg:col-span-2">
+            <Card className="shadow-sm border rounded-2xl">
+              <CardHeader className="flex justify-between items-center">
+                <CardTitle>Revenue Overview</CardTitle>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant={range === "month" ? "default" : "outline"}
+                    onClick={() => setRange("month")}
                   >
-                    <div className="flex items-center space-x-4">
-                      <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-sm">
-                        {client.name.charAt(0)}
-                      </div>
-                      <div>
-                        <p className="font-medium text-slate-800 group-hover:text-blue-600 transition-colors">
-                          {client.name}
-                        </p>
-                        <p className="text-xs text-slate-500">
-                          {client.eventType}
-                        </p>
-                      </div>
-                    </div>
+                    Month
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant={range === "6months" ? "default" : "outline"}
+                    onClick={() => setRange("6months")}
+                  >
+                    6 Months
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant={range === "year" ? "default" : "outline"}
+                    onClick={() => setRange("year")}
+                  >
+                    Year
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[300px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={revenueData}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                      <XAxis dataKey="name" />
+                      <YAxis tickFormatter={(v) => `$${v}`} />
+                      <Tooltip formatter={(v: any) => `$${v}`} />
+                      <Area
+                        type="monotone"
+                        dataKey="revenue"
+                        stroke="#1d4ed8"
+                        strokeWidth={3}
+                        fillOpacity={0.2}
+                        fill="#1d4ed8"
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
-                    <span
-                      className={`text-xs px-2 py-1 rounded-full font-medium 
-                        ${
-                          client.status === "Confirmed"
-                            ? "bg-emerald-100 text-emerald-700"
-                            : client.status === "Lead"
-                              ? "bg-blue-100 text-blue-700"
-                              : "bg-slate-100 text-slate-700"
-                        }
-                      `}
-                    >
-                      {client.status}
-                    </span>
+          {/* Upcoming Events - 1/3 */}
+          <div>
+            <Card className="shadow-md h-full">
+              <CardHeader>
+                <CardTitle>Upcoming Events</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {upcomingEventsList.length === 0 ? (
+                  <div className="text-muted-foreground text-sm">
+                    No upcoming events
                   </div>
-                ))}
+                ) : (
+                  <div className="space-y-4">
+                    {upcomingEventsList.map((event: any) => (
+                      <div
+                        key={event.id}
+                        onClick={() => navigate(`/clients/${event.id}`)}
+                        className="flex justify-between items-center p-3 rounded-lg hover:bg-slate-100 cursor-pointer transition"
+                      >
+                        <div>
+                          <p className="font-medium">{event.name}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {event.eventType} •{" "}
+                            {new Date(event.eventDate).toLocaleDateString()}
+                          </p>
+                        </div>
 
-                {(!clients || clients.length === 0) && (
-                  <div className="text-center py-8 text-muted-foreground">
-                    No recent clients
+                        {(() => {
+                          const eventDate = new Date(event.eventDate);
+                          const today = new Date();
+                          const diffTime =
+                            eventDate.getTime() - today.getTime();
+                          const diffDays = Math.ceil(
+                            diffTime / (1000 * 60 * 60 * 24),
+                          );
+
+                          let label = "Normal";
+                          let className = "bg-slate-100 text-slate-700";
+
+                          if (diffDays < 0) {
+                            label = "Overdue";
+                            className = "bg-gray-200 text-gray-800";
+                          } else if (diffDays <= 3) {
+                            label = "High";
+                            className = "bg-red-100 text-red-700";
+                          } else if (diffDays <= 14) {
+                            label = "Medium";
+                            className = "bg-yellow-100 text-yellow-800";
+                          }
+
+                          return (
+                            <div className="text-right">
+                              <span
+                                className={`text-xs px-2 py-1 rounded-full font-medium ${className}`}
+                              >
+                                {label}
+                              </span>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                {diffDays < 0
+                                  ? `${Math.abs(diffDays)} days ago`
+                                  : `${diffDays} days left`}
+                              </p>
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    ))}
                   </div>
                 )}
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </Layout>
