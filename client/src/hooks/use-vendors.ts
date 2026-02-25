@@ -65,6 +65,36 @@ export function useDeleteVendor() {
   });
 }
 
+/* NEW: Update Vendor */
+
+export function useUpdateVendor() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, ...data }: { id: number } & InsertVendor) => {
+      const res = await fetch(`/api/vendors/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      if (!res.ok) throw new Error("Failed to update vendor");
+
+      return await res.json();
+    },
+
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["vendor", variables.id],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: [api.vendors.list.path],
+      });
+    },
+  });
+}
+
 /* ===============================
    Vendor Products
 ================================ */

@@ -3,19 +3,21 @@ import {
   useVendor,
   useCreateVendorProduct,
   useDeleteVendorProduct,
+  useUpdateVendor,
 } from "@/hooks/use-vendors";
 import { Link, useRoute } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { ArrowLeft, Plus, Store, Phone, Tag, Trash2 } from "lucide-react";
+  ArrowLeft,
+  Plus,
+  Store,
+  Phone,
+  Tag,
+  Trash2,
+  Mail,
+  Pencil,
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -57,7 +59,19 @@ export default function VendorDetails() {
   const id = Number(params?.id);
   const { data: vendor, isLoading } = useVendor(id);
   const deleteProduct = useDeleteVendorProduct();
+  const updateVendor = useUpdateVendor();
+  const [phonePart, emailPart] = vendor?.contact?.split("|") || [];
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+
+  function formatCurrency(amount: number | string) {
+    const value = Number(amount);
+    if (isNaN(value)) return amount;
+    return new Intl.NumberFormat("en-AE", {
+      style: "currency",
+      currency: "AED",
+    }).format(value);
+  }
 
   if (isLoading) {
     return (
@@ -82,35 +96,94 @@ export default function VendorDetails() {
 
   return (
     <Layout title="Vendor Details">
-      {/* Header */}
-      <div className="mb-6">
+      <div className="mb-8 space-y-6">
         <Link
           href="/vendors"
-          className="text-sm text-slate-500 hover:text-blue-600 flex items-center mb-4 transition-colors"
+          className="text-sm text-slate-500 hover:text-blue-600 flex items-center transition-colors"
         >
           <ArrowLeft className="w-4 h-4 mr-1" /> Back to Vendors
         </Link>
 
-        <div className="flex items-start justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">{vendor.name}</h1>
-            <div className="flex items-center gap-4 mt-2 text-slate-500">
-              <span className="flex items-center text-sm">
-                <Tag className="w-4 h-4 mr-1.5" /> {vendor.category}
-              </span>
-              <span className="flex items-center text-sm">
-                <Phone className="w-4 h-4 mr-1.5" /> {vendor.contact}
-              </span>
+        {/* HEADER CARD */}
+        <Card className="border-none shadow-md">
+          <CardContent className="p-6">
+            <div className="flex items-start justify-between">
+              {/* LEFT SIDE */}
+              <div className="max-w-xl">
+                <div className="flex items-center gap-3">
+                  <Store className="w-8 h-8 text-blue-600" />
+                  <h1 className="text-3xl font-bold tracking-tight">
+                    {vendor.name}
+                  </h1>
+                </div>
+
+                {/* Category */}
+                <div className="mt-2 inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-medium">
+                  <Tag className="w-3.5 h-3.5 mr-1" />
+                  {vendor.category}
+                </div>
+
+                {/* Contact Section */}
+                <div className="mt-4 space-y-2 text-sm text-slate-600">
+                  {phonePart && (
+                    <div className="flex items-center gap-2">
+                      <Phone className="w-4 h-4 text-slate-500" />
+                      <a
+                        href={`tel:${phonePart.replace("Phone:", "").trim()}`}
+                        className="hover:text-blue-600"
+                      >
+                        {phonePart.replace("Phone:", "").trim()}
+                      </a>
+                    </div>
+                  )}
+
+                  {emailPart && (
+                    <div className="flex items-center gap-2">
+                      <Mail className="w-4 h-4 text-slate-500" />
+                      <a
+                        href={`mailto:${emailPart.replace("Email:", "").trim()}`}
+                        className="hover:text-blue-600"
+                      >
+                        {emailPart.replace("Email:", "").trim()}
+                      </a>
+                    </div>
+                  )}
+                </div>
+              </div>{" "}
+              {/* ← THIS WAS MISSING */}
+              {/* RIGHT SIDE */}
+              <div>
+                <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm" className="h-9 px-4">
+                      <Pencil className="w-4 h-4 mr-2" />
+                      Edit
+                    </Button>
+                  </DialogTrigger>
+
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Edit Vendor</DialogTitle>
+                    </DialogHeader>
+
+                    <EditVendorForm
+                      vendor={vendor}
+                      onClose={() => setIsEditOpen(false)}
+                    />
+                  </DialogContent>
+                </Dialog>
+              </div>
             </div>
-          </div>
-          <Store className="w-8 h-8 text-blue-600" />
-        </div>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Products */}
+      {/* Services & Products Section */}
       <Card className="border-none shadow-md overflow-hidden">
-        <CardHeader className="flex justify-between items-center">
-          <CardTitle>Services & Products</CardTitle>
+        <CardHeader className="flex justify-between items-center px-6 py-4 border-b bg-slate-50">
+          <CardTitle className="text-lg font-semibold">
+            Services & Products
+          </CardTitle>
 
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
@@ -133,51 +206,50 @@ export default function VendorDetails() {
         </CardHeader>
 
         <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="pl-6">Item</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead className="text-right">Price</TableHead>
-                <TableHead className="text-right pr-6">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
+          {vendor.products?.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <Store className="w-10 h-10 text-slate-300 mb-4" />
+              <p className="text-slate-500 font-medium">
+                No services added yet
+              </p>
+              <p className="text-sm text-slate-400">
+                Use the "Add Item" button above to create your first service.
+              </p>
+            </div>
+          ) : (
+            <div className="divide-y">
+              {vendor.products?.map((product) => (
+                <div
+                  key={product.id}
+                  className="flex items-center justify-between px-6 py-4 hover:bg-slate-50 transition-colors"
+                >
+                  <div>
+                    <p className="font-medium">{product.name}</p>
+                    {product.description && (
+                      <p className="text-sm text-slate-500 mt-1">
+                        {product.description}
+                      </p>
+                    )}
+                  </div>
 
-            <TableBody>
-              {vendor.products?.length === 0 ? (
-                <TableRow>
-                  <TableCell
-                    colSpan={4}
-                    className="text-center h-32 text-muted-foreground"
-                  >
-                    No products added.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                vendor.products?.map((product) => (
-                  <TableRow key={product.id}>
-                    <TableCell className="pl-6 font-medium">
-                      {product.name}
-                    </TableCell>
-                    <TableCell>{product.description}</TableCell>
-                    <TableCell className="text-right">
-                      {product.price}
-                    </TableCell>
-                    <TableCell className="text-right pr-6">
-                      <DeleteProductDialog
-                        onDelete={() =>
-                          deleteProduct.mutate({
-                            vendorId: id,
-                            productId: product.id,
-                          })
-                        }
-                      />
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+                  <div className="flex items-center gap-6">
+                    <p className="font-semibold text-slate-700">
+                      {formatCurrency(product.price)}
+                    </p>
+
+                    <DeleteProductDialog
+                      onDelete={() =>
+                        deleteProduct.mutate({
+                          vendorId: id,
+                          productId: product.id,
+                        })
+                      }
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -193,8 +265,8 @@ export default function VendorDetails() {
 }
 
 /* ===============================
-   Create Product Form
-================================ */
+      Create Product Form
+      ================================ */
 
 function CreateProductForm({
   vendorId,
@@ -209,27 +281,25 @@ function CreateProductForm({
     resolver: zodResolver(productSchema),
     defaultValues: {
       name: "",
-      currency: "USD",
+      currency: "AED",
       price: "",
       description: "",
     },
   });
-
-  // ONLY the onSubmit part changed
 
   function onSubmit(data: ProductFormValues) {
     mutate(
       {
         vendorId,
         name: data.name,
-        price: Number(data.price), // ✅ FIXED (send number)
+        price: Number(data.price),
         description: data.description,
       },
       {
         onSuccess: () => {
           form.reset();
           onSuccess();
-          window.location.reload(); // ✅ force refresh
+          window.location.reload();
         },
       },
     );
@@ -252,41 +322,19 @@ function CreateProductForm({
           )}
         />
 
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="currency"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Currency</FormLabel>
-                <FormControl>
-                  <select
-                    {...field}
-                    className="w-full border rounded-md h-10 px-3"
-                  >
-                    <option value="USD">USD</option>
-                    <option value="AED">AED</option>
-                    <option value="EUR">EUR</option>
-                  </select>
-                </FormControl>
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="price"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Price</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter price" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+        <FormField
+          control={form.control}
+          name="price"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Price (AED)</FormLabel>
+              <FormControl>
+                <Input placeholder="Enter price" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <FormField
           control={form.control}
@@ -311,8 +359,8 @@ function CreateProductForm({
 }
 
 /* ===============================
-   Delete Dialog
-================================ */
+      Delete Dialog
+      ================================ */
 
 function DeleteProductDialog({ onDelete }: { onDelete: () => void }) {
   const [open, setOpen] = useState(false);
@@ -346,5 +394,85 @@ function DeleteProductDialog({ onDelete }: { onDelete: () => void }) {
         </div>
       </DialogContent>
     </Dialog>
+  );
+}
+
+/* ===============================
+   Edit Vendor Form
+================================ */
+
+function EditVendorForm({
+  vendor,
+  onClose,
+}: {
+  vendor: any;
+  onClose: () => void;
+}) {
+  const updateVendor = useUpdateVendor();
+
+  const [phonePart, emailPart] = vendor.contact?.split("|") || [];
+
+  const [name, setName] = useState(vendor.name);
+  const [category, setCategory] = useState(vendor.category);
+  const [phone, setPhone] = useState(
+    phonePart?.replace("Phone:", "").trim() || "",
+  );
+  const [email, setEmail] = useState(
+    emailPart?.replace("Email:", "").trim() || "",
+  );
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+
+    const combinedContact = `Phone: ${phone} | Email: ${email}`;
+
+    updateVendor.mutate(
+      {
+        id: vendor.id,
+        name,
+        category,
+        contact: combinedContact,
+      },
+      {
+        onSuccess: () => {
+          onClose();
+        },
+        onError: (err) => {
+          console.error("Update failed:", err);
+        },
+      },
+    );
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4 py-4">
+      <div>
+        <label className="text-sm font-medium">Vendor Name</label>
+        <Input value={name} onChange={(e) => setName(e.target.value)} />
+      </div>
+
+      <div>
+        <label className="text-sm font-medium">Category</label>
+        <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+      </div>
+
+      <div>
+        <label className="text-sm font-medium">Phone</label>
+        <Input value={phone} onChange={(e) => setPhone(e.target.value)} />
+      </div>
+
+      <div>
+        <label className="text-sm font-medium">Email</label>
+        <Input value={email} onChange={(e) => setEmail(e.target.value)} />
+      </div>
+
+      <div className="flex justify-end gap-2 pt-2">
+        <Button type="button" variant="outline" onClick={onClose}>
+          Cancel
+        </Button>
+
+        <Button type="submit">Save Changes</Button>
+      </div>
+    </form>
   );
 }

@@ -43,6 +43,20 @@ export async function registerRoutes(
     res.status(204).end();
   });
 
+  // UPDATE VENDOR
+  app.put("/api/vendors/:id", async (req, res) => {
+    try {
+      const vendorId = Number(req.params.id);
+
+      const updated = await storage.updateVendor(vendorId, req.body);
+
+      res.json(updated);
+    } catch (err) {
+      console.error("Update vendor error:", err);
+      res.status(500).json({ message: "Failed to update vendor" });
+    }
+  });
+
   // ================= VENDOR PRODUCTS =================
 
   app.post("/api/vendors/:vendorId/products", async (req, res) => {
