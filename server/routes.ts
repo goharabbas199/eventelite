@@ -120,6 +120,21 @@ export async function registerRoutes(
     res.json(venue);
   });
 
+  // UPDATE VENUE
+  // UPDATE VENUE
+  app.patch("/api/venues/:id", async (req, res) => {
+    try {
+      const venueId = Number(req.params.id);
+
+      const updated = await storage.updateVenue(venueId, req.body);
+
+      res.json(updated);
+    } catch (err) {
+      console.error("Update venue error:", err);
+      res.status(500).json({ message: "Failed to update venue" });
+    }
+  });
+
   // ✅ NEW: UPDATE MAIN IMAGE
   app.patch("/api/venues/:id/main-image", async (req, res) => {
     try {

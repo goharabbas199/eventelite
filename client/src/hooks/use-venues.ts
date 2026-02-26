@@ -157,3 +157,42 @@ export function useDeleteBookingOption() {
     },
   });
 }
+
+/* ================================
+   UPDATE VENUE
+================================ */
+
+export function useUpdateVenue() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      id,
+      ...data
+    }: { id: number } & Partial<InsertVenue>) => {
+      const url = buildUrl(api.venues.update.path, { id });
+
+      const res = await fetch(url, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      if (!res.ok) {
+        const error = await res.json().catch(() => null);
+        throw new Error(error?.message || "Failed to update venue");
+      }
+
+      return await res.json();
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.refetchQueries({
+        queryKey: ["venue", variables.id],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["venues"],
+      });
+    },
+  });
+}

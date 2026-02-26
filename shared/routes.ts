@@ -98,7 +98,6 @@ export const api = {
         200: z.array(z.custom<typeof venues.$inferSelect>()),
       },
     },
-
     create: {
       method: "POST" as const,
       path: "/api/venues" as const,
@@ -108,7 +107,6 @@ export const api = {
         400: errorSchemas.validation,
       },
     },
-
     get: {
       method: "GET" as const,
       path: "/api/venues/:id" as const,
@@ -122,7 +120,15 @@ export const api = {
         404: errorSchemas.notFound,
       },
     },
-
+    update: {
+      method: "PATCH" as const,
+      path: "/api/venues/:id" as const,
+      input: insertVenueSchema.partial(),
+      responses: {
+        200: z.custom<typeof venues.$inferSelect>(),
+        404: errorSchemas.notFound,
+      },
+    },
     delete: {
       method: "DELETE" as const,
       path: "/api/venues/:id" as const,
@@ -137,7 +143,7 @@ export const api = {
     create: {
       method: "POST" as const,
       path: "/api/venues/:venueId/options" as const,
-      input: insertBookingOptionSchema, // ✅ FIXED HERE
+      input: insertBookingOptionSchema,
       responses: {
         201: z.custom<typeof bookingOptions.$inferSelect>(),
         400: errorSchemas.validation,

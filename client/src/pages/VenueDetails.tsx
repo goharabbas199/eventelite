@@ -1,14 +1,15 @@
-// FULL FILE REPLACEMENT (CORRECTED VERSION)
+// FULL FILE REPLACEMENT – FIXED EDIT FORM STRUCTURE
 
 import { Layout } from "@/components/Layout";
 import {
   useVenue,
   useCreateBookingOption,
   useDeleteBookingOption,
+  useUpdateVenue,
 } from "@/hooks/use-venues";
 import { Link, useRoute, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -21,10 +22,13 @@ import {
   ArrowLeft,
   Plus,
   MapPin,
-  Users,
   Trash2,
   Upload,
   ImagePlus,
+  ChevronDown,
+  ChevronUp,
+  Pencil,
+  Users,
 } from "lucide-react";
 import {
   Dialog,
@@ -57,12 +61,17 @@ export default function VenueDetails() {
   const [, params] = useRoute("/venues/:id");
   const [, navigate] = useLocation();
   const id = Number(params?.id);
+
   const { data: venue, isLoading } = useVenue(id);
   const deleteOption = useDeleteBookingOption();
   const queryClient = useQueryClient();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [showContact, setShowContact] = useState(true);
+  const [showPackages, setShowPackages] = useState(true);
+  const [imageToDelete, setImageToDelete] = useState<number | null>(null);
+  const [packageToDelete, setPackageToDelete] = useState<number | null>(null);
 
   const mainImageInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
@@ -123,222 +132,403 @@ export default function VenueDetails() {
 
   return (
     <Layout title="Venue Details">
-      <div className="mb-6">
+      <div className="space-y-10">
         <Link
           href="/venues"
-          className="text-sm text-slate-500 hover:text-blue-600 flex items-center mb-4"
+          className="text-sm text-slate-500 hover:text-blue-600 flex items-center"
         >
           <ArrowLeft className="w-4 h-4 mr-1" /> Back to Venues
         </Link>
 
-        {/* IMAGE CONTROLS */}
-        <div className="flex gap-3 mb-6">
-          <input
-            type="file"
-            hidden
-            ref={mainImageInputRef}
-            accept="image/*"
-            onChange={(e) =>
-              e.target.files?.[0] && handleMainImageUpload(e.target.files[0])
-            }
-          />
-          <input
-            type="file"
-            hidden
-            ref={galleryInputRef}
-            accept="image/*"
-            onChange={(e) =>
-              e.target.files?.[0] && handleGalleryUpload(e.target.files[0])
-            }
-          />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          {/* LEFT */}
+          <div className="space-y-6">
+            <div className="flex gap-3">
+              <input
+                type="file"
+                hidden
+                ref={mainImageInputRef}
+                accept="image/*"
+                onChange={(e) =>
+                  e.target.files?.[0] &&
+                  handleMainImageUpload(e.target.files[0])
+                }
+              />
+              <input
+                type="file"
+                hidden
+                ref={galleryInputRef}
+                accept="image/*"
+                onChange={(e) =>
+                  e.target.files?.[0] && handleGalleryUpload(e.target.files[0])
+                }
+              />
 
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => mainImageInputRef.current?.click()}
-          >
-            <Upload className="w-4 h-4 mr-2" />
-            {venue.mainImage ? "Change Main Image" : "Upload Main Image"}
-          </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => mainImageInputRef.current?.click()}
+              >
+                <Upload className="w-4 h-4 mr-2" />
+                Change Main Image
+              </Button>
 
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => galleryInputRef.current?.click()}
-          >
-            <ImagePlus className="w-4 h-4 mr-2" />
-            Add Gallery Image
-          </Button>
-        </div>
-
-        {/* IMAGE DISPLAY */}
-        {images.length > 0 && (
-          <div className="flex gap-6 mb-10">
-            <div className="flex flex-col gap-3 w-24">
-              {images.map((img, index) => (
-                <img
-                  key={index}
-                  src={img}
-                  onClick={() => setSelectedIndex(index)}
-                  className={`h-20 w-20 object-cover rounded-md border cursor-pointer transition ${
-                    selectedIndex === index
-                      ? "ring-2 ring-blue-600"
-                      : "hover:ring-1"
-                  }`}
-                />
-              ))}
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => galleryInputRef.current?.click()}
+              >
+                <ImagePlus className="w-4 h-4 mr-2" />
+                Add Gallery Image
+              </Button>
             </div>
 
-            <div className="flex-1">
-              <div className="h-[420px] bg-gray-100 rounded-xl flex items-center justify-center overflow-hidden">
-                <img
-                  src={images[selectedIndex]}
-                  className="max-h-full max-w-full object-contain"
-                />
-              </div>
-            </div>
-          </div>
-        )}
+            {images.length > 0 && (
+              <div className="flex gap-6">
+                <div className="flex flex-col gap-3 w-24">
+                  {venue.images?.map((img: any, index: number) => (
+                    <div key={img.id} className="relative group">
+                      <img
+                        src={img.imageUrl}
+                        onClick={() => setSelectedIndex(index + 1)}
+                        className={`h-20 w-20 object-cover rounded-lg border cursor-pointer ${
+                          selectedIndex === index + 1
+                            ? "ring-2 ring-blue-600"
+                            : "hover:ring-1"
+                        }`}
+                      />
 
-        {/* DETAILS */}
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold">{venue.name}</h1>
-            <p className="text-slate-500 flex items-center mt-2">
-              <MapPin className="w-4 h-4 mr-1" /> {venue.location}
-            </p>
-          </div>
-
-          <div className="flex gap-4">
-            <div className="bg-white px-4 py-2 rounded-lg shadow border">
-              <div className="text-xs uppercase font-bold text-slate-500">
-                Capacity
-              </div>
-              <div className="font-bold text-lg">{venue.capacity}</div>
-            </div>
-
-            <div className="bg-white px-4 py-2 rounded-lg shadow border">
-              <div className="text-xs uppercase font-bold text-slate-500">
-                Base Price
-              </div>
-              <div className="font-bold text-lg text-emerald-600">
-                ${venue.basePrice}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      {/* CONTACT & GENERAL INFO */}
-      {(venue.bookingPhone || venue.bookingEmail || venue.notes) && (
-        <Card className="shadow-md mb-8">
-          <CardHeader>
-            <CardTitle>Booking & General Information</CardTitle>
-          </CardHeader>
-
-          <CardContent className="space-y-4 text-sm">
-            {venue.bookingPhone && (
-              <div>
-                <div className="text-xs uppercase font-bold text-slate-500 mb-1">
-                  Booking Phone
+                      {/* Delete Button */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setImageToDelete(img.id);
+                        }}
+                        className="absolute top-1 right-1 bg-white rounded-full p-1 shadow opacity-0 group-hover:opacity-100 transition"
+                      >
+                        <Trash2 className="w-3 h-3 text-red-500" />
+                      </button>
+                    </div>
+                  ))}
                 </div>
-                <div className="text-base">{venue.bookingPhone}</div>
+
+                <div className="flex-1">
+                  <div className="h-[420px] bg-slate-50 rounded-2xl flex items-center justify-center overflow-hidden">
+                    <img
+                      src={images[selectedIndex]}
+                      className="max-h-full max-w-full object-contain"
+                    />
+                  </div>
+                </div>
               </div>
             )}
+          </div>
 
-            {venue.bookingEmail && (
+          {/* RIGHT */}
+          <div className="space-y-8">
+            <div className="flex justify-between items-start">
               <div>
-                <div className="text-xs uppercase font-bold text-slate-500 mb-1">
-                  Booking Email
-                </div>
-                <div className="text-base">{venue.bookingEmail}</div>
+                <h1 className="text-3xl font-semibold text-slate-900">
+                  {venue.name}
+                </h1>
+                <p className="text-slate-500 flex items-center mt-2">
+                  <MapPin className="w-4 h-4 mr-1" />
+                  {venue.location}
+                </p>
               </div>
+
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button size="sm" variant="outline">
+                    <Pencil className="w-4 h-4 mr-2" />
+                    Edit Venue
+                  </Button>
+                </DialogTrigger>
+
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Edit Venue</DialogTitle>
+                  </DialogHeader>
+                  <EditVenueForm venue={venue} />
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            <div className="grid grid-cols-2 gap-6">
+              {/* Capacity Card */}
+              <div className="bg-white px-6 py-5 rounded-2xl border shadow-sm hover:shadow-md transition">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs uppercase font-semibold text-slate-500">
+                    Capacity
+                  </span>
+                  <Users className="w-5 h-5 text-slate-400" />
+                </div>
+
+                <div className="mt-3 text-3xl font-bold text-slate-900">
+                  {venue.capacity}
+                </div>
+
+                <div className="text-xs text-slate-400 mt-1">
+                  Maximum guest count
+                </div>
+              </div>
+
+              {/* Base Price Card */}
+              <div className="bg-white px-6 py-5 rounded-2xl border shadow-sm hover:shadow-md transition">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs uppercase font-semibold text-slate-500">
+                    Base Price
+                  </span>
+                  <Plus className="w-5 h-5 text-emerald-500" />
+                </div>
+
+                <div className="mt-3 text-3xl font-bold text-emerald-600">
+                  ${Number(venue.basePrice).toLocaleString()}
+                </div>
+
+                <div className="text-xs text-slate-400 mt-1">
+                  Starting package rate
+                </div>
+              </div>
+            </div>
+
+            {(venue.bookingPhone || venue.bookingEmail || venue.notes) && (
+              <Card className="border shadow-sm">
+                <CardContent className="p-5 space-y-4">
+                  <div
+                    className="flex justify-between items-center cursor-pointer"
+                    onClick={() => setShowContact(!showContact)}
+                  >
+                    <h3 className="font-semibold text-slate-800">
+                      Booking & General Information
+                    </h3>
+                    {showContact ? (
+                      <ChevronUp className="w-4 h-4" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4" />
+                    )}
+                  </div>
+
+                  {showContact && (
+                    <div className="grid gap-4 text-sm">
+                      {venue.bookingPhone && (
+                        <div>
+                          <div className="text-xs uppercase font-semibold text-slate-500">
+                            Booking Phone
+                          </div>
+                          <a
+                            href={`tel:${venue.bookingPhone}`}
+                            className="text-blue-600 hover:underline"
+                          >
+                            {venue.bookingPhone}
+                          </a>
+                        </div>
+                      )}
+
+                      {venue.bookingEmail && (
+                        <div>
+                          <div className="text-xs uppercase font-semibold text-slate-500">
+                            Booking Email
+                          </div>
+                          <a
+                            href={`mailto:${venue.bookingEmail}`}
+                            className="text-blue-600 hover:underline"
+                          >
+                            {venue.bookingEmail}
+                          </a>
+                        </div>
+                      )}
+
+                      {venue.notes && (
+                        <div>
+                          <div className="text-xs uppercase font-semibold text-slate-500">
+                            General Notes
+                          </div>
+                          <div className="whitespace-pre-line break-words">
+                            {venue.notes}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             )}
+          </div>
+        </div>
 
-            {venue.notes && (
-              <div>
-                <div className="text-xs uppercase font-bold text-slate-500 mb-1">
-                  General Notes
-                </div>
-                <div className="text-base whitespace-pre-line">
-                  {venue.notes}
-                </div>
+        {/* BOOKING PACKAGES */}
+        <Card className="border shadow-sm">
+          <CardContent className="p-6">
+            <div className="flex justify-between items-center mb-6">
+              <div
+                className="flex items-center gap-2 cursor-pointer"
+                onClick={() => setShowPackages(!showPackages)}
+              >
+                <h3 className="font-semibold text-slate-900">
+                  Booking Packages ({venue.options?.length || 0})
+                </h3>
+                {showPackages ? (
+                  <ChevronUp className="w-4 h-4" />
+                ) : (
+                  <ChevronDown className="w-4 h-4" />
+                )}
               </div>
+
+              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button size="sm" variant="outline">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Package
+                  </Button>
+                </DialogTrigger>
+
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Add Booking Option</DialogTitle>
+                  </DialogHeader>
+                  <CreateOptionForm
+                    venueId={id}
+                    onSuccess={() => setIsDialogOpen(false)}
+                  />
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            {showPackages && (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Package Name</TableHead>
+                    <TableHead>Price</TableHead>
+                    <TableHead>Description</TableHead>
+                    <TableHead className="w-20 text-center">Action</TableHead>
+                  </TableRow>
+                </TableHeader>
+
+                <TableBody>
+                  {venue.options?.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={4} className="text-center h-20">
+                        No options defined.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    venue.options.map((opt: any) => (
+                      <TableRow key={opt.id}>
+                        <TableCell>{opt.name}</TableCell>
+                        <TableCell>
+                          {opt.currency} {opt.price}
+                        </TableCell>
+                        <TableCell>{opt.description}</TableCell>
+                        <TableCell className="text-center">
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            onClick={() => setPackageToDelete(opt.id)}
+                          >
+                            <Trash2 className="w-4 h-4 text-red-500" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
             )}
           </CardContent>
         </Card>
-      )}
 
-      {/* BOOKING PACKAGES */}
-      <Card className="shadow-md mb-8">
-        <CardHeader className="flex justify-between items-center">
-          <CardTitle>Booking Packages</CardTitle>
+        {/* IMAGE DELETE CONFIRMATION DIALOG */}
+        <Dialog
+          open={imageToDelete !== null}
+          onOpenChange={() => setImageToDelete(null)}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Delete Image</DialogTitle>
+            </DialogHeader>
 
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button size="sm" variant="outline">
-                <Plus className="w-4 h-4 mr-2" /> Add Package
+            <p className="text-sm text-slate-500">
+              Are you sure you want to delete this image? This action cannot be
+              undone.
+            </p>
+
+            <div className="flex justify-end gap-3 mt-6">
+              <Button variant="outline" onClick={() => setImageToDelete(null)}>
+                Cancel
               </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Add Booking Option</DialogTitle>
-              </DialogHeader>
-              <CreateOptionForm
-                venueId={id}
-                onSuccess={() => setIsDialogOpen(false)}
-              />
-            </DialogContent>
-          </Dialog>
-        </CardHeader>
 
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Package Name</TableHead>
-                <TableHead>Price</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead className="w-20 text-center">Action</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {venue.options?.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={4} className="text-center h-20">
-                    No options defined.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                venue.options.map((opt: any) => (
-                  <TableRow key={opt.id}>
-                    <TableCell>{opt.name}</TableCell>
-                    <TableCell>
-                      {opt.currency} {opt.price}
-                    </TableCell>
-                    <TableCell>{opt.description}</TableCell>
-                    <TableCell className="text-center">
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={() => deleteOption.mutate(opt.id)}
-                      >
-                        <Trash2 className="w-4 h-4 text-red-500" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+              <Button
+                variant="destructive"
+                onClick={async () => {
+                  if (!imageToDelete) return;
 
-      <div className="flex justify-end">
-        <Button onClick={() => navigate("/venues")}>Done</Button>
+                  await fetch(`/api/venue-images/${imageToDelete}`, {
+                    method: "DELETE",
+                  });
+
+                  setImageToDelete(null);
+                  queryClient.refetchQueries({ queryKey: ["venue", id] });
+                }}
+              >
+                Delete
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* PACKAGE DELETE CONFIRMATION DIALOG */}
+        <Dialog
+          open={packageToDelete !== null}
+          onOpenChange={() => setPackageToDelete(null)}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Delete Package</DialogTitle>
+            </DialogHeader>
+
+            <p className="text-sm text-slate-500">
+              Are you sure you want to delete this booking package? This action
+              cannot be undone.
+            </p>
+
+            <div className="flex justify-end gap-3 mt-6">
+              <Button
+                variant="outline"
+                onClick={() => setPackageToDelete(null)}
+              >
+                Cancel
+              </Button>
+
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  if (!packageToDelete) return;
+
+                  deleteOption.mutate(packageToDelete, {
+                    onSuccess: () => {
+                      setPackageToDelete(null);
+                    },
+                  });
+                }}
+              >
+                Delete
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        <div className="flex justify-end">
+          <Button onClick={() => navigate("/venues")}>Done</Button>
+        </div>
       </div>
     </Layout>
   );
 }
+
+/* ================= CREATE OPTION FORM ================= */
+
 function CreateOptionForm({
   venueId,
   onSuccess,
@@ -376,7 +566,8 @@ function CreateOptionForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5 py-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 py-4">
+        {/* Package Name */}
         <FormField
           control={form.control}
           name="name"
@@ -391,6 +582,7 @@ function CreateOptionForm({
           )}
         />
 
+        {/* Price & Currency */}
         <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -433,6 +625,7 @@ function CreateOptionForm({
           />
         </div>
 
+        {/* Description */}
         <FormField
           control={form.control}
           name="description"
@@ -449,6 +642,148 @@ function CreateOptionForm({
 
         <Button type="submit" disabled={isPending} className="w-full">
           {isPending ? "Adding..." : "Add Option"}
+        </Button>
+      </form>
+    </Form>
+  );
+}
+
+/* ================= EDIT VENUE FORM ================= */
+
+function EditVenueForm({ venue }: { venue: any }) {
+  const { mutate, isPending } = useUpdateVenue();
+
+  const form = useForm({
+    defaultValues: {
+      name: venue.name,
+      location: venue.location,
+      capacity: venue.capacity,
+      basePrice: venue.basePrice,
+      bookingPhone: venue.bookingPhone || "",
+      bookingEmail: venue.bookingEmail || "",
+      notes: venue.notes || "",
+    },
+  });
+
+  function onSubmit(data: any) {
+    mutate(
+      {
+        id: venue.id,
+        ...data,
+      },
+      {
+        onSuccess: () => {
+          window.location.reload();
+        },
+      },
+    );
+  }
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 py-4">
+        {/* Name */}
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Venue Name</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
+        {/* Location */}
+        <FormField
+          control={form.control}
+          name="location"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Location</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
+        {/* Capacity & Base Price */}
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="capacity"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Capacity</FormLabel>
+                <FormControl>
+                  <Input type="number" {...field} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="basePrice"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Base Price</FormLabel>
+                <FormControl>
+                  <Input type="number" {...field} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {/* Booking Phone & Email */}
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="bookingPhone"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Booking Phone</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="bookingEmail"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Booking Email</FormLabel>
+                <FormControl>
+                  <Input type="email" {...field} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {/* Notes */}
+        <FormField
+          control={form.control}
+          name="notes"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>General Notes</FormLabel>
+              <FormControl>
+                <Textarea rows={4} {...field} />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
+        <Button type="submit" disabled={isPending} className="w-full">
+          {isPending ? "Saving..." : "Save Changes"}
         </Button>
       </form>
     </Form>

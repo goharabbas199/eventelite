@@ -22,6 +22,7 @@ export interface IStorage {
   getVendors(): Promise<any[]>;
   getVendor(id: number): Promise<any | undefined>;
   createVendor(vendor: InsertVendor): Promise<any>;
+  updateVenue(id: number, updates: Partial<InsertVenue>): Promise<any>;
   updateVendor(id: number, updates: Partial<InsertVendor>): Promise<any>;
   deleteVendor(id: number): Promise<void>;
   createVendorProduct(product: InsertVendorProduct): Promise<any>;
@@ -30,6 +31,7 @@ export interface IStorage {
   getVenues(): Promise<any[]>;
   getVenue(id: number): Promise<any | undefined>;
   createVenue(venue: InsertVenue): Promise<any>;
+  updateVenue(id: number, updates: Partial<InsertVenue>): Promise<any>;
   deleteVenue(id: number): Promise<void>;
   updateVenueMainImage(id: number, mainImage: string): Promise<any>;
   createBookingOption(option: InsertBookingOption): Promise<any>;
@@ -133,6 +135,16 @@ export class DatabaseStorage implements IStorage {
   async createVenue(insertVenue: InsertVenue) {
     const [venue] = await db.insert(venues).values(insertVenue).returning();
     return venue;
+  }
+
+  async updateVenue(id: number, updates: Partial<InsertVenue>) {
+    const [updated] = await db
+      .update(venues)
+      .set(updates)
+      .where(eq(venues.id, id))
+      .returning();
+
+    return updated;
   }
 
   async deleteVenue(id: number) {
