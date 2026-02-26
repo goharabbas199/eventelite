@@ -11,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Plus, Eye, Trash2 } from "lucide-react";
+import { Plus, Eye, Trash2, ArrowUp, ArrowDown, Users } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
   Dialog,
@@ -32,7 +32,7 @@ function getPriority(eventDate: Date) {
   if (daysLeft < 0) {
     return {
       label: "Overdue",
-      color: "bg-gray-500",
+      color: "bg-gray-100 text-gray-700",
       text: `${Math.abs(daysLeft)} days ago`,
       level: "Overdue",
     };
@@ -41,7 +41,7 @@ function getPriority(eventDate: Date) {
   if (daysLeft <= 7) {
     return {
       label: "High",
-      color: "bg-red-500",
+      color: "bg-red-100 text-red-700",
       text: `${daysLeft} days left`,
       level: "High",
     };
@@ -50,7 +50,7 @@ function getPriority(eventDate: Date) {
   if (daysLeft <= 30) {
     return {
       label: "Medium",
-      color: "bg-yellow-500",
+      color: "bg-yellow-100 text-yellow-700",
       text: `${daysLeft} days left`,
       level: "Medium",
     };
@@ -58,18 +58,25 @@ function getPriority(eventDate: Date) {
 
   return {
     label: "Low",
-    color: "bg-green-500",
+    color: "bg-green-100 text-green-700",
     text: `${daysLeft} days left`,
     level: "Low",
   };
 }
 
 export default function Clients() {
-  const { data: clients } = useClients();
+  const { data: clients, isLoading } = useClients();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [filter, setFilter] = useState("All");
+  const [statusFilter, setStatusFilter] = useState("All");
+  const [typeFilter, setTypeFilter] = useState("All");
+  const [search, setSearch] = useState("");
+  const [sortBy, setSortBy] = useState<"date" | "budget" | "priority">(
+    "priority",
+  );
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [, setLocation] = useLocation();
 
   const handleDelete = async () => {
@@ -91,25 +98,123 @@ export default function Clients() {
     }
   };
 
+  // ---------------- KPI CALCULATIONS ----------------
+
+  const totalClients = clients?.length || 0;
+
+  const filtersActive =
+    filter !== "All" ||
+    statusFilter !== "All" ||
+    typeFilter !== "All" ||
+    search !== "";
+
+  const highPriorityCount =
+    clients?.filter((client) => {
+      const priority = getPriority(new Date(client.eventDate));
+      return priority.level === "High";
+    }).length || 0;
+
+  const upcomingCount =
+    clients?.filter((client) => {
+      const days = differenceInDays(new Date(client.eventDate), new Date());
+      return days >= 0 && days <= 30;
+    }).length || 0;
+
+  const totalPipelineBudget =
+    clients?.reduce((sum, client) => {
+      return sum + Number(client.budget || 0);
+    }, 0) || 0;
+
   const filteredClients = clients
     ?.filter((client) => {
       const priority = getPriority(new Date(client.eventDate));
-      if (filter === "All") return true;
-      return priority.level === filter;
+
+      const matchesPriority = filter === "All" || priority.level === filter;
+
+      const matchesStatus =
+        statusFilter === "All" || client.status === statusFilter;
+
+      const matchesType =
+        typeFilter === "All" || client.eventType === typeFilter;
+
+      const matchesSearch =
+        client.name.toLowerCase().includes(search.toLowerCase()) ||
+        client.eventType.toLowerCase().includes(search.toLowerCase()) ||
+        client.status.toLowerCase().includes(search.toLowerCase());
+
+      return matchesPriority && matchesStatus && matchesType && matchesSearch;
     })
+
     ?.sort((a, b) => {
-      const priorityOrder: Record<string, number> = {
-        Overdue: 0,
-        High: 1,
-        Medium: 2,
-        Low: 3,
-      };
+      let result = 0;
 
-      const aPriority = getPriority(new Date(a.eventDate)).level;
-      const bPriority = getPriority(new Date(b.eventDate)).level;
+      if (sortBy === "date") {
+        result =
+          new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime();
+      }
 
-      return priorityOrder[aPriority] - priorityOrder[bPriority];
+      if (sortBy === "budget") {
+        result = Number(a.budget || 0) - Number(b.budget || 0);
+      }
+
+      if (sortBy === "priority") {
+        const priorityOrder: Record<string, number> = {
+          Overdue: 0,
+          High: 1,
+          Medium: 2,
+          Low: 3,
+        };
+
+        const aPriority = getPriority(new Date(a.eventDate)).level;
+        const bPriority = getPriority(new Date(b.eventDate)).level;
+
+        result = priorityOrder[aPriority] - priorityOrder[bPriority];
+      }
+
+      return sortOrder === "asc" ? result : -result;
     });
+
+  const filteredCount = filteredClients?.length || 0;
+  const handleExportCSV = () => {
+    if (!filteredClients || filteredClients.length === 0) {
+      alert("No clients to export");
+      return;
+    }
+
+    const headers = [
+      "Name",
+      "Email",
+      "Phone",
+      "Event Date",
+      "Event Type",
+      "Budget",
+      "Status",
+    ];
+
+    const rows = filteredClients.map((client) => [
+      client.name,
+      client.email,
+      client.phone,
+      format(new Date(client.eventDate), "yyyy-MM-dd"),
+      client.eventType,
+      client.budget || "0",
+      client.status,
+    ]);
+
+    const csvContent =
+      "data:text/csv;charset=utf-8," +
+      [headers, ...rows]
+        .map((row) => row.map((item) => `"${item}"`).join(","))
+        .join("\n");
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "clients_export.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   return (
     <Layout title="Clients">
@@ -151,95 +256,331 @@ export default function Clients() {
         </DialogContent>
       </Dialog>
 
-      <Card className="mt-6">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Client List</CardTitle>
+      {/* ---------------- KPI CARDS ---------------- */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
+        <Card className="p-6 bg-card shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-border/60 rounded-2xl">
+          <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
+            Total Clients
+          </p>
+          <p className="text-3xl font-semibold mt-2 tracking-tight">
+            {totalClients}
+          </p>
+        </Card>
 
-          <select
-            className="border rounded-md px-3 py-2 text-sm bg-background"
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-          >
-            <option value="All">All</option>
-            <option value="High">High (0–7 days)</option>
-            <option value="Medium">Medium (8–30 days)</option>
-            <option value="Low">Low (31+ days)</option>
-            <option value="Overdue">Overdue</option>
-          </select>
+        <Card className="p-6 bg-card shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-border/60 rounded-2xl">
+          <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
+            High Priority
+          </p>
+          <p className="text-2xl font-bold mt-1 text-red-600">
+            {highPriorityCount}
+          </p>
+        </Card>
+
+        <Card className="p-6 bg-card shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-border/60 rounded-2xl">
+          <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
+            Upcoming (30 days)
+          </p>
+          <p className="text-2xl font-bold mt-1 text-yellow-600">
+            {upcomingCount}
+          </p>
+        </Card>
+
+        <Card className="p-6 bg-card shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-border/60 rounded-2xl">
+          <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
+            Pipeline Budget
+          </p>
+          <p className="text-3xl font-semibold mt-2 tracking-tight">
+            ${totalPipelineBudget.toLocaleString()}
+          </p>
+        </Card>
+      </div>
+
+      <Card className="mt-6 shadow-lg border border-border/50 bg-card/80 backdrop-blur-sm">
+        <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 px-6 py-5 border-b bg-muted/20">
+          <div className="flex items-center gap-3">
+            <CardTitle>Client List</CardTitle>
+
+            <span className="text-sm text-muted-foreground">
+              Showing {filteredCount} of {totalClients}
+            </span>
+
+            {filtersActive && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setFilter("All");
+                  setStatusFilter("All");
+                  setTypeFilter("All");
+                  setSearch("");
+                }}
+              >
+                Clear Filters
+              </Button>
+            )}
+          </div>
+
+          <div className="flex flex-wrap gap-3 w-full md:w-auto">
+            <Button variant="outline" onClick={handleExportCSV}>
+              Export CSV
+            </Button>
+
+            <Input
+              placeholder="Search clients..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full md:w-56"
+            />
+
+            {/* Priority Filter */}
+            <select
+              className="border rounded-md px-3 py-2 text-sm bg-background"
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+            >
+              <option value="All">All Priority</option>
+              <option value="High">High</option>
+              <option value="Medium">Medium</option>
+              <option value="Low">Low</option>
+              <option value="Overdue">Overdue</option>
+            </select>
+
+            {/* Status Filter */}
+            <select
+              className="border rounded-md px-3 py-2 text-sm bg-background"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <option value="All">All Status</option>
+              <option value="Lead">Lead</option>
+              <option value="Pending">Pending</option>
+              <option value="Confirmed">Confirmed</option>
+              <option value="Completed">Completed</option>
+            </select>
+
+            {/* Type Filter */}
+            <select
+              className="border rounded-md px-3 py-2 text-sm bg-background"
+              value={typeFilter}
+              onChange={(e) => setTypeFilter(e.target.value)}
+            >
+              <option value="All">All Types</option>
+              <option value="Wedding">Wedding</option>
+              <option value="Corporate">Corporate</option>
+              <option value="Birthday">Birthday</option>
+              <option value="Engagement">Engagement</option>
+              <option value="Conference">Conference</option>
+            </select>
+          </div>
         </CardHeader>
 
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Priority</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Budget</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="w-[120px] text-center">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
+        <CardContent className="px-6 py-4">
+          <div className="max-h-[600px] overflow-auto">
+            <Table className="border-separate border-spacing-y-3">
+              <TableHeader className="sticky top-0 bg-background z-10">
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead
+                    className={`cursor-pointer hover:text-primary ${
+                      sortBy === "date" ? "text-primary font-semibold" : ""
+                    }`}
+                    onClick={() => {
+                      if (sortBy === "date") {
+                        setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+                      } else {
+                        setSortBy("date");
+                        setSortOrder("asc");
+                      }
+                    }}
+                  >
+                    <div className="flex items-center gap-1">
+                      Date
+                      {sortBy === "date" &&
+                        (sortOrder === "asc" ? (
+                          <ArrowUp className="w-4 h-4" />
+                        ) : (
+                          <ArrowDown className="w-4 h-4" />
+                        ))}
+                    </div>
+                  </TableHead>
+                  <TableHead
+                    className={`cursor-pointer hover:text-primary ${
+                      sortBy === "date" ? "text-primary font-semibold" : ""
+                    }`}
+                    onClick={() => {
+                      if (sortBy === "priority") {
+                        setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+                      } else {
+                        setSortBy("priority");
+                        setSortOrder("asc");
+                      }
+                    }}
+                  >
+                    <div className="flex items-center gap-1">
+                      Priority
+                      {sortBy === "priority" &&
+                        (sortOrder === "asc" ? (
+                          <ArrowUp className="w-4 h-4" />
+                        ) : (
+                          <ArrowDown className="w-4 h-4" />
+                        ))}
+                    </div>
+                  </TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead
+                    className={`text-right cursor-pointer hover:text-primary ${
+                      sortBy === "budget" ? "text-primary font-semibold" : ""
+                    }`}
+                    onClick={() => {
+                      if (sortBy === "budget") {
+                        setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+                      } else {
+                        setSortBy("budget");
+                        setSortOrder("asc");
+                      }
+                    }}
+                  >
+                    <div className="flex items-center justify-end gap-1">
+                      Budget
+                      {sortBy === "budget" &&
+                        (sortOrder === "asc" ? (
+                          <ArrowUp className="w-4 h-4" />
+                        ) : (
+                          <ArrowDown className="w-4 h-4" />
+                        ))}
+                    </div>
+                  </TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="w-[120px] text-center">
+                    Actions
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {isLoading ? (
+                  [...Array(5)].map((_, index) => (
+                    <TableRow key={index}>
+                      <TableCell colSpan={7} className="py-6">
+                        <div className="h-6 w-full bg-muted animate-pulse rounded-md" />
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : filteredClients && filteredClients.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-16">
+                      <div className="flex flex-col items-center gap-4">
+                        <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
+                          <Users className="w-8 h-8 text-muted-foreground" />
+                        </div>
 
-            <TableBody>
-              {filteredClients?.map((client) => {
-                const priority = getPriority(new Date(client.eventDate));
+                        <div className="space-y-1">
+                          <p className="text-lg font-semibold">
+                            No clients found
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            Try adjusting your filters or create a new client.
+                          </p>
+                        </div>
 
-                return (
-                  <TableRow key={client.id}>
-                    <TableCell className="font-medium">{client.name}</TableCell>
-
-                    <TableCell>
-                      {format(new Date(client.eventDate), "MMM dd, yyyy")}
-                    </TableCell>
-
-                    <TableCell>
-                      <div className="flex flex-col gap-1">
-                        <span
-                          className={`text-white text-xs px-2 py-1 rounded-md w-fit ${priority.color}`}
+                        <Button
+                          onClick={() => {
+                            setFilter("All");
+                            setStatusFilter("All");
+                            setTypeFilter("All");
+                            setSearch("");
+                          }}
+                          variant="outline"
                         >
-                          {priority.label}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          {priority.text}
-                        </span>
+                          Clear Filters
+                        </Button>
                       </div>
                     </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredClients?.map((client) => {
+                    const priority = getPriority(new Date(client.eventDate));
 
-                    <TableCell>{client.eventType}</TableCell>
-
-                    <TableCell>
-                      {client.budget
-                        ? `$${Number(client.budget).toLocaleString()}`
-                        : "-"}
-                    </TableCell>
-
-                    <TableCell>{client.status}</TableCell>
-
-                    <TableCell className="flex gap-2 justify-center">
-                      <Button
-                        variant="ghost"
-                        size="icon"
+                    return (
+                      <TableRow
+                        key={client.id}
+                        className="bg-background border border-border/60 rounded-lg shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-200 cursor-pointer"
                         onClick={() => setLocation(`/clients/${client.id}`)}
                       >
-                        <Eye className="w-4 h-4" />
-                      </Button>
+                        <TableCell className="font-medium">
+                          {client.name}
+                        </TableCell>
 
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => setDeleteId(client.id)}
-                        className="text-red-500 hover:text-red-600"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
+                        <TableCell>
+                          {format(new Date(client.eventDate), "MMM dd, yyyy")}
+                        </TableCell>
+
+                        <TableCell>
+                          <div className="flex flex-col gap-1">
+                            <span
+                              className={`text-[11px] font-semibold px-2.5 py-1 rounded-full w-fit tracking-wide ${priority.color}`}
+                            >
+                              {priority.label}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              {priority.text}
+                            </span>
+                          </div>
+                        </TableCell>
+
+                        <TableCell>{client.eventType}</TableCell>
+
+                        <TableCell className="text-right font-semibold">
+                          {client.budget
+                            ? `$${Number(client.budget).toLocaleString()}`
+                            : "-"}
+                        </TableCell>
+
+                        <TableCell>
+                          <span
+                            className={`text-xs font-semibold px-3 py-1 rounded-full tracking-wide ${
+                              client.status === "Lead"
+                                ? "bg-gray-100 text-gray-700"
+                                : client.status === "Pending"
+                                  ? "bg-yellow-100 text-yellow-700"
+                                  : client.status === "Confirmed"
+                                    ? "bg-green-100 text-green-700"
+                                    : client.status === "Completed"
+                                      ? "bg-blue-100 text-blue-700"
+                                      : "bg-gray-100 text-gray-700"
+                            }`}
+                          >
+                            {client.status}
+                          </span>
+                        </TableCell>
+
+                        <TableCell
+                          className="flex gap-2 justify-center"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setLocation(`/clients/${client.id}`)}
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Button>
+
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setDeleteId(client.id)}
+                            className="text-red-500 hover:text-red-600"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
     </Layout>
