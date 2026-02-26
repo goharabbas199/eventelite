@@ -37,6 +37,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -68,6 +74,7 @@ export default function VenueDetails() {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [showContact, setShowContact] = useState(true);
   const [showPackages, setShowPackages] = useState(true);
   const [imageToDelete, setImageToDelete] = useState<number | null>(null);
@@ -164,23 +171,32 @@ export default function VenueDetails() {
                 }
               />
 
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => mainImageInputRef.current?.click()}
-              >
-                <Upload className="w-4 h-4 mr-2" />
-                Change Main Image
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button size="sm" variant="outline">
+                    <ImagePlus className="w-4 h-4 mr-2" />
+                    Manage Images
+                  </Button>
+                </DropdownMenuTrigger>
 
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => galleryInputRef.current?.click()}
-              >
-                <ImagePlus className="w-4 h-4 mr-2" />
-                Add Gallery Image
-              </Button>
+                <DropdownMenuContent align="start" className="w-48">
+                  <DropdownMenuItem
+                    onClick={() => mainImageInputRef.current?.click()}
+                    className="cursor-pointer"
+                  >
+                    <Upload className="w-4 h-4 mr-2" />
+                    Change Main Image
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem
+                    onClick={() => galleryInputRef.current?.click()}
+                    className="cursor-pointer"
+                  >
+                    <ImagePlus className="w-4 h-4 mr-2" />
+                    Add Gallery Image
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
             {images.length > 0 && (
@@ -191,7 +207,9 @@ export default function VenueDetails() {
                       <img
                         src={img.imageUrl}
                         onClick={() => setSelectedIndex(index + 1)}
-                        className={`h-20 w-20 object-cover rounded-lg border cursor-pointer ${
+                        onMouseEnter={() => setHoveredIndex(index + 1)}
+                        onMouseLeave={() => setHoveredIndex(null)}
+                        className={`h-20 w-20 object-cover rounded-lg border cursor-pointer transition ${
                           selectedIndex === index + 1
                             ? "ring-2 ring-blue-600"
                             : "hover:ring-1"
@@ -215,7 +233,11 @@ export default function VenueDetails() {
                 <div className="flex-1">
                   <div className="h-[420px] bg-slate-50 rounded-2xl flex items-center justify-center overflow-hidden">
                     <img
-                      src={images[selectedIndex]}
+                      src={
+                        images[
+                          hoveredIndex !== null ? hoveredIndex : selectedIndex
+                        ]
+                      }
                       className="max-h-full max-w-full object-contain"
                     />
                   </div>
