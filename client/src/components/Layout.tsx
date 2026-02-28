@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
 
@@ -8,14 +9,35 @@ export function Layout({
   children: React.ReactNode;
   title?: string;
 }) {
+  const [collapsed, setCollapsed] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return localStorage.getItem("sidebar-collapsed") === "true";
+  });
+
+  useEffect(() => {
+    localStorage.setItem("sidebar-collapsed", String(collapsed));
+  }, [collapsed]);
+
   return (
     <div className="min-h-screen bg-slate-50/50">
-      <Sidebar />
+      {/* Sidebar */}
+      <Sidebar collapsed={collapsed} />
 
-      <div className="flex flex-col min-h-screen transition-all duration-300 md:pl-64">
-        <Header title={title} />
+      {/* Content Wrapper */}
+      <div
+        className={`flex flex-col min-h-screen transition-all duration-300 ${
+          collapsed ? "md:pl-16" : "md:pl-64"
+        }`}
+      >
+        {/* Header */}
+        <Header
+          title={title}
+          collapsed={collapsed}
+          setCollapsed={setCollapsed}
+        />
 
-        <main className="flex-1 p-6 md:p-8 space-y-8 animate-in fade-in duration-500 slide-in-from-bottom-2">
+        {/* Main Content */}
+        <main className="flex-1 px-6 md:px-8 pb-8 pt-6 space-y-8 transition-all duration-300">
           {children}
         </main>
       </div>

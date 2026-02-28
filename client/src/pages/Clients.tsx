@@ -257,82 +257,70 @@ export default function Clients() {
       </Dialog>
 
       {/* ---------------- KPI CARDS ---------------- */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
-        <Card className="p-6 bg-card shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-border/60 rounded-2xl">
-          <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-10">
+        <Card className="px-5 py-4 bg-card border border-border/50 rounded-xl">
+          <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground/80">
             Total Clients
           </p>
-          <p className="text-3xl font-semibold mt-2 tracking-tight">
+          <p className="text-2xl font-semibold tracking-tight">
             {totalClients}
           </p>
         </Card>
 
-        <Card className="p-6 bg-card shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-border/60 rounded-2xl">
-          <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
+        <Card className="px-5 py-4 bg-card border border-border/50 rounded-xl">
+          <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground/80">
             High Priority
           </p>
-          <p className="text-2xl font-bold mt-1 text-red-600">
+          <p className="text-xl font-semibold tracking-tight text-red-600">
             {highPriorityCount}
           </p>
         </Card>
 
-        <Card className="p-6 bg-card shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-border/60 rounded-2xl">
-          <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
+        <Card className="px-5 py-4 bg-card border border-border/50 rounded-xl">
+          <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground/80">
             Upcoming (30 days)
           </p>
-          <p className="text-2xl font-bold mt-1 text-yellow-600">
+          <p className="text-xl font-semibold tracking-tight text-yellow-600">
             {upcomingCount}
           </p>
         </Card>
 
-        <Card className="p-6 bg-card shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-border/60 rounded-2xl">
-          <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
+        <Card className="px-5 py-4 bg-card border border-border/50 rounded-xl">
+          <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground/80">
             Pipeline Budget
           </p>
-          <p className="text-3xl font-semibold mt-2 tracking-tight">
+          <p className="text-2xl font-semibold tracking-tight">
             ${totalPipelineBudget.toLocaleString()}
           </p>
         </Card>
       </div>
 
-      <Card className="mt-6 shadow-lg border border-border/50 bg-card/80 backdrop-blur-sm">
-        <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 px-6 py-5 border-b bg-muted/20">
-          <div className="flex items-center gap-3">
-            <CardTitle>Client List</CardTitle>
+      <Card className="mt-12 border border-border/50 bg-card rounded-2xl">
+        <CardHeader className="px-6 py-6 border-b space-y-5">
+          {/* Top Row */}
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-lg font-semibold">
+                Client List
+              </CardTitle>
+              <p className="text-sm text-muted-foreground mt-1">
+                Showing {filteredCount} of {totalClients}
+              </p>
+            </div>
 
-            <span className="text-sm text-muted-foreground">
-              Showing {filteredCount} of {totalClients}
-            </span>
-
-            {filtersActive && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setFilter("All");
-                  setStatusFilter("All");
-                  setTypeFilter("All");
-                  setSearch("");
-                }}
-              >
-                Clear Filters
-              </Button>
-            )}
-          </div>
-
-          <div className="flex flex-wrap gap-3 w-full md:w-auto">
-            <Button variant="outline" onClick={handleExportCSV}>
+            <Button variant="outline" onClick={handleExportCSV} className="h-9">
               Export CSV
             </Button>
+          </div>
 
+          {/* Filters Row */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
             <Input
               placeholder="Search clients..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full md:w-56"
             />
 
-            {/* Priority Filter */}
             <select
               className="border rounded-md px-3 py-2 text-sm bg-background"
               value={filter}
@@ -345,7 +333,6 @@ export default function Clients() {
               <option value="Overdue">Overdue</option>
             </select>
 
-            {/* Status Filter */}
             <select
               className="border rounded-md px-3 py-2 text-sm bg-background"
               value={statusFilter}
@@ -358,7 +345,6 @@ export default function Clients() {
               <option value="Completed">Completed</option>
             </select>
 
-            {/* Type Filter */}
             <select
               className="border rounded-md px-3 py-2 text-sm bg-background"
               value={typeFilter}
@@ -374,14 +360,16 @@ export default function Clients() {
           </div>
         </CardHeader>
 
-        <CardContent className="px-6 py-4">
+        <CardContent className="px-6 py-2">
           <div className="max-h-[600px] overflow-auto">
-            <Table className="border-separate border-spacing-y-3">
-              <TableHeader className="sticky top-0 bg-background z-10">
+            <Table className="border-separate border-spacing-y-2">
+              <TableHeader className="sticky top-0 bg-background z-10 border-b">
                 <TableRow>
-                  <TableHead>Name</TableHead>
+                  <TableHead className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    Name
+                  </TableHead>
                   <TableHead
-                    className={`cursor-pointer hover:text-primary ${
+                    className={`text-xs uppercase tracking-wide cursor-pointer hover:text-primary ${
                       sortBy === "date" ? "text-primary font-semibold" : ""
                     }`}
                     onClick={() => {
@@ -404,7 +392,7 @@ export default function Clients() {
                     </div>
                   </TableHead>
                   <TableHead
-                    className={`cursor-pointer hover:text-primary ${
+                    className={`text-xs uppercase tracking-wide cursor-pointer hover:text-primary ${
                       sortBy === "date" ? "text-primary font-semibold" : ""
                     }`}
                     onClick={() => {
@@ -426,7 +414,9 @@ export default function Clients() {
                         ))}
                     </div>
                   </TableHead>
-                  <TableHead>Type</TableHead>
+                  <TableHead className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    Type
+                  </TableHead>
                   <TableHead
                     className={`text-right cursor-pointer hover:text-primary ${
                       sortBy === "budget" ? "text-primary font-semibold" : ""
@@ -450,8 +440,10 @@ export default function Clients() {
                         ))}
                     </div>
                   </TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="w-[120px] text-center">
+                  <TableHead className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    Status
+                  </TableHead>
+                  <TableHead className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                     Actions
                   </TableHead>
                 </TableRow>
@@ -503,7 +495,7 @@ export default function Clients() {
                     return (
                       <TableRow
                         key={client.id}
-                        className="bg-background border border-border/60 rounded-lg shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-200 cursor-pointer"
+                        className="bg-background border border-border/30 rounded-xl hover:bg-muted/30 transition-colors cursor-pointer"
                         onClick={() => setLocation(`/clients/${client.id}`)}
                       >
                         <TableCell className="font-medium">
@@ -517,7 +509,7 @@ export default function Clients() {
                         <TableCell>
                           <div className="flex flex-col gap-1">
                             <span
-                              className={`text-[11px] font-semibold px-2.5 py-1 rounded-full w-fit tracking-wide ${priority.color}`}
+                              className={`text-[10px] font-semibold px-2 py-0.5 rounded-full w-fit tracking-wide ${priority.color}`}
                             >
                               {priority.label}
                             </span>
@@ -537,7 +529,7 @@ export default function Clients() {
 
                         <TableCell>
                           <span
-                            className={`text-xs font-semibold px-3 py-1 rounded-full tracking-wide ${
+                            className={`text-[10px] font-semibold px-2.5 py-0.5 rounded-full tracking-wide ${
                               client.status === "Lead"
                                 ? "bg-gray-100 text-gray-700"
                                 : client.status === "Pending"

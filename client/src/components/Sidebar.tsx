@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
-export function Sidebar() {
+export function Sidebar({ collapsed }: { collapsed: boolean }) {
   const [location, navigate] = useLocation();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -24,7 +24,7 @@ export function Sidebar() {
 
   return (
     <>
-      {/* Hamburger Button */}
+      {/* Mobile Hamburger */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="fixed top-4 left-4 z-50 bg-white p-2 rounded-lg shadow-md md:hidden"
@@ -32,7 +32,7 @@ export function Sidebar() {
         ☰
       </button>
 
-      {/* Overlay */}
+      {/* Mobile Overlay */}
       {isOpen && (
         <div
           onClick={() => setIsOpen(false)}
@@ -40,25 +40,30 @@ export function Sidebar() {
         />
       )}
 
-      {/* Sidebar */}
       <aside
         className={`
-          fixed left-0 top-0 bottom-0 w-64 bg-[hsl(222,47%,11%)] text-white z-50 flex flex-col shadow-2xl
-          transform transition-transform duration-300
-          ${isOpen ? "translate-x-0" : "-translate-x-full"}
-          md:translate-x-0
-        `}
+                fixed left-0 top-0 bottom-0 bg-[hsl(222,47%,11%)] text-white z-50 flex flex-col
+                transition-all duration-300 shadow-xl
+                ${collapsed ? "w-16" : "w-64"}
+                ${isOpen ? "translate-x-0" : "-translate-x-full"}
+                md:translate-x-0
+              `}
       >
         {/* Brand */}
-        <div className="h-16 flex items-center px-6 border-b border-white/10">
-          <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center mr-3 font-bold text-lg">
+        <div className="h-16 flex items-center border-b border-white/10 px-4">
+          <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center font-bold text-lg shrink-0">
             E
           </div>
-          <span className="font-bold text-xl tracking-tight">EventElite</span>
+
+          {!collapsed && (
+            <span className="ml-3 font-bold text-lg tracking-tight whitespace-nowrap">
+              EventElite
+            </span>
+          )}
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 py-6 px-3 space-y-1">
+        <nav className="flex-1 py-6 px-2 space-y-1">
           {links.map((link) => {
             const Icon = link.icon;
             const isActive =
@@ -70,24 +75,28 @@ export function Sidebar() {
                 <div
                   onClick={() => setIsOpen(false)}
                   className={`
-                    flex items-center px-3 py-3 rounded-lg cursor-pointer transition-all duration-200
-                    ${
-                      isActive
-                        ? "bg-blue-600 text-white shadow-lg shadow-blue-900/50 translate-x-1"
-                        : "text-slate-400 hover:bg-white/5 hover:text-white"
-                    }
-                  `}
+                          flex items-center px-3 py-3 rounded-lg cursor-pointer transition-colors duration-200
+                          ${
+                            isActive
+                              ? "bg-blue-600/90 text-white"
+                              : "text-slate-400 hover:bg-white/5 hover:text-white"
+                          }
+                        `}
                 >
-                  <Icon className="w-5 h-5 mr-3" />
-                  <span className="font-medium">{link.label}</span>
+                  <Icon className="w-5 h-5 shrink-0" />
+                  {!collapsed && (
+                    <span className="ml-3 font-medium whitespace-nowrap">
+                      {link.label}
+                    </span>
+                  )}
                 </div>
               </Link>
             );
           })}
         </nav>
 
-        {/* Footer Actions */}
-        <div className="p-4 border-t border-white/10">
+        {/* Footer */}
+        <div className="p-3 border-t border-white/10 space-y-1">
           <button
             onClick={() => {
               navigate("/settings");
@@ -95,8 +104,8 @@ export function Sidebar() {
             }}
             className="flex items-center w-full px-3 py-2 text-sm text-slate-400 hover:text-white transition-colors rounded-lg hover:bg-white/5"
           >
-            <Settings className="w-4 h-4 mr-3" />
-            Settings
+            <Settings className="w-4 h-4" />
+            {!collapsed && <span className="ml-3">Settings</span>}
           </button>
 
           <button
@@ -104,10 +113,10 @@ export function Sidebar() {
               navigate("/");
               setIsOpen(false);
             }}
-            className="flex items-center w-full px-3 py-2 text-sm text-slate-400 hover:text-red-400 transition-colors rounded-lg hover:bg-white/5 mt-1"
+            className="flex items-center w-full px-3 py-2 text-sm text-slate-400 hover:text-red-400 transition-colors rounded-lg hover:bg-white/5"
           >
-            <LogOut className="w-4 h-4 mr-3" />
-            Sign Out
+            <LogOut className="w-4 h-4" />
+            {!collapsed && <span className="ml-3">Sign Out</span>}
           </button>
         </div>
       </aside>
