@@ -187,6 +187,134 @@ export async function registerRoutes(
     }
   });
 
+  // ================= CLIENTS ============================
+
+  app.get(api.clients.list.path, async (_req, res) => {
+    const result = await storage.getClients();
+    res.json(result);
+  });
+
+  app.post(api.clients.create.path, async (req, res) => {
+    try {
+      const input = api.clients.create.input.parse(req.body);
+      const client = await storage.createClient(input);
+      res.status(201).json(client);
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ message: err.errors[0].message });
+      }
+      console.error("Create client error:", err);
+      res.status(500).json({ message: "Failed to create client" });
+    }
+  });
+
+  app.get(api.clients.get.path, async (req, res) => {
+    const client = await storage.getClient(Number(req.params.id));
+    if (!client) return res.status(404).json({ message: "Client not found" });
+    res.json(client);
+  });
+
+  app.patch(api.clients.update.path, async (req, res) => {
+    try {
+      const id = Number(req.params.id);
+      const input = api.clients.update.input.parse(req.body);
+      const client = await storage.updateClient(id, input);
+      if (!client) return res.status(404).json({ message: "Client not found" });
+      res.json(client);
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ message: err.errors[0].message });
+      }
+      console.error("Update client error:", err);
+      res.status(500).json({ message: "Failed to update client" });
+    }
+  });
+
+  app.delete(api.clients.delete.path, async (req, res) => {
+    await storage.deleteClient(Number(req.params.id));
+    res.status(204).end();
+  });
+
+  // ================= PLANNED SERVICES ===================
+
+  app.post(api.plannedServices.create.path, async (req, res) => {
+    try {
+      const clientId = Number(req.params.clientId);
+      const input = api.plannedServices.create.input.parse(req.body);
+      const service = await storage.createPlannedService({ ...input, clientId });
+      res.status(201).json(service);
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ message: err.errors[0].message });
+      }
+      console.error("Create planned service error:", err);
+      res.status(500).json({ message: "Failed to create service" });
+    }
+  });
+
+  app.patch("/api/services/:id", async (req, res) => {
+    try {
+      const id = Number(req.params.id);
+      const updates = req.body;
+      if (updates.cost !== undefined) updates.cost = String(updates.cost);
+      const service = await storage.updatePlannedService(id, updates);
+      res.json(service);
+    } catch (err) {
+      console.error("Update service error:", err);
+      res.status(500).json({ message: "Failed to update service" });
+    }
+  });
+
+  app.delete(api.plannedServices.delete.path, async (req, res) => {
+    await storage.deletePlannedService(Number(req.params.id));
+    res.status(204).end();
+  });
+
+  // ================= EXPENSES ===========================
+
+  app.get(api.expenses.list.path, async (req, res) => {
+    const clientId = Number(req.params.clientId);
+    const result = await storage.getExpenses(clientId);
+    res.json(result);
+  });
+
+  app.post(api.expenses.create.path, async (req, res) => {
+    try {
+      const clientId = Number(req.params.clientId);
+      const input = api.expenses.create.input.parse(req.body);
+      const expense = await storage.createExpense({ ...input, clientId, cost: String(input.cost) });
+      res.status(201).json(expense);
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ message: err.errors[0].message });
+      }
+      console.error("Create expense error:", err);
+      res.status(500).json({ message: "Failed to create expense" });
+    }
+  });
+
+  app.patch(api.expenses.update.path, async (req, res) => {
+    try {
+      const id = Number(req.params.id);
+      const input = api.expenses.update.input.parse(req.body);
+      const updates: any = { ...input };
+      if (updates.cost !== undefined) updates.cost = String(updates.cost);
+      const expense = await storage.updateExpense(id, updates);
+      res.json(expense);
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ message: err.errors[0].message });
+      }
+      console.error("Update expense error:", err);
+      res.status(500).json({ message: "Failed to update expense" });
+    }
+  });
+
+  app.delete(api.expenses.delete.path, async (req, res) => {
+    await storage.deleteExpense(Number(req.params.id));
+    res.status(204).end();
+  });
+
   // ================= BOOKING OPTIONS ====================
 
   app.post(api.bookingOptions.create.path, async (req, res) => {
@@ -339,24 +467,47 @@ export async function registerRoutes(
   // ===================== EXPENSES ========================
 
   app.get(api.expenses.list.path, async (req, res) => {
-    const expenses = await storage.getExpenses(Number(req.params.clientId));
-    res.json(expenses);
+    const clientId = Number(req.params.clientId);
+
+    if (isNaN(clientId)) {
+      return res.status(400).json({
+        message: "Invalid clientId in route params",
+      });
+    }
+
+    const expenses = await storage.getExpenses(clientId);
+    return res.json(expenses);
   });
 
   app.post(api.expenses.create.path, async (req, res) => {
     try {
       const clientId = Number(req.params.clientId);
-      const input = api.expenses.create.input.parse({
-        ...req.body,
+
+      if (isNaN(clientId)) {
+        return res.status(400).json({
+          message: "Invalid clientId in route params",
+        });
+      }
+
+      const parsed = api.expenses.create.input.parse(req.body);
+
+      const expense = await storage.createExpense({
+        ...parsed,
         clientId,
       });
-      const expense = await storage.createExpense(input);
-      res.status(201).json(expense);
+
+      return res.status(201).json(expense);
     } catch (err) {
+      console.error("Create expense error:", err);
+
       if (err instanceof z.ZodError) {
         return res.status(400).json({ message: err.errors[0].message });
       }
-      res.status(500).json({ message: "Failed to create expense" });
+
+      return res.status(500).json({
+        message:
+          err instanceof Error ? err.message : "Failed to create expense",
+      });
     }
   });
 
@@ -364,18 +515,21 @@ export async function registerRoutes(
     try {
       const input = api.expenses.update.input.parse(req.body);
       const expense = await storage.updateExpense(Number(req.params.id), input);
-      res.json(expense);
+      return res.json(expense);
     } catch (err) {
       if (err instanceof z.ZodError) {
         return res.status(400).json({ message: err.errors[0].message });
       }
-      res.status(500).json({ message: "Failed to update expense" });
+
+      return res.status(500).json({
+        message: "Failed to update expense",
+      });
     }
   });
 
   app.delete(api.expenses.delete.path, async (req, res) => {
     await storage.deleteExpense(Number(req.params.id));
-    res.status(204).end();
+    return res.status(204).end();
   });
 
   // ================= CLOUDINARY UPLOAD ==================

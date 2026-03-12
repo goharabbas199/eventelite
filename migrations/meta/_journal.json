@@ -57,6 +57,13 @@
       "when": 1771672366213,
       "tag": "0007_keen_mandroid",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1772265693571,
+      "tag": "0008_fast_vermin",
+      "breakpoints": true
     }
   ]
 }

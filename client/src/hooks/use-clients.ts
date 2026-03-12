@@ -183,6 +183,8 @@ export function useCreateExpense() {
       ...data
     }: { clientId: number } & Omit<InsertExpense, "clientId">) => {
       const url = buildUrl(api.expenses.create.path, { clientId });
+      console.log("Expense URL:", url);
+      console.log("ClientId being sent:", clientId);
 
       const payload = {
         ...data,
@@ -207,6 +209,66 @@ export function useCreateExpense() {
 
       queryClient.invalidateQueries({
         queryKey: [api.expenses.list.path, variables.clientId],
+      });
+    },
+  });
+}
+
+export function useDeletePlannedService() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      serviceId,
+      clientId,
+    }: {
+      serviceId: number;
+      clientId: number;
+    }) => {
+      const url = buildUrl(api.plannedServices.delete.path, { id: serviceId });
+      const res = await fetch(url, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete service");
+    },
+
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: [api.clients.get.path, variables.clientId],
+      });
+    },
+  });
+}
+
+export function useUpdatePlannedService() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      serviceId,
+      clientId,
+      ...data
+    }: {
+      serviceId: number;
+      clientId: number;
+      cost?: number;
+      notes?: string;
+      status?: string;
+    }) => {
+      const payload: any = { ...data };
+      if (payload.cost !== undefined) payload.cost = String(payload.cost);
+
+      const res = await fetch(`/api/services/${serviceId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) throw new Error("Failed to update service");
+      return res.json();
+    },
+
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: [api.clients.get.path, variables.clientId],
       });
     },
   });
@@ -252,28 +314,23 @@ export function useUpdateExpense() {
   });
 }
 
-// ================= DELETE PLANNED SERVICE =================
 
-export function useDeletePlannedService() {
+export function useDeleteExpense() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({
-      clientId,
-      serviceId,
-    }: {
-      clientId: number;
-      serviceId: number;
-    }) => {
-      const res = await fetch(`/api/planned-services/${serviceId}`, {
+    mutationFn: async ({ id, clientId }: { id: number; clientId: number }) => {
+      const url = buildUrl(api.expenses.delete.path, { id });
+
+      const res = await fetch(url, {
         method: "DELETE",
       });
 
-      if (!res.ok) throw new Error("Failed to delete service");
+      if (!res.ok) throw new Error("Failed to delete expense");
     },
 
     onSuccess: (_, variables) => {
-      // IMPORTANT: must match useClient queryKey
+      // refresh client details
       queryClient.invalidateQueries({
         queryKey: [api.clients.get.path, variables.clientId],
       });

@@ -45,6 +45,7 @@ export interface IStorage {
   updateClient(id: number, updates: Partial<InsertClient>): Promise<any>;
   deleteClient(id: number): Promise<void>;
   createPlannedService(service: InsertPlannedService): Promise<any>;
+  updatePlannedService(id: number, updates: Partial<InsertPlannedService>): Promise<any>;
   deletePlannedService(id: number): Promise<void>;
 
   getExpenses(clientId: number): Promise<any[]>;
@@ -272,6 +273,15 @@ export class DatabaseStorage implements IStorage {
     return newService;
   }
 
+  async updatePlannedService(id: number, updates: Partial<InsertPlannedService>) {
+    const [updated] = await db
+      .update(plannedServices)
+      .set(updates)
+      .where(eq(plannedServices.id, id))
+      .returning();
+    return updated;
+  }
+
   async deletePlannedService(id: number) {
     await db.delete(plannedServices).where(eq(plannedServices.id, id));
   }
@@ -284,11 +294,29 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(expenses.createdAt));
   }
 
-  async createExpense(insertExpense: InsertExpense) {
+  async createExpense(insertExpense: InsertExpense & { clientId: number }) {
+    const clientId = Number(insertExpense.clientId);
+
+    if (isNaN(clientId)) {
+      throw new Error("Invalid clientId in createExpense");
+    }
+
+    const costValue =
+      insertExpense.cost !== undefined && insertExpense.cost !== null
+        ? Number(insertExpense.cost)
+        : 0;
+
     const [expense] = await db
       .insert(expenses)
-      .values(insertExpense)
+      .values({
+        clientId,
+        category: insertExpense.category,
+        item: insertExpense.item,
+        cost: costValue,
+        isPaid: insertExpense.isPaid ?? false,
+      })
       .returning();
+
     return expense;
   }
 

@@ -121,8 +121,21 @@ export const plannedServices = pgTable("planned_services", {
   id: serial("id").primaryKey(),
   clientId: integer("client_id").notNull(),
   vendorId: integer("vendor_id"),
+
   serviceName: text("service_name").notNull(),
+
+  // 🔴 Legacy cost (keep for backward compatibility)
   cost: numeric("cost").notNull(),
+
+  // 🟢 NEW – Expense Tracking
+  vendorCost: numeric("vendor_cost"),
+
+  // 🟢 NEW – Revenue Tracking
+  clientPrice: numeric("client_price"),
+
+  // 🟢 NEW – Service Status
+  status: text("status").default("Planned"),
+
   notes: text("notes"),
 });
 
@@ -194,6 +207,7 @@ export const insertPlannedServiceSchema = createInsertSchema(
 export const insertExpenseSchema = createInsertSchema(expenses).omit({
   id: true,
   createdAt: true,
+  clientId: true, // 👈 REMOVE clientId from body validation
 });
 
 // ======================================================
@@ -204,6 +218,7 @@ export type Client = typeof clients.$inferSelect;
 export type InsertClient = z.infer<typeof insertClientSchema>;
 
 export type PlannedService = typeof plannedServices.$inferSelect;
+export type InsertPlannedService = z.infer<typeof insertPlannedServiceSchema>;
 export type Expense = typeof expenses.$inferSelect;
 export type InsertExpense = z.infer<typeof insertExpenseSchema>;
 

@@ -6,6 +6,7 @@ import {
   useCreatePlannedService,
   useUpdateClient,
   useDeletePlannedService, // ✅ ADD THIS
+  useUpdatePlannedService,
 } from "@/hooks/use-clients";
 import { useVendors } from "@/hooks/use-vendors";
 import { useVenues } from "@/hooks/use-venues";
@@ -28,6 +29,7 @@ import {
   Phone,
   Users,
   Trash2,
+  Pencil,
 } from "lucide-react";
 import {
   Dialog,
@@ -70,6 +72,7 @@ export default function ClientDetails() {
   const { data: venues } = useVenues();
   const updateClient = useUpdateClient();
   const deleteService = useDeletePlannedService();
+  const updateService = useUpdatePlannedService();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -215,8 +218,8 @@ export default function ClientDetails() {
                 </TableHeader>
                 <TableBody>
                   {selectedVenue && (
-                    <TableRow>
-                      <TableCell className="font-medium pl-6">
+                    <TableRow className="bg-slate-50">
+                      <TableCell className="font-semibold text-slate-700 pl-6">
                         Venue — {selectedVenue.name}
                       </TableCell>
                       <TableCell>${venueCost.toLocaleString()}</TableCell>
@@ -226,11 +229,11 @@ export default function ClientDetails() {
 
                   {client.services?.map((service) => (
                     <TableRow key={service.id}>
-                      <TableCell className="font-medium pl-6">
+                      <TableCell className="font-semibold text-slate-700 pl-6">
                         {service.serviceName}
                       </TableCell>
 
-                      <TableCell>
+                      <TableCell className="font-medium text-slate-800">
                         ${Number(service.cost).toLocaleString()}
                       </TableCell>
 
@@ -238,7 +241,26 @@ export default function ClientDetails() {
                         {service.notes || "-"}
                       </TableCell>
 
-                      <TableCell className="text-right pr-6">
+                      <TableCell className="text-right pr-6 flex justify-end gap-2">
+                        <button
+                          onClick={() => {
+                            const newCost = prompt(
+                              "Edit service cost",
+                              String(service.cost),
+                            );
+                            if (!newCost) return;
+
+                            updateService.mutate({
+                              serviceId: service.id,
+                              clientId: client.id,
+                              cost: Number(newCost),
+                            });
+                          }}
+                          className="text-blue-500 hover:text-blue-700 transition"
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </button>
+
                         <button
                           onClick={() =>
                             deleteService.mutate({
@@ -255,9 +277,9 @@ export default function ClientDetails() {
                   ))}
 
                   {totalCost > 0 && (
-                    <TableRow className="bg-slate-50 font-bold border-t-2">
+                    <TableRow className="bg-blue-50 font-semibold border-t-2">
                       <TableCell className="pl-6">Total</TableCell>
-                      <TableCell className="text-blue-700">
+                      <TableCell className="text-blue-800 text-lg">
                         ${totalCost.toLocaleString()}
                       </TableCell>
                       <TableCell />
@@ -276,47 +298,63 @@ export default function ClientDetails() {
               <CardTitle className="text-base">Budget Overview</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <div className="flex justify-between pb-2 border-b">
-                  <span className="text-sm text-slate-500">Total Budget</span>
-                  <span className="font-bold text-lg">
-                    ${budget.toLocaleString()}
-                  </span>
-                </div>
-
-                <div className="flex justify-between pb-2 border-b">
-                  <span className="text-sm text-slate-500">Venue Cost</span>
-                  <span className="font-bold text-lg">
-                    ${venueCost.toLocaleString()}
-                  </span>
-                </div>
-
-                <div className="flex justify-between pb-2 border-b">
-                  <span className="text-sm text-slate-500">Services Cost</span>
-                  <span className="font-bold text-lg text-blue-600">
-                    ${totalPlannedCost.toLocaleString()}
-                  </span>
-                </div>
-
-                <div className="flex justify-between pt-2 border-t">
-                  <span className="text-sm text-slate-500">Total Cost</span>
-                  <span className="font-bold text-lg text-blue-700">
-                    ${totalCost.toLocaleString()}
-                  </span>
-                </div>
-
-                <div className="flex justify-between pt-2">
-                  <span className="text-sm text-slate-500">Profit / Loss</span>
-                  <div className="text-right">
-                    <span
-                      className={`font-bold text-lg ${
-                        profit < 0 ? "text-red-500" : "text-emerald-600"
-                      }`}
-                    >
-                      ${profit.toLocaleString()}
+              <div className="space-y-6">
+                {/* REVENUE */}
+                <div>
+                  <p className="text-xs uppercase text-slate-400 mb-2">
+                    Revenue
+                  </p>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-slate-500">
+                      Client Budget
                     </span>
-                    <div className="text-xs text-slate-400">
-                      {profitPercentage}% margin
+                    <span className="font-bold text-lg text-slate-900">
+                      ${budget.toLocaleString()}
+                    </span>
+                  </div>
+                </div>
+
+                {/* EXPENSES */}
+                <div className="border-t pt-4">
+                  <p className="text-xs uppercase text-slate-400 mb-2">
+                    Expenses
+                  </p>
+
+                  <div className="flex justify-between text-sm mb-2">
+                    <span className="text-slate-500">Venue Cost</span>
+                    <span>${venueCost.toLocaleString()}</span>
+                  </div>
+
+                  <div className="flex justify-between text-sm mb-2">
+                    <span className="text-slate-500">Services Cost</span>
+                    <span>${totalPlannedCost.toLocaleString()}</span>
+                  </div>
+
+                  <div className="flex justify-between font-semibold border-t pt-2 mt-2">
+                    <span>Total Expenses</span>
+                    <span>${totalCost.toLocaleString()}</span>
+                  </div>
+                </div>
+
+                {/* PROFIT */}
+                <div className="border-t pt-4">
+                  <p className="text-xs uppercase text-slate-400 mb-2">
+                    Profit
+                  </p>
+
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-slate-500">Gross Profit</span>
+                    <div className="text-right">
+                      <span
+                        className={`font-bold text-lg ${
+                          profit < 0 ? "text-red-500" : "text-emerald-600"
+                        }`}
+                      >
+                        ${profit.toLocaleString()}
+                      </span>
+                      <div className="text-xs text-slate-400">
+                        {profitPercentage}% margin
+                      </div>
                     </div>
                   </div>
                 </div>
