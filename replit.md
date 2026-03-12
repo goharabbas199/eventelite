@@ -42,12 +42,14 @@
 - `/search` — Global search results
 
 ## Features Implemented
-1. **Financial Summary** — 5 KPI cards per client (Budget, Expenses, Payments Received, Balance Due, Profit)
-2. **Client Payment Tracker** — Track payments received from clients
-3. **Vendor Payment Tracker** — Track payments made to vendors, mark as paid
-4. **Event Checklist** — Add/complete/delete tasks per event (keyboard-enter supported)
-5. **Event Templates** — Auto-create default services on new client based on event type
-6. **Analytics Page** — Revenue by month, events by type, revenue vs expenses per client, status breakdown — all with Recharts
+1. **Dashboard** — KPI cards (Active Clients, Vendors, Venues, Revenue, Expenses, Net Profit), Revenue Overview chart, Upcoming Events list
+2. **Financial Summary** — 6 KPI cards per client (Budget, Total Expenses, Received, Balance Due, Vendor Pending, Net Profit)
+3. **Client Payment Tracker** — Track payments received from clients (date, amount, method, notes)
+4. **Vendor Payment Tracker** — Track payments to vendors, mark as Paid
+5. **Event Checklist** — Add/complete/delete tasks per event (keyboard-enter supported)
+6. **Event Templates** — Auto-create default services on new client based on event type (Wedding, Corporate, Birthday, etc.)
+7. **Profit Simulator** — Interactive markup % calculator in ClientDetails right column; shows Suggested Price, Expected Profit, Profit Margin with slider + preset buttons
+8. **Analytics/Reports Page** — Revenue by month, events by type (pie chart), revenue vs expenses per client, status breakdown, avg profit per event
 
 ## Event Templates
 | Type | Default Services |

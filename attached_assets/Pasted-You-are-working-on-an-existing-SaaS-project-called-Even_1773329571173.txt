@@ -1,0 +1,210 @@
+You are working on an existing SaaS project called EventElite.
+
+Tech stack:
+Frontend: React + TypeScript + Tailwind + ShadCN UI + TanStack Query
+Backend: Express + Drizzle ORM + PostgreSQL
+Charts: Recharts
+
+The system already includes:
+Clients, Vendors, Venues, Planned Services, Expenses, Budget calculations.
+
+Your goal is to extend the system to make it a **professional event management SaaS**.
+
+Important rules:
+
+* Do NOT refactor the architecture.
+* Do NOT break existing modules.
+* Maintain the current professional ShadCN + Tailwind design.
+* Only extend the system cleanly.
+
+Add the following features.
+
+---
+
+FEATURE 1 — GLOBAL DASHBOARD
+
+Create a new Dashboard page.
+
+Display KPI cards:
+
+Total Events
+Total Revenue
+Total Expenses
+Total Profit
+Upcoming Events
+
+Add charts:
+
+Monthly Revenue
+Profit Trend
+Event Type Distribution
+
+---
+
+FEATURE 2 — EVENT TASK MANAGEMENT
+
+Create table:
+
+tasks
+id
+clientId
+title
+status (Pending / Completed)
+dueDate
+createdAt
+
+Add a Tasks section inside the Client Details page.
+
+Allow users to:
+
+Add task
+Mark task complete
+Delete task
+
+Display tasks as a checklist.
+
+---
+
+FEATURE 3 — CLIENT PAYMENT TRACKING
+
+Create table:
+
+payments
+id
+clientId
+amount
+paymentDate
+paymentMethod
+notes
+
+Add Payments section inside Client Details page.
+
+Display:
+
+Payment Date
+Amount
+Method
+Notes
+
+Calculate automatically:
+
+Total Paid
+Remaining Balance
+Next Payment Due
+
+---
+
+FEATURE 4 — VENDOR PAYMENT TRACKING
+
+Create table:
+
+vendorPayments
+id
+vendorId
+clientId
+serviceId
+amount
+status (Paid / Unpaid)
+paymentDate
+notes
+
+Add Vendor Payments section.
+
+Allow:
+
+Add payment
+Mark paid
+Delete payment
+
+Display total pending vendor payments.
+
+---
+
+FEATURE 5 — EVENT COST BUILDER (PROFIT SIMULATOR)
+
+Create a Cost Builder panel inside the Client Details page.
+
+The system must calculate:
+
+Total Cost =
+Venue Cost +
+Planned Services Cost +
+Manual Expenses
+
+Allow setting markup percentage:
+
+Example:
+
+Markup: 20%
+
+System calculates:
+
+Suggested Client Price
+Expected Profit
+Profit Margin
+
+Display this in a financial summary card.
+
+---
+
+FEATURE 6 — EVENT TEMPLATES
+
+Create templates table:
+
+templates
+id
+name
+eventType
+
+templateServices
+id
+templateId
+serviceName
+estimatedCost
+
+When creating a new client event, allow selecting a template.
+
+Selecting a template automatically creates planned services.
+
+Example wedding template:
+
+Venue
+Catering
+Decoration
+Photography
+DJ
+
+---
+
+FEATURE 7 — FINANCIAL REPORTS PAGE
+
+Create Reports page with charts:
+
+Total Revenue
+Total Expenses
+Total Profit
+Average Profit per Event
+
+Charts:
+
+Monthly Revenue
+Profit Trend
+Expense Breakdown
+
+---
+
+UI REQUIREMENTS
+
+Maintain the existing professional SaaS style.
+
+Use:
+
+ShadCN cards
+Tailwind layout
+Clean enterprise UI
+Minimal colors
+Responsive layout
+
+Do not change existing routes or break the current system.
+
+Extend the system safely.
