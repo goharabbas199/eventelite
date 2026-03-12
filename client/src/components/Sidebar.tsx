@@ -42,7 +42,7 @@ export function Sidebar({ collapsed }: { collapsed: boolean }) {
         className={`h-14 flex items-center shrink-0 ${collapsed ? "justify-center px-0" : "px-4 gap-2.5"}`}
         style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}
       >
-        <div className="w-7 h-7 rounded-lg gradient-indigo flex items-center justify-center shadow-lg shadow-indigo-900/40 shrink-0">
+        <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center shadow-lg shadow-black/30 shrink-0">
           <Zap className="w-3.5 h-3.5 text-white" fill="currentColor" />
         </div>
         {!collapsed && (
@@ -69,7 +69,7 @@ export function Sidebar({ collapsed }: { collapsed: boolean }) {
                   nav-item group
                   ${collapsed ? "justify-center px-0" : ""}
                   ${isActive
-                    ? "bg-indigo-600 text-white shadow-sm shadow-indigo-900/30"
+                    ? "bg-primary text-white shadow-sm shadow-black/20"
                     : "text-white/40 hover:text-white/80 hover:bg-white/[0.05]"}
                 `}
                 title={collapsed ? link.label : undefined}
@@ -93,7 +93,7 @@ export function Sidebar({ collapsed }: { collapsed: boolean }) {
               nav-item
               ${collapsed ? "justify-center px-0" : ""}
               ${location === "/settings"
-                ? "bg-indigo-600 text-white"
+                ? "bg-primary text-white"
                 : "text-white/35 hover:text-white/70 hover:bg-white/[0.05]"}
             `}
             title={collapsed ? "Settings" : undefined}
@@ -128,8 +128,8 @@ export function MobileNav() {
 
           return (
             <Link key={link.href} href={link.href} className="flex-1">
-              <div className={`flex flex-col items-center justify-center gap-1 h-full transition-all duration-150 ${isActive ? "text-indigo-600" : "text-slate-400"}`}>
-                <div className={`p-1 rounded-lg transition-all ${isActive ? "bg-indigo-50" : ""}`}>
+              <div className={`flex flex-col items-center justify-center gap-1 h-full transition-all duration-150 ${isActive ? "text-primary" : "text-slate-400"}`}>
+                <div className={`p-1 rounded-lg transition-all ${isActive ? "bg-primary/10" : ""}`}>
                   <Icon className="w-[18px] h-[18px]" strokeWidth={isActive ? 2.2 : 1.8} />
                 </div>
                 <span className="text-[9px] font-semibold leading-none tracking-wide">{link.label}</span>

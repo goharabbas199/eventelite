@@ -159,7 +159,14 @@
 
   /* Input base */
   .input-base {
-    @apply h-9 rounded-xl border-slate-200 bg-white text-sm placeholder:text-slate-400 transition-all focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/15;
+    @apply h-9 rounded-xl border-slate-200 bg-white text-sm placeholder:text-slate-400 transition-all;
+    --tw-ring-color: hsl(var(--primary) / 0.15);
+    border-color: inherit;
+  }
+  .input-base:focus {
+    border-color: hsl(var(--primary) / 0.6);
+    outline: none;
+    box-shadow: 0 0 0 2px hsl(var(--primary) / 0.15);
   }
 
   /* Card hover lift */
