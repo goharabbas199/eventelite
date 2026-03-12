@@ -223,6 +223,26 @@ export const vendorPaymentsRelations = relations(vendorPayments, ({ one }) => ({
 }));
 
 // ======================================================
+// ======================= TASKS ========================
+// ======================================================
+
+export const tasks = pgTable("tasks", {
+  id: serial("id").primaryKey(),
+  clientId: integer("client_id").notNull(),
+  title: text("title").notNull(),
+  status: text("status").notNull().default("Pending"),
+  dueDate: timestamp("due_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const tasksRelations = relations(tasks, ({ one }) => ({
+  client: one(clients, {
+    fields: [tasks.clientId],
+    references: [clients.id],
+  }),
+}));
+
+// ======================================================
 // ======================= SCHEMAS ======================
 // ======================================================
 
@@ -306,3 +326,11 @@ export const insertVenueImageSchema = createInsertSchema(venueImages).omit({
 export const insertBookingOptionSchema = createInsertSchema(
   bookingOptions,
 ).omit({ id: true });
+
+export const insertTaskSchema = createInsertSchema(tasks).omit({
+  id: true,
+  createdAt: true,
+  clientId: true,
+});
+export type Task = typeof tasks.$inferSelect;
+export type InsertTask = z.infer<typeof insertTaskSchema>;

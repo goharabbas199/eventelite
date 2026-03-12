@@ -1,5 +1,5 @@
 import { Layout } from "@/components/Layout";
-import { useClients, useCreateClient } from "@/hooks/use-clients";
+import { useClients, useCreateClient, useCreatePlannedService } from "@/hooks/use-clients";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -581,11 +581,21 @@ export default function Clients() {
 
 /* ------------------ CREATE CLIENT FORM ------------------ */
 
+const EVENT_TEMPLATES: Record<string, string[]> = {
+  Wedding: ["Venue", "Catering", "Decoration", "Photography", "DJ"],
+  Corporate: ["Venue", "Catering", "AV Equipment", "Photography"],
+  Birthday: ["Venue", "Catering", "Decoration", "Photography"],
+  Engagement: ["Venue", "Catering", "Decoration", "Photography"],
+  Conference: ["Venue", "Catering", "AV Equipment"],
+};
+
 function CreateClientForm({ onSuccess }: { onSuccess: () => void }) {
   const { mutate, isPending } = useCreateClient();
+  const { mutateAsync: createService } = useCreatePlannedService();
   const [, setLocation] = useLocation();
 
   const [customEventType, setCustomEventType] = useState("");
+  const [applyTemplate, setApplyTemplate] = useState(true);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -630,7 +640,23 @@ function CreateClientForm({ onSuccess }: { onSuccess: () => void }) {
           : undefined,
       },
       {
-        onSuccess: (newClient) => {
+        onSuccess: async (newClient) => {
+          if (applyTemplate) {
+            const templateServices = EVENT_TEMPLATES[finalEventType] || [];
+            for (const serviceName of templateServices) {
+              try {
+                await createService({
+                  clientId: newClient.id,
+                  serviceName,
+                  cost: 0,
+                  notes: "",
+                  status: "Planned",
+                });
+              } catch {
+                // continue if one fails
+              }
+            }
+          }
           setCustomEventType("");
           onSuccess();
           setLocation(`/clients/${newClient.id}`);
@@ -725,6 +751,18 @@ function CreateClientForm({ onSuccess }: { onSuccess: () => void }) {
               onChange={(e) => setCustomEventType(e.target.value)}
               className="mt-2"
             />
+          )}
+
+          {EVENT_TEMPLATES[formData.eventType] && (
+            <label className="flex items-center gap-2 mt-2 cursor-pointer text-sm text-slate-600">
+              <input
+                type="checkbox"
+                checked={applyTemplate}
+                onChange={(e) => setApplyTemplate(e.target.checked)}
+                className="rounded"
+              />
+              Auto-add {EVENT_TEMPLATES[formData.eventType]?.length} default services
+            </label>
           )}
         </div>
 

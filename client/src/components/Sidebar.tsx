@@ -5,6 +5,7 @@ import {
   Store,
   MapPin,
   PieChart,
+  BarChart2,
   LogOut,
   Settings,
 } from "lucide-react";
@@ -20,6 +21,7 @@ export function Sidebar({ collapsed }: { collapsed: boolean }) {
     { href: "/venues", label: "Venues", icon: MapPin },
     { href: "/clients", label: "Clients", icon: Users },
     { href: "/budget", label: "Budget Planner", icon: PieChart },
+    { href: "/analytics", label: "Analytics", icon: BarChart2 },
   ];
 
   return (

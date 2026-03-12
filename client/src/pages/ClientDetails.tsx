@@ -10,6 +10,10 @@ import {
   useCreateVendorPayment,
   useUpdateVendorPayment,
   useDeleteVendorPayment,
+  useCreateTask,
+  useUpdateTask,
+  useDeleteTask,
+  useTasks,
 } from "@/hooks/use-clients";
 import { useVendors } from "@/hooks/use-vendors";
 import { useVenues } from "@/hooks/use-venues";
@@ -39,6 +43,9 @@ import {
   TrendingUp,
   TrendingDown,
   Building2,
+  Square,
+  SquareCheck,
+  ListChecks,
 } from "lucide-react";
 import {
   Dialog,
@@ -89,10 +96,17 @@ export default function ClientDetails() {
   const updateVendorPayment = useUpdateVendorPayment();
   const deleteVendorPayment = useDeleteVendorPayment();
 
+  const { data: taskList = [] } = useTasks(id);
+  const createTask = useCreateTask();
+  const updateTask = useUpdateTask();
+  const deleteTask = useDeleteTask();
+
   const [isServiceDialogOpen, setIsServiceDialogOpen] = useState(false);
   const [editingService, setEditingService] = useState<any | null>(null);
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
   const [isVendorPaymentDialogOpen, setIsVendorPaymentDialogOpen] = useState(false);
+  const [newTaskTitle, setNewTaskTitle] = useState("");
+  const [newTaskDueDate, setNewTaskDueDate] = useState("");
 
   if (isLoading)
     return (
@@ -496,6 +510,109 @@ export default function ClientDetails() {
                     ))}
                   </TableBody>
                 </Table>
+              )}
+            </CardContent>
+          </Card>
+          {/* FEATURE 4 — TASK CHECKLIST */}
+          <Card className="border-none shadow-md">
+            <CardHeader className="border-b pb-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <ListChecks className="w-4 h-4 text-slate-500" />
+                  <CardTitle>Event Checklist</CardTitle>
+                  <span className="text-xs text-slate-400 ml-1">
+                    {taskList.filter((t) => t.status === "Completed").length}/{taskList.length} done
+                  </span>
+                </div>
+              </div>
+              <div className="flex gap-2 mt-3">
+                <Input
+                  placeholder="Add a task..."
+                  value={newTaskTitle}
+                  onChange={(e) => setNewTaskTitle(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && newTaskTitle.trim()) {
+                      createTask.mutate({
+                        clientId: id,
+                        title: newTaskTitle.trim(),
+                        dueDate: newTaskDueDate || undefined,
+                      });
+                      setNewTaskTitle("");
+                      setNewTaskDueDate("");
+                    }
+                  }}
+                  className="flex-1"
+                />
+                <Input
+                  type="date"
+                  value={newTaskDueDate}
+                  onChange={(e) => setNewTaskDueDate(e.target.value)}
+                  className="w-36"
+                />
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={!newTaskTitle.trim() || createTask.isPending}
+                  onClick={() => {
+                    if (!newTaskTitle.trim()) return;
+                    createTask.mutate({
+                      clientId: id,
+                      title: newTaskTitle.trim(),
+                      dueDate: newTaskDueDate || undefined,
+                    });
+                    setNewTaskTitle("");
+                    setNewTaskDueDate("");
+                  }}
+                >
+                  <Plus className="w-4 h-4" />
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="p-0">
+              {taskList.length === 0 ? (
+                <p className="text-sm text-slate-400 text-center py-6">No tasks yet. Add one above.</p>
+              ) : (
+                <ul className="divide-y divide-border/50">
+                  {taskList.map((task) => (
+                    <li key={task.id} className="flex items-center gap-3 px-5 py-3 hover:bg-muted/30 transition-colors group">
+                      <button
+                        onClick={() =>
+                          updateTask.mutate({
+                            id: task.id,
+                            clientId: id,
+                            status: task.status === "Completed" ? "Pending" : "Completed",
+                          })
+                        }
+                        className="shrink-0 text-slate-400 hover:text-emerald-500 transition-colors"
+                      >
+                        {task.status === "Completed" ? (
+                          <SquareCheck className="w-5 h-5 text-emerald-500" />
+                        ) : (
+                          <Square className="w-5 h-5" />
+                        )}
+                      </button>
+                      <div className="flex-1 min-w-0">
+                        <span className={`text-sm ${task.status === "Completed" ? "line-through text-slate-400" : "text-slate-700"}`}>
+                          {task.title}
+                        </span>
+                        {task.dueDate && (
+                          <div className="flex items-center gap-1 mt-0.5">
+                            <Clock className="w-3 h-3 text-slate-400" />
+                            <span className="text-xs text-slate-400">
+                              Due {format(new Date(task.dueDate), "MMM dd, yyyy")}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => deleteTask.mutate({ id: task.id, clientId: id })}
+                        className="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 transition-all"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
               )}
             </CardContent>
           </Card>

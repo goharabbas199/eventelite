@@ -591,6 +591,39 @@ export async function registerRoutes(
     return res.status(204).end();
   });
 
+  // ====================== TASKS ==========================
+
+  app.get("/api/clients/:clientId/tasks", async (req, res) => {
+    const clientId = Number(req.params.clientId);
+    const list = await storage.getTasks(clientId);
+    res.json(list);
+  });
+
+  app.post("/api/clients/:clientId/tasks", async (req, res) => {
+    try {
+      const clientId = Number(req.params.clientId);
+      const task = await storage.createTask({ ...req.body, clientId });
+      res.status(201).json(task);
+    } catch (err) {
+      console.error("Create task error:", err);
+      res.status(500).json({ message: "Failed to create task" });
+    }
+  });
+
+  app.patch("/api/tasks/:id", async (req, res) => {
+    try {
+      const task = await storage.updateTask(Number(req.params.id), req.body);
+      res.json(task);
+    } catch (err) {
+      res.status(500).json({ message: "Failed to update task" });
+    }
+  });
+
+  app.delete("/api/tasks/:id", async (req, res) => {
+    await storage.deleteTask(Number(req.params.id));
+    res.status(204).end();
+  });
+
   // ================= CLOUDINARY UPLOAD ==================
 
   app.post("/api/upload", upload.single("image"), async (req, res) => {

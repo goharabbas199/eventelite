@@ -439,6 +439,90 @@ export function useDeleteVendorPayment() {
   });
 }
 
+export function useCreateTask() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      clientId,
+      title,
+      dueDate,
+      status,
+    }: {
+      clientId: number;
+      title: string;
+      dueDate?: string;
+      status?: string;
+    }) => {
+      const res = await fetch(`/api/clients/${clientId}/tasks`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, dueDate: dueDate || null, status: status || "Pending" }),
+      });
+      if (!res.ok) throw new Error("Failed to create task");
+      return res.json();
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: [`/api/clients/${variables.clientId}/tasks`] });
+    },
+  });
+}
+
+export function useUpdateTask() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      id,
+      clientId,
+      ...data
+    }: {
+      id: number;
+      clientId: number;
+      status?: string;
+      title?: string;
+      dueDate?: string | null;
+    }) => {
+      const res = await fetch(`/api/tasks/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error("Failed to update task");
+      return res.json();
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: [`/api/clients/${variables.clientId}/tasks`] });
+    },
+  });
+}
+
+export function useDeleteTask() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, clientId }: { id: number; clientId: number }) => {
+      const res = await fetch(`/api/tasks/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete task");
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: [`/api/clients/${variables.clientId}/tasks`] });
+    },
+  });
+}
+
+export function useTasks(clientId: number) {
+  return useQuery({
+    queryKey: [`/api/clients/${clientId}/tasks`],
+    queryFn: async () => {
+      const res = await fetch(`/api/clients/${clientId}/tasks`);
+      if (!res.ok) throw new Error("Failed to fetch tasks");
+      return res.json() as Promise<Array<{ id: number; clientId: number; title: string; status: string; dueDate: string | null; createdAt: string }>>;
+    },
+    enabled: !!clientId,
+  });
+}
+
 export function useDeleteExpense() {
   const queryClient = useQueryClient();
 

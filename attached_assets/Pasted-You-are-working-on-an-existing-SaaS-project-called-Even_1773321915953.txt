@@ -1,0 +1,190 @@
+You are working on an existing SaaS project called **EventElite**.
+
+Tech stack:
+Frontend: Vite + React + TypeScript + TanStack Query + Wouter + ShadCN UI + Tailwind + React Hook Form + Zod
+Backend: Express + Drizzle ORM + PostgreSQL + Zod
+Hosting: Render
+
+IMPORTANT RULES
+
+* Do NOT change architecture.
+* Do NOT rewrite large files.
+* Do NOT break existing functionality.
+* Only extend the system safely.
+* Maintain current clean enterprise SaaS design.
+* Use existing ShadCN components and Tailwind styling.
+* Keep UI minimal and professional (no flashy UI).
+
+Current modules:
+Clients, Vendors, Venues, Planned Services, Expenses, Budget overview.
+
+Add the following features carefully.
+
+---
+
+FEATURE 1 — EVENT DASHBOARD (CLIENT PROFILE SUMMARY)
+
+At the top of the Client Details page add a **Financial Summary section** with 5 KPI cards:
+
+Client Budget
+Total Expenses
+Total Payments Received
+Balance Due
+Profit
+
+Use existing calculations where possible.
+
+Profit must be calculated as:
+
+Profit = Client Budget
+- Venue Cost
+- Planned Services Cost
+- Manual Expenses
+
+Cards must use existing design style (ShadCN Card components).
+
+---
+
+FEATURE 2 — CLIENT PAYMENT TRACKER
+
+Create a database table:
+
+payments
+
+* id
+* clientId
+* amount
+* paymentDate
+* paymentMethod
+* notes
+* createdAt
+
+Relationships:
+payments.clientId → clients.id
+
+Add a **Payments section** inside the Client Details page showing:
+
+Payment Date | Amount | Method | Notes | Actions
+
+Actions:
+Delete payment.
+
+Add a button:
+"Add Payment"
+
+When a payment is added:
+
+* Update total paid
+* Update remaining balance automatically.
+
+---
+
+FEATURE 3 — VENDOR PAYMENT TRACKER
+
+Create a database table:
+
+vendorPayments
+
+* id
+* vendorId
+* clientId
+* serviceId
+* amount
+* status (Paid / Unpaid)
+* paymentDate
+* notes
+
+Add UI section in Client Details page:
+
+Vendor | Service | Amount | Status | Payment Date | Actions
+
+Actions:
+Mark as Paid
+Delete payment
+
+Display a **Vendor Payments Pending** total in the financial summary.
+
+---
+
+FEATURE 4 — TASK / EVENT CHECKLIST SYSTEM
+
+Create table:
+
+tasks
+
+* id
+* clientId
+* title
+* status (Pending / Completed)
+* dueDate
+* createdAt
+
+Add a **Task Checklist section** on the Client Details page.
+
+Users can:
+Add task
+Mark task completed
+Delete task
+
+UI should display:
+
+☑ Task completed
+☐ Pending tasks
+
+---
+
+FEATURE 5 — EVENT TEMPLATE SYSTEM
+
+When creating a new client event allow selecting:
+
+Event Type:
+Wedding
+Corporate Event
+Birthday
+Custom
+
+Each type automatically creates default services.
+
+Example wedding template:
+
+Venue
+Catering
+Decoration
+Photography
+DJ
+
+These should populate the Planned Services table automatically.
+
+---
+
+FEATURE 6 — PROFIT ANALYTICS
+
+Create a new **Analytics page** showing:
+
+Total Events
+Total Revenue
+Total Expenses
+Total Profit
+Average Profit per Event
+
+Use simple chart components with Recharts.
+
+---
+
+UI REQUIREMENTS
+
+All UI must follow existing design:
+
+* ShadCN components
+* Tailwind
+* Minimal SaaS layout
+* No flashy colors
+* Maintain current sidebar and layout system
+
+---
+
+IMPORTANT
+
+Do not refactor working modules.
+
+Only extend the project safely with new features and small components.

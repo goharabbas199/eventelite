@@ -10,6 +10,7 @@ import {
   expenses,
   payments,
   vendorPayments,
+  tasks,
   type InsertVendor,
   type InsertVendorProduct,
   type InsertVenue,
@@ -19,6 +20,7 @@ import {
   type InsertExpense,
   type InsertPayment,
   type InsertVendorPayment,
+  type InsertTask,
 } from "@shared/schema";
 import { eq, desc } from "drizzle-orm";
 
@@ -67,6 +69,12 @@ export interface IStorage {
   createVendorPayment(payment: InsertVendorPayment): Promise<any>;
   updateVendorPayment(id: number, updates: Partial<InsertVendorPayment>): Promise<any>;
   deleteVendorPayment(id: number): Promise<void>;
+
+  // Tasks
+  getTasks(clientId: number): Promise<any[]>;
+  createTask(task: InsertTask & { clientId: number }): Promise<any>;
+  updateTask(id: number, updates: Partial<InsertTask>): Promise<any>;
+  deleteTask(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -430,6 +438,44 @@ export class DatabaseStorage implements IStorage {
 
   async deleteVendorPayment(id: number) {
     await db.delete(vendorPayments).where(eq(vendorPayments.id, id));
+  }
+
+  // ================= TASKS =================
+
+  async getTasks(clientId: number) {
+    return db
+      .select()
+      .from(tasks)
+      .where(eq(tasks.clientId, clientId))
+      .orderBy(desc(tasks.createdAt));
+  }
+
+  async createTask(task: InsertTask & { clientId: number }) {
+    const [newTask] = await db
+      .insert(tasks)
+      .values({
+        clientId: task.clientId,
+        title: task.title,
+        status: task.status || "Pending",
+        dueDate: task.dueDate ? new Date(task.dueDate as any) : null,
+      })
+      .returning();
+    return newTask;
+  }
+
+  async updateTask(id: number, updates: Partial<InsertTask>) {
+    const updateData: any = { ...updates };
+    if (updates.dueDate) updateData.dueDate = new Date(updates.dueDate as any);
+    const [updated] = await db
+      .update(tasks)
+      .set(updateData)
+      .where(eq(tasks.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteTask(id: number) {
+    await db.delete(tasks).where(eq(tasks.id, id));
   }
 
   async updateVenue(id: number, updates: Partial<InsertVenue>) {

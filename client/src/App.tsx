@@ -19,6 +19,7 @@ import ClientDetails from "@/pages/ClientDetails";
 import BudgetPlanner from "@/pages/BudgetPlanner";
 import SearchResults from "@/pages/SearchResults";
 import Settings from "@/pages/Settings";
+import Analytics from "@/pages/Analytics";
 
 function Router() {
   return (
@@ -37,6 +38,7 @@ function Router() {
       <Route path="/clients" component={Clients} />
       <Route path="/clients/:id" component={ClientDetails} />
       <Route path="/budget" component={BudgetPlanner} />
+      <Route path="/analytics" component={Analytics} />
       <Route path="/search" component={SearchResults} />
       <Route path="/settings" component={Settings} />
       <Route component={NotFound} />
