@@ -11,11 +11,11 @@ interface StatsCardProps {
 }
 
 const colorConfig = {
-  blue:   { icon: "bg-indigo-50 text-indigo-600" },
-  green:  { icon: "bg-emerald-50 text-emerald-600" },
-  purple: { icon: "bg-violet-50 text-violet-600" },
-  orange: { icon: "bg-amber-50 text-amber-600" },
-  red:    { icon: "bg-rose-50 text-rose-600" },
+  blue:   { icon: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400" },
+  green:  { icon: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" },
+  purple: { icon: "bg-violet-500/10 text-violet-600 dark:text-violet-400" },
+  orange: { icon: "bg-amber-500/10 text-amber-600 dark:text-amber-400" },
+  red:    { icon: "bg-rose-500/10 text-rose-600 dark:text-rose-400" },
 };
 
 export function StatsCard({ title, value, icon: Icon, color = "blue", subtitle, onClick }: StatsCardProps) {
@@ -28,7 +28,7 @@ export function StatsCard({ title, value, icon: Icon, color = "blue", subtitle, 
     >
       <div className="min-w-0 flex-1">
         <p className="eyebrow mb-1.5">{title}</p>
-        <p className="text-[22px] font-bold tracking-tight text-slate-900 leading-none">{value}</p>
+        <p className="text-[22px] font-bold tracking-tight text-slate-900 dark:text-white leading-none">{value}</p>
         {subtitle && <p className="text-[11px] text-slate-400 font-medium mt-1.5 leading-none">{subtitle}</p>}
       </div>
       <div className={`p-2.5 rounded-xl ${cfg.icon} shrink-0`}>

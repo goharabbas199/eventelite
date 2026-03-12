@@ -107,7 +107,7 @@
 @layer utilities {
   /* Stat cards — white, soft shadow, rounded */
   .stat-card {
-    @apply bg-white border border-slate-100 rounded-2xl p-4 shadow-sm;
+    @apply bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700/50 rounded-2xl p-4 shadow-sm;
     transition: box-shadow 0.15s ease, transform 0.15s ease;
   }
   .stat-card:hover {
