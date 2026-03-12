@@ -1,47 +1,94 @@
-import { Card, CardContent } from "@/components/ui/card";
 import { LucideIcon } from "lucide-react";
+import { TrendingUp } from "lucide-react";
 
 interface StatsCardProps {
   title: string;
   value: string | number;
   icon: LucideIcon;
   trend?: string;
-  color: "blue" | "green" | "purple" | "orange";
+  color: "blue" | "green" | "purple" | "orange" | "red";
+  subtitle?: string;
+  onClick?: () => void;
 }
 
-export function StatsCard({ title, value, icon: Icon, trend, color }: StatsCardProps) {
-  const colorMap = {
-    blue: "bg-blue-50 text-blue-600 border-blue-100",
-    green: "bg-emerald-50 text-emerald-600 border-emerald-100",
-    purple: "bg-purple-50 text-purple-600 border-purple-100",
-    orange: "bg-orange-50 text-orange-600 border-orange-100",
-  };
+const colorConfig = {
+  blue: {
+    icon: "bg-indigo-500/10 text-indigo-600",
+    accent: "bg-indigo-500",
+    value: "text-slate-900",
+    trend: "text-indigo-600 bg-indigo-50",
+  },
+  green: {
+    icon: "bg-emerald-500/10 text-emerald-600",
+    accent: "bg-emerald-500",
+    value: "text-slate-900",
+    trend: "text-emerald-600 bg-emerald-50",
+  },
+  purple: {
+    icon: "bg-purple-500/10 text-purple-600",
+    accent: "bg-purple-500",
+    value: "text-slate-900",
+    trend: "text-purple-600 bg-purple-50",
+  },
+  orange: {
+    icon: "bg-amber-500/10 text-amber-600",
+    accent: "bg-amber-500",
+    value: "text-slate-900",
+    trend: "text-amber-600 bg-amber-50",
+  },
+  red: {
+    icon: "bg-red-500/10 text-red-600",
+    accent: "bg-red-500",
+    value: "text-slate-900",
+    trend: "text-red-600 bg-red-50",
+  },
+};
 
-  const iconColorMap = {
-    blue: "text-blue-600",
-    green: "text-emerald-600",
-    purple: "text-purple-600",
-    orange: "text-orange-600",
-  };
+export function StatsCard({
+  title,
+  value,
+  icon: Icon,
+  trend,
+  color,
+  subtitle,
+  onClick,
+}: StatsCardProps) {
+  const cfg = colorConfig[color];
 
   return (
-    <Card className="border shadow-sm hover:shadow-md transition-all duration-300 group">
-      <CardContent className="p-6 flex items-start justify-between">
-        <div>
-          <p className="text-sm font-medium text-slate-500 mb-1">{title}</p>
-          <h3 className="text-2xl font-bold text-slate-800">{value}</h3>
+    <div
+      onClick={onClick}
+      className={`
+        stat-card group relative overflow-hidden
+        ${onClick ? "cursor-pointer hover:-translate-y-1 active:scale-[0.98]" : ""}
+      `}
+    >
+      {/* Accent strip */}
+      <div className={`absolute top-0 left-0 right-0 h-0.5 ${cfg.accent} opacity-60`} />
+
+      <div className="flex items-start justify-between">
+        <div className="space-y-1.5 flex-1 min-w-0">
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-500 leading-none">
+            {title}
+          </p>
+          <p className={`text-2xl font-bold tracking-tight leading-none ${cfg.value}`}>
+            {value}
+          </p>
+          {subtitle && (
+            <p className="text-xs text-slate-400 font-medium">{subtitle}</p>
+          )}
           {trend && (
-            <p className="text-xs font-medium text-emerald-600 flex items-center mt-2 bg-emerald-50 w-fit px-2 py-0.5 rounded-full">
-              <span>+</span>
-              {trend}
-              <span className="text-emerald-400 ml-1">this month</span>
-            </p>
+            <span className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full ${cfg.trend}`}>
+              <TrendingUp className="w-2.5 h-2.5" />
+              +{trend} this month
+            </span>
           )}
         </div>
-        <div className={`p-3 rounded-xl ${colorMap[color]} group-hover:scale-110 transition-transform duration-300`}>
-          <Icon className={`w-6 h-6 ${iconColorMap[color]}`} />
+
+        <div className={`p-2.5 rounded-xl ${cfg.icon} group-hover:scale-110 transition-transform duration-200 shrink-0`}>
+          <Icon className="w-5 h-5" />
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

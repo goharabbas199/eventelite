@@ -1,53 +1,53 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --font-sans: 'Inter', sans-serif;
+  --font-sans: 'Plus Jakarta Sans', 'Inter', sans-serif;
 
-  /* Base Light Theme - Clean SaaS */
-  --background: 210 20% 98%; /* Light grey/blue tint background */
-  --foreground: 222 47% 11%;
-  
+  /* Premium Light Theme */
+  --background: 220 20% 97%;
+  --foreground: 224 71% 4%;
+
   --card: 0 0% 100%;
-  --card-foreground: 222 47% 11%;
-  
+  --card-foreground: 224 71% 4%;
+
   --popover: 0 0% 100%;
-  --popover-foreground: 222 47% 11%;
-  
-  --primary: 221 83% 53%; /* Bright Blue */
-  --primary-foreground: 210 40% 98%;
-  
-  --secondary: 210 40% 96.1%;
-  --secondary-foreground: 222 47% 11.2%;
-  
-  --muted: 210 40% 96.1%;
-  --muted-foreground: 215 16% 47%;
-  
-  --accent: 210 40% 96.1%;
-  --accent-foreground: 222 47% 11.2%;
-  
-  --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 210 40% 98%;
+  --popover-foreground: 224 71% 4%;
 
-  --border: 214.3 31.8% 91.4%;
-  --input: 214.3 31.8% 91.4%;
-  --ring: 221 83% 53%;
-  
-  --radius: 0.5rem;
+  --primary: 231 70% 53%;
+  --primary-foreground: 0 0% 100%;
 
-  /* Sidebar Specifics */
-  --sidebar-bg: 222 47% 11%; /* Slate 900 */
-  --sidebar-fg: 210 40% 98%;
-  --sidebar-hover: 217 33% 17%;
-  --sidebar-active: 221 83% 53%;
+  --secondary: 220 14% 96%;
+  --secondary-foreground: 220 9% 46%;
 
-  /* Status Colors */
+  --muted: 220 14% 96%;
+  --muted-foreground: 220 9% 46%;
+
+  --accent: 231 70% 96%;
+  --accent-foreground: 231 70% 35%;
+
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 220 13% 91%;
+  --input: 220 13% 91%;
+  --ring: 231 70% 53%;
+
+  --radius: 0.625rem;
+
+  /* Sidebar */
+  --sidebar-bg: 224 71% 4%;
+  --sidebar-fg: 220 14% 96%;
+  --sidebar-hover: 223 47% 11%;
+  --sidebar-active: 231 70% 53%;
+
+  /* Status */
   --status-success: 142 71% 45%;
   --status-warning: 38 92% 50%;
-  --status-info: 221 83% 53%;
+  --status-info: 231 70% 53%;
   --status-neutral: 220 9% 46%;
 }
 
@@ -55,21 +55,78 @@
   * {
     @apply border-border;
   }
+  html {
+    -webkit-tap-highlight-color: transparent;
+    scroll-behavior: smooth;
+  }
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-sans);
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
   h1, h2, h3, h4, h5, h6 {
-    @apply font-sans font-semibold tracking-tight;
+    @apply font-semibold tracking-tight;
+    font-family: var(--font-sans);
+  }
+  ::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-border rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground/30;
   }
 }
 
-/* Custom Utilities */
 @layer utilities {
   .glass-panel {
     @apply bg-white/80 backdrop-blur-md border border-white/20 shadow-xl;
   }
-  
+
   .card-hover {
-    @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
+    @apply transition-all duration-200 hover:shadow-md hover:-translate-y-0.5;
+  }
+
+  .page-section {
+    @apply space-y-1 mb-1;
+  }
+
+  .section-label {
+    @apply text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/70 px-0;
+  }
+
+  .stat-card {
+    @apply bg-white border border-border/60 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all duration-200;
+  }
+
+  .action-btn {
+    @apply inline-flex items-center gap-1.5 rounded-xl font-medium transition-all duration-150;
+  }
+
+  .badge-status {
+    @apply text-[10px] font-semibold px-2.5 py-0.5 rounded-full tracking-wide;
+  }
+
+  .nav-item {
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 cursor-pointer;
+  }
+
+  /* Gradient backgrounds */
+  .gradient-blue {
+    background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+  }
+  .gradient-green {
+    background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  }
+  .gradient-purple {
+    background: linear-gradient(135deg, #7c3aed 0%, #9333ea 100%);
+  }
+  .gradient-amber {
+    background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
   }
 }
