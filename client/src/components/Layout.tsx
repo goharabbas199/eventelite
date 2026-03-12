@@ -19,26 +19,21 @@ export function Layout({
   }, [collapsed]);
 
   return (
-    <div className="min-h-screen bg-[#f5f6fa]">
-      {/* Desktop Sidebar */}
+    <div className="min-h-screen bg-[#f4f5f8]">
       <Sidebar collapsed={collapsed} />
 
-      {/* Main content — shifted right on desktop */}
       <div
         className={`flex flex-col min-h-screen transition-all duration-300 ${
-          collapsed ? "md:pl-[68px]" : "md:pl-60"
+          collapsed ? "md:pl-[64px]" : "md:pl-56"
         }`}
       >
-        {/* Header */}
         <Header title={title} collapsed={collapsed} setCollapsed={setCollapsed} />
 
-        {/* Page Content — extra bottom padding on mobile for bottom nav */}
-        <main className="flex-1 px-4 md:px-6 lg:px-8 py-6 pb-24 md:pb-8 space-y-6">
+        <main className="flex-1 px-4 md:px-6 py-5 pb-24 md:pb-6 space-y-5">
           {children}
         </main>
       </div>
 
-      {/* Mobile Bottom Nav */}
       <MobileNav />
     </div>
   );

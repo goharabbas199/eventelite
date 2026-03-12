@@ -170,7 +170,7 @@ export default function Clients() {
       </div>
 
       {/* Filter bar */}
-      <Card className="border border-border/60 rounded-2xl shadow-sm bg-white">
+      <Card className="border border-slate-100 rounded-2xl shadow-sm bg-white">
         <CardContent className="p-4 md:p-5">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
             <Input
@@ -186,7 +186,7 @@ export default function Clients() {
             ].map(({ value, onChange, options }, i) => (
               <select
                 key={i}
-                className="h-9 border border-border/60 rounded-xl px-3 text-sm bg-background text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                className="h-9 border border-slate-100 rounded-xl px-3 text-sm bg-background text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
               >
@@ -209,12 +209,12 @@ export default function Clients() {
       </Card>
 
       {/* Desktop Table */}
-      <Card className="border border-border/60 rounded-2xl shadow-sm bg-white hidden md:block">
+      <Card className="border border-slate-100 rounded-2xl shadow-sm bg-white hidden md:block">
         <CardContent className="p-0">
           <div className="overflow-auto">
             <Table>
               <TableHeader>
-                <TableRow className="border-b border-border/60 bg-slate-50/80">
+                <TableRow className="border-b border-slate-100 bg-slate-50/80">
                   <TableHead className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 pl-5">Name</TableHead>
                   <TableHead className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 cursor-pointer hover:text-indigo-600 select-none" onClick={() => toggleSort("date")}>
                     <div className="flex items-center gap-1">Date <SortIcon col="date" /></div>
@@ -257,7 +257,7 @@ export default function Clients() {
                     return (
                       <TableRow
                         key={client.id}
-                        className="border-b border-border/40 hover:bg-slate-50/80 transition-colors cursor-pointer group"
+                        className="border-b border-slate-100 hover:bg-slate-50/80 transition-colors cursor-pointer group"
                         onClick={() => setLocation(`/clients/${client.id}`)}
                       >
                         <TableCell className="font-semibold text-slate-800 pl-5 group-hover:text-indigo-600 transition-colors">
@@ -306,9 +306,9 @@ export default function Clients() {
       {/* Mobile Card List */}
       <div className="md:hidden space-y-3">
         {isLoading ? (
-          [...Array(3)].map((_, i) => <div key={i} className="h-28 bg-white rounded-2xl animate-pulse border border-border/40" />)
+          [...Array(3)].map((_, i) => <div key={i} className="h-28 bg-white rounded-2xl animate-pulse border border-slate-100" />)
         ) : !filteredClients?.length ? (
-          <div className="flex flex-col items-center justify-center py-16 gap-3 bg-white rounded-2xl border border-border/40">
+          <div className="flex flex-col items-center justify-center py-16 gap-3 bg-white rounded-2xl border border-slate-100">
             <Users className="w-10 h-10 text-slate-300" />
             <p className="text-sm font-medium text-slate-500">No clients found</p>
           </div>
@@ -319,7 +319,7 @@ export default function Clients() {
               <div
                 key={client.id}
                 onClick={() => setLocation(`/clients/${client.id}`)}
-                className="bg-white rounded-2xl border border-border/60 p-4 shadow-sm active:scale-[0.98] transition-all cursor-pointer"
+                className="bg-white rounded-2xl border border-slate-100 p-4 shadow-sm active:scale-[0.98] transition-all cursor-pointer"
               >
                 <div className="flex items-start justify-between mb-2">
                   <div>
@@ -407,8 +407,8 @@ function CreateClientForm({ onSuccess }: { onSuccess: () => void }) {
     );
   };
 
-  const inputCls = "h-9 rounded-xl text-sm border-border/60 focus:ring-indigo-500/20";
-  const selectCls = "w-full h-9 border border-border/60 rounded-xl px-3 text-sm bg-background text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20";
+  const inputCls = "h-9 rounded-xl text-sm border-slate-100 focus:ring-indigo-500/20";
+  const selectCls = "w-full h-9 border border-slate-100 rounded-xl px-3 text-sm bg-background text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20";
   const labelCls = "text-xs font-semibold text-slate-600 mb-1 block";
 
   return (

@@ -1,59 +1,48 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --font-sans: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  --font-sans: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
 
-  /* Premium Light Theme */
-  --background: 220 20% 97%;
-  --foreground: 224 71% 4%;
+  /* Color Tokens */
+  --background: 220 22% 97%;
+  --foreground: 222 47% 8%;
 
   --card: 0 0% 100%;
-  --card-foreground: 224 71% 4%;
+  --card-foreground: 222 47% 8%;
 
   --popover: 0 0% 100%;
-  --popover-foreground: 224 71% 4%;
+  --popover-foreground: 222 47% 8%;
 
-  --primary: 231 70% 53%;
+  --primary: 238 76% 58%;
   --primary-foreground: 0 0% 100%;
 
   --secondary: 220 14% 96%;
-  --secondary-foreground: 220 9% 46%;
+  --secondary-foreground: 220 9% 40%;
 
   --muted: 220 14% 96%;
-  --muted-foreground: 220 9% 46%;
+  --muted-foreground: 220 9% 54%;
 
-  --accent: 231 70% 96%;
-  --accent-foreground: 231 70% 35%;
+  --accent: 238 76% 97%;
+  --accent-foreground: 238 76% 38%;
 
   --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 100%;
 
-  --border: 220 13% 91%;
-  --input: 220 13% 91%;
-  --ring: 231 70% 53%;
+  --border: 220 13% 90%;
+  --input: 220 13% 90%;
+  --ring: 238 76% 58%;
 
-  --radius: 0.625rem;
-
-  /* Sidebar */
-  --sidebar-bg: 224 71% 4%;
-  --sidebar-fg: 220 14% 96%;
-  --sidebar-hover: 223 47% 11%;
-  --sidebar-active: 231 70% 53%;
-
-  /* Status */
-  --status-success: 142 71% 45%;
-  --status-warning: 38 92% 50%;
-  --status-info: 231 70% 53%;
-  --status-neutral: 220 9% 46%;
+  --radius: 0.75rem;
 }
 
 @layer base {
   * {
     @apply border-border;
+    box-sizing: border-box;
   }
   html {
     -webkit-tap-highlight-color: transparent;
@@ -63,70 +52,84 @@
     @apply bg-background text-foreground antialiased;
     font-family: var(--font-sans);
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   h1, h2, h3, h4, h5, h6 {
-    @apply font-semibold tracking-tight;
     font-family: var(--font-sans);
+    @apply font-semibold tracking-tight;
   }
-  ::-webkit-scrollbar {
-    width: 5px;
-    height: 5px;
-  }
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  ::-webkit-scrollbar-thumb {
-    @apply bg-border rounded-full;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    @apply bg-muted-foreground/30;
-  }
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { @apply bg-slate-200 rounded-full; }
+  ::-webkit-scrollbar-thumb:hover { @apply bg-slate-300; }
 }
 
 @layer utilities {
-  .glass-panel {
-    @apply bg-white/80 backdrop-blur-md border border-white/20 shadow-xl;
-  }
-
-  .card-hover {
-    @apply transition-all duration-200 hover:shadow-md hover:-translate-y-0.5;
-  }
-
-  .page-section {
-    @apply space-y-1 mb-1;
-  }
-
-  .section-label {
-    @apply text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/70 px-0;
-  }
-
+  /* Stat cards — white, soft shadow, rounded */
   .stat-card {
-    @apply bg-white border border-border/60 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all duration-200;
+    @apply bg-white border border-slate-100 rounded-2xl p-4 shadow-sm;
+    transition: box-shadow 0.15s ease, transform 0.15s ease;
+  }
+  .stat-card:hover {
+    @apply shadow-md;
   }
 
-  .action-btn {
-    @apply inline-flex items-center gap-1.5 rounded-xl font-medium transition-all duration-150;
-  }
-
-  .badge-status {
-    @apply text-[10px] font-semibold px-2.5 py-0.5 rounded-full tracking-wide;
-  }
-
+  /* Navigation item */
   .nav-item {
-    @apply flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 cursor-pointer;
+    @apply flex items-center gap-3 px-3 py-2 rounded-xl text-[13px] font-medium transition-all duration-150 cursor-pointer;
   }
 
-  /* Gradient backgrounds */
-  .gradient-blue {
-    background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+  /* Section eyebrow */
+  .eyebrow {
+    @apply text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400;
   }
-  .gradient-green {
+
+  /* Premium chip / badge */
+  .chip {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold;
+  }
+
+  /* Gradient fills */
+  .gradient-indigo {
+    background: linear-gradient(135deg, #4f46e5 0%, #6366f1 50%, #818cf8 100%);
+  }
+  .gradient-emerald {
     background: linear-gradient(135deg, #059669 0%, #10b981 100%);
-  }
-  .gradient-purple {
-    background: linear-gradient(135deg, #7c3aed 0%, #9333ea 100%);
   }
   .gradient-amber {
     background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
+  }
+  .gradient-rose {
+    background: linear-gradient(135deg, #e11d48 0%, #f43f5e 100%);
+  }
+  /* backwards compat aliases */
+  .gradient-blue   { background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%); }
+  .gradient-green  { background: linear-gradient(135deg, #059669 0%, #10b981 100%); }
+  .gradient-purple { background: linear-gradient(135deg, #7c3aed 0%, #9333ea 100%); }
+
+  /* Glass card */
+  .glass {
+    @apply bg-white/80 backdrop-blur-md;
+  }
+
+  /* Focus ring */
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:ring-offset-0;
+  }
+
+  /* Input base */
+  .input-base {
+    @apply h-9 rounded-xl border-slate-200 bg-white text-sm placeholder:text-slate-400 transition-all focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/15;
+  }
+
+  /* Card hover lift */
+  .card-hover {
+    @apply transition-all duration-150 hover:shadow-md hover:-translate-y-0.5;
+  }
+
+  /* Scrollable fade-x */
+  .fade-x {
+    mask-image: linear-gradient(to right, transparent, black 1rem, black calc(100% - 1rem), transparent);
   }
 }

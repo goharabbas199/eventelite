@@ -50,14 +50,14 @@ export default function Settings() {
           <p className="text-sm text-slate-400 mt-1">Manage your preferences and account configuration</p>
         </div>
 
-        <Card className="border border-border/60 rounded-2xl shadow-sm bg-white overflow-hidden">
+        <Card className="border border-slate-100 rounded-2xl shadow-sm bg-white overflow-hidden">
           <CardContent className="p-0">
             {settingsSections.map((section, idx) => {
               const Icon = section.icon;
               return (
                 <button
                   key={section.title}
-                  className={`w-full flex items-center gap-4 px-5 py-4 hover:bg-slate-50 transition-colors text-left group ${idx !== 0 ? "border-t border-border/40" : ""}`}
+                  className={`w-full flex items-center gap-4 px-5 py-4 hover:bg-slate-50 transition-colors text-left group ${idx !== 0 ? "border-t border-slate-100" : ""}`}
                 >
                   <div className={`p-2.5 rounded-xl ${section.bg} shrink-0`}>
                     <Icon className={`w-4 h-4 ${section.color}`} />

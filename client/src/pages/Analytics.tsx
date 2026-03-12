@@ -19,7 +19,7 @@ function fmtMoney(n: number) {
 const CustomBarTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-white border border-border/60 rounded-xl shadow-lg px-4 py-3 text-xs">
+    <div className="bg-white border border-slate-100 rounded-xl shadow-lg px-4 py-3 text-xs">
       <p className="font-semibold text-slate-600 mb-1.5">{label}</p>
       {payload.map((p: any) => (
         <p key={p.name} className="flex items-center gap-2 font-medium" style={{ color: p.fill }}>
@@ -116,7 +116,7 @@ export default function Analytics() {
       </div>
 
       {/* Avg Profit Banner */}
-      <div className="bg-white border border-border/60 rounded-2xl px-5 py-4 shadow-sm flex items-center justify-between">
+      <div className="bg-white border border-slate-100 rounded-2xl px-5 py-4 shadow-sm flex items-center justify-between">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">Avg Profit per Event</p>
           <p className="text-xs text-slate-400 mt-0.5">Across all {totalEvents} events</p>
@@ -129,7 +129,7 @@ export default function Analytics() {
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* Revenue by Month */}
-        <Card className="border border-border/60 rounded-2xl shadow-sm bg-white">
+        <Card className="border border-slate-100 rounded-2xl shadow-sm bg-white">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-bold text-slate-900">Revenue by Event Month</CardTitle>
           </CardHeader>
@@ -150,7 +150,7 @@ export default function Analytics() {
         </Card>
 
         {/* Events by Type */}
-        <Card className="border border-border/60 rounded-2xl shadow-sm bg-white">
+        <Card className="border border-slate-100 rounded-2xl shadow-sm bg-white">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-bold text-slate-900">Events by Type</CardTitle>
           </CardHeader>
@@ -181,7 +181,7 @@ export default function Analytics() {
 
         {/* Revenue vs Expenses per Client */}
         {revExpData.length > 0 && (
-          <Card className="border border-border/60 rounded-2xl shadow-sm bg-white lg:col-span-2">
+          <Card className="border border-slate-100 rounded-2xl shadow-sm bg-white lg:col-span-2">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-bold text-slate-900">Revenue vs Expenses per Client</CardTitle>
             </CardHeader>
@@ -203,7 +203,7 @@ export default function Analytics() {
 
         {/* Status Breakdown */}
         {Object.keys(byStatus).length > 0 && (
-          <Card className="border border-border/60 rounded-2xl shadow-sm bg-white">
+          <Card className="border border-slate-100 rounded-2xl shadow-sm bg-white">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-bold text-slate-900">Events by Status</CardTitle>
             </CardHeader>

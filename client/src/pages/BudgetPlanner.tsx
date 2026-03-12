@@ -61,7 +61,7 @@ export default function BudgetPlanner() {
 
         <div className="min-w-[220px]">
           <Select value={selectedClientId} onValueChange={setSelectedClientId}>
-            <SelectTrigger className="h-9 rounded-xl text-sm border-border/60 bg-white">
+            <SelectTrigger className="h-9 rounded-xl text-sm border-slate-100 bg-white">
               <SelectValue placeholder="Select a client..." />
             </SelectTrigger>
             <SelectContent>
@@ -85,7 +85,7 @@ export default function BudgetPlanner() {
           initialBudget={Number(selectedClient.budget)}
         />
       ) : (
-        <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-border/40 gap-3">
+        <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-slate-100 gap-3">
           <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center">
             <PieIcon className="w-7 h-7 text-slate-400" />
           </div>
@@ -104,7 +104,7 @@ function ClientBudgetView({ clientId, initialBudget }: { clientId: number; initi
   if (isLoading || !client) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {[...Array(3)].map((_, i) => <div key={i} className="h-24 bg-white rounded-2xl animate-pulse border border-border/40" />)}
+        {[...Array(3)].map((_, i) => <div key={i} className="h-24 bg-white rounded-2xl animate-pulse border border-slate-100" />)}
       </div>
     );
   }
@@ -151,7 +151,7 @@ function ClientBudgetView({ clientId, initialBudget }: { clientId: number; initi
       </div>
 
       {/* Progress bar */}
-      <div className="bg-white border border-border/60 rounded-2xl p-4 shadow-sm">
+      <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm">
         <div className="flex items-center justify-between mb-2">
           <p className="text-xs font-semibold text-slate-600">Budget Used</p>
           <p className={`text-xs font-bold ${spendPercent >= 90 ? "text-red-600" : "text-slate-700"}`}>{spendPercent.toFixed(1)}%</p>
@@ -168,8 +168,8 @@ function ClientBudgetView({ clientId, initialBudget }: { clientId: number; initi
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Expense list */}
         <div className="lg:col-span-2">
-          <Card className="border border-border/60 rounded-2xl shadow-sm bg-white">
-            <CardHeader className="flex flex-row items-center justify-between pb-3 border-b border-border/40">
+          <Card className="border border-slate-100 rounded-2xl shadow-sm bg-white">
+            <CardHeader className="flex flex-row items-center justify-between pb-3 border-b border-slate-100">
               <div>
                 <CardTitle className="text-sm font-bold text-slate-900">Expenses</CardTitle>
                 <p className="text-xs text-slate-400 mt-0.5">{expenses.length} items recorded</p>
@@ -221,7 +221,7 @@ function ClientBudgetView({ clientId, initialBudget }: { clientId: number; initi
         </div>
 
         {/* Pie chart */}
-        <Card className="border border-border/60 rounded-2xl shadow-sm bg-white">
+        <Card className="border border-slate-100 rounded-2xl shadow-sm bg-white">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-bold text-slate-900">Spending Breakdown</CardTitle>
           </CardHeader>
@@ -286,7 +286,7 @@ function CreateExpenseForm({ clientId, onSuccess }: { clientId: number; onSucces
     mutate({ clientId, ...data }, { onSuccess: () => { form.reset(); onSuccess(); } });
   }
 
-  const inputCls = "h-9 rounded-xl text-sm border-border/60";
+  const inputCls = "h-9 rounded-xl text-sm border-slate-100";
   const labelCls = "text-xs font-semibold text-slate-600";
 
   return (

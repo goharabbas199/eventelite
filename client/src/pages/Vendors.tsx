@@ -91,7 +91,7 @@ export default function Vendors() {
       </div>
 
       {/* Filter bar */}
-      <Card className="border border-border/60 rounded-2xl shadow-sm bg-white">
+      <Card className="border border-slate-100 rounded-2xl shadow-sm bg-white">
         <CardContent className="p-4 flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
@@ -120,7 +120,7 @@ export default function Vendors() {
           {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-20 w-full rounded-2xl" />)}
         </div>
       ) : filteredVendors.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-border/40 gap-3">
+        <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-slate-100 gap-3">
           <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center">
             <Store className="w-7 h-7 text-slate-400" />
           </div>
@@ -136,7 +136,7 @@ export default function Vendors() {
               <div
                 key={vendor.id}
                 onClick={() => navigate(`/vendors/${vendor.id}`)}
-                className="bg-white border border-border/60 rounded-2xl px-4 py-4 shadow-sm hover:shadow-md hover:border-indigo-200 transition-all duration-150 cursor-pointer group"
+                className="bg-white border border-slate-100 rounded-2xl px-4 py-4 shadow-sm hover:shadow-md hover:border-indigo-200 transition-all duration-150 cursor-pointer group"
               >
                 <div className="flex items-center justify-between gap-3">
                   {/* Left info */}

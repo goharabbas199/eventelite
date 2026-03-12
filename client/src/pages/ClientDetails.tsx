@@ -145,114 +145,85 @@ export default function ClientDetails() {
   return (
     <Layout title="Client Profile">
       {/* HEADER */}
-      <div className="mb-6">
-        <div className="flex justify-between items-center mb-4">
-          <Link
-            href="/clients"
-            className="text-sm text-slate-500 hover:text-blue-600 flex items-center transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4 mr-1" /> Back to Clients
+      <div className="space-y-4">
+        {/* Back nav + action */}
+        <div className="flex items-center justify-between">
+          <Link href="/clients" className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-indigo-600 transition-colors">
+            <ArrowLeft className="w-3.5 h-3.5" /> Back to Clients
           </Link>
           <Link href="/clients">
-            <Button variant="outline">Done</Button>
+            <Button variant="outline" className="h-8 rounded-xl text-xs">Done</Button>
           </Link>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-          <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-2xl">
-              {client.name.charAt(0)}
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-slate-900">{client.name}</h1>
-              <div className="flex flex-wrap gap-4 text-sm text-slate-500 mt-1">
-                <span className="flex items-center">
-                  <Mail className="w-3.5 h-3.5 mr-1" /> {client.email}
-                </span>
-                <span className="flex items-center">
-                  <Phone className="w-3.5 h-3.5 mr-1" /> {client.phone}
-                </span>
-                {client.guestCount && (
-                  <span className="flex items-center">
-                    <Users className="w-3.5 h-3.5 mr-1" />
-                    {client.guestCount} Guests
+        {/* Profile card */}
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 md:p-5">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+            {/* Avatar + name */}
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <div className="w-12 h-12 rounded-2xl gradient-indigo flex items-center justify-center font-bold text-lg text-white shrink-0 shadow-sm shadow-indigo-900/20">
+                {client.name.charAt(0)}
+              </div>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h1 className="text-lg font-bold text-slate-900 truncate">{client.name}</h1>
+                  <span className={`chip ${client.status === "Confirmed" ? "bg-emerald-50 text-emerald-700" : client.status === "Completed" ? "bg-indigo-50 text-indigo-700" : "bg-slate-100 text-slate-600"}`}>
+                    {client.status}
                   </span>
-                )}
+                </div>
+                <div className="flex flex-wrap gap-3 text-xs text-slate-400 mt-1">
+                  <span className="flex items-center gap-1"><Mail className="w-3 h-3" /> {client.email}</span>
+                  <span className="flex items-center gap-1"><Phone className="w-3 h-3" /> {client.phone}</span>
+                  <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> {format(new Date(client.eventDate), "MMM d, yyyy")}</span>
+                  {client.guestCount && <span className="flex items-center gap-1"><Users className="w-3 h-3" /> {client.guestCount} guests</span>}
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="flex flex-col items-end gap-2">
-            <Select
-              value={client.venueId ? String(client.venueId) : ""}
-              onValueChange={(val) =>
-                updateClient.mutate({
-                  id: client.id,
-                  venueId: val ? Number(val) : undefined,
-                })
-              }
-            >
-              <SelectTrigger className="w-52">
-                <SelectValue placeholder="Select Venue" />
-              </SelectTrigger>
-              <SelectContent>
-                {venues?.map((venue) => (
-                  <SelectItem key={venue.id} value={String(venue.id)}>
-                    {venue.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <span
-              className={`px-3 py-1 rounded-full text-sm font-medium ${
-                client.status === "Confirmed"
-                  ? "bg-emerald-100 text-emerald-700"
-                  : "bg-blue-100 text-blue-700"
-              }`}
-            >
-              {client.status}
-            </span>
-
-            <span className="text-sm text-slate-500 flex items-center">
-              <Calendar className="w-4 h-4 mr-1" />
-              {format(new Date(client.eventDate), "MMMM dd, yyyy")}
-            </span>
+            {/* Venue selector */}
+            <div className="shrink-0">
+              <Select
+                value={client.venueId ? String(client.venueId) : ""}
+                onValueChange={(val) => updateClient.mutate({ id: client.id, venueId: val ? Number(val) : undefined })}
+              >
+                <SelectTrigger className="h-8 w-48 rounded-xl text-xs border-slate-200">
+                  <SelectValue placeholder="Assign venue" />
+                </SelectTrigger>
+                <SelectContent>
+                  {venues?.map((venue) => (
+                    <SelectItem key={venue.id} value={String(venue.id)}>{venue.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* FEATURE 4 — EVENT FINANCIAL SUMMARY */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
+      {/* FINANCIAL SUMMARY */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         {[
-          { label: "Client Budget", value: `$${budget.toLocaleString()}`, icon: DollarSign, color: "blue" },
-          { label: "Total Expenses", value: `$${totalCost.toLocaleString()}`, icon: Building2, color: "orange" },
-          { label: "Payments Received", value: `$${totalPaid.toLocaleString()}`, icon: CheckCircle, color: "green" },
-          { label: "Balance Due", value: `$${remainingBalance.toLocaleString()}`, icon: Clock, color: remainingBalance > 0 ? "red" : "green" },
-          { label: "Vendor Pending", value: `$${vendorPaymentsPending.toLocaleString()}`, icon: TrendingDown, color: "red" },
-          { label: "Profit", value: `$${profit.toLocaleString()}`, icon: TrendingUp, color: profit >= 0 ? "green" : "red" },
-        ].map(({ label, value, icon: Icon, color }) => (
-          <Card key={label} className="border-none shadow-sm">
-            <CardContent className="p-4">
-              <p className="text-xs text-slate-400 mb-1">{label}</p>
-              <div className="flex items-center gap-2">
-                <Icon className={`w-4 h-4 text-${color}-500`} />
-                <span className={`font-bold text-sm text-${color === "green" ? "emerald" : color}-600`}>
-                  {value}
-                </span>
-              </div>
-            </CardContent>
-          </Card>
+          { label: "Budget",           value: `$${budget.toLocaleString()}`,             cls: "text-slate-800" },
+          { label: "Total Expenses",   value: `$${totalCost.toLocaleString()}`,           cls: "text-amber-600" },
+          { label: "Received",         value: `$${totalPaid.toLocaleString()}`,           cls: "text-emerald-600" },
+          { label: "Balance Due",      value: `$${remainingBalance.toLocaleString()}`,    cls: remainingBalance > 0 ? "text-red-600" : "text-emerald-600" },
+          { label: "Vendor Pending",   value: `$${vendorPaymentsPending.toLocaleString()}`, cls: "text-red-500" },
+          { label: "Net Profit",       value: `$${profit.toLocaleString()}`,              cls: profit >= 0 ? "text-emerald-600" : "text-red-600" },
+        ].map(({ label, value, cls }) => (
+          <div key={label} className="stat-card">
+            <p className="eyebrow mb-1.5">{label}</p>
+            <p className={`text-[18px] font-bold tracking-tight leading-none ${cls}`}>{value}</p>
+          </div>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* LEFT COLUMN */}
         <div className="lg:col-span-2 flex flex-col gap-6">
 
           {/* FEATURE 1 — PLANNED SERVICES TABLE */}
-          <Card className="border-none shadow-md">
-            <CardHeader className="flex flex-row items-center justify-between border-b pb-4">
+          <Card className="border border-slate-100 shadow-sm">
+            <CardHeader className="flex flex-row items-center justify-between border-b border-slate-100 pb-3">
               <CardTitle>Planned Services</CardTitle>
               <Dialog open={isServiceDialogOpen} onOpenChange={setIsServiceDialogOpen}>
                 <DialogTrigger asChild>
@@ -348,8 +319,8 @@ export default function ClientDetails() {
           </Card>
 
           {/* FEATURE 2 — CLIENT PAYMENT TRACKER */}
-          <Card className="border-none shadow-md">
-            <CardHeader className="flex flex-row items-center justify-between border-b pb-4">
+          <Card className="border border-slate-100 shadow-sm">
+            <CardHeader className="flex flex-row items-center justify-between border-b border-slate-100 pb-3">
               <div>
                 <CardTitle>Client Payments</CardTitle>
                 <p className="text-sm text-slate-500 mt-1">
@@ -417,8 +388,8 @@ export default function ClientDetails() {
           </Card>
 
           {/* FEATURE 3 — VENDOR PAYMENT TRACKER */}
-          <Card className="border-none shadow-md">
-            <CardHeader className="flex flex-row items-center justify-between border-b pb-4">
+          <Card className="border border-slate-100 shadow-sm">
+            <CardHeader className="flex flex-row items-center justify-between border-b border-slate-100 pb-3">
               <div>
                 <CardTitle>Vendor Payments</CardTitle>
                 <p className="text-sm text-slate-500 mt-1">
@@ -514,8 +485,8 @@ export default function ClientDetails() {
             </CardContent>
           </Card>
           {/* FEATURE 4 — TASK CHECKLIST */}
-          <Card className="border-none shadow-md">
-            <CardHeader className="border-b pb-4">
+          <Card className="border border-slate-100 shadow-sm">
+            <CardHeader className="border-b border-slate-100 pb-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <ListChecks className="w-4 h-4 text-slate-500" />
@@ -620,7 +591,7 @@ export default function ClientDetails() {
 
         {/* RIGHT COLUMN — FEATURE 5: Updated Budget Overview */}
         <div className="flex flex-col gap-4">
-          <Card className="border-none shadow-md bg-white">
+          <Card className="border border-slate-100 shadow-sm bg-white">
             <CardHeader>
               <CardTitle className="text-base">Budget Overview</CardTitle>
             </CardHeader>
