@@ -39,6 +39,15 @@
   --radius: 0.75rem;
 }
 
+.no-animations *,
+.no-animations *::before,
+.no-animations *::after {
+  animation-duration: 0.001ms !important;
+  animation-delay: 0.001ms !important;
+  transition-duration: 0.001ms !important;
+  transition-delay: 0.001ms !important;
+}
+
 .dark {
   --background: 222 47% 8%;
   --foreground: 213 31% 91%;

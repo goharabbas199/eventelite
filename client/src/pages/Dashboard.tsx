@@ -1,5 +1,6 @@
 import { useMemo, useState, useEffect } from "react";
 import { Layout } from "@/components/Layout";
+import { useSettings } from "@/context/SettingsContext";
 import { StatsCard } from "@/components/StatsCard";
 import {
   Users, Store, MapPin, DollarSign, TrendingUp, Wallet,
@@ -44,6 +45,7 @@ const ChartTooltip = ({ active, payload, label }: any) => {
 };
 
 export default function Dashboard() {
+  const { profile } = useSettings();
   const { data: clients, isLoading: loadingClients } = useClients();
   const { data: vendors, isLoading: loadingVendors } = useVendors();
   const { data: venues,  isLoading: loadingVenues  } = useVenues();
@@ -140,7 +142,7 @@ export default function Dashboard() {
           <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400 mb-0.5">
             {format(new Date(), "EEEE, MMMM do")}
           </p>
-          <h2 className="text-xl font-bold text-slate-900">Welcome back, Alex 👋</h2>
+          <h2 className="text-xl font-bold text-slate-900">Welcome back, {profile.name.split(" ")[0]} 👋</h2>
         </div>
         <div className="hidden sm:flex flex-col items-end">
           <p className="eyebrow mb-1">Pipeline value</p>

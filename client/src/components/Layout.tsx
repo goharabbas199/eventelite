@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Sidebar, MobileNav } from "./Sidebar";
 import { Header } from "./Header";
+import { useSettings } from "@/context/SettingsContext";
 
 export function Layout({
   children,
@@ -9,6 +10,8 @@ export function Layout({
   children: React.ReactNode;
   title?: string;
 }) {
+  const { appearance, isLoaded } = useSettings();
+
   const [collapsed, setCollapsed] = useState(() => {
     if (typeof window === "undefined") return false;
     return localStorage.getItem("sidebar-collapsed") === "true";
@@ -17,6 +20,21 @@ export function Layout({
   useEffect(() => {
     localStorage.setItem("sidebar-collapsed", String(collapsed));
   }, [collapsed]);
+
+  useEffect(() => {
+    if (isLoaded) {
+      setCollapsed(appearance.sidebarCollapsed);
+    }
+  }, [isLoaded]);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (appearance.animationsEnabled) {
+      root.classList.remove("no-animations");
+    } else {
+      root.classList.add("no-animations");
+    }
+  }, [appearance.animationsEnabled]);
 
   return (
     <div className="min-h-screen bg-[#f4f5f8] dark:bg-slate-950">

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Layout } from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -91,9 +91,13 @@ export default function Settings() {
 
 /* ─── Profile tab ─── */
 function ProfileTab({ toast }: { toast: any }) {
-  const { profile, updateProfile } = useSettings();
+  const { profile, updateProfile, isLoaded } = useSettings();
   const [form, setForm] = useState<ProfileSettings>({ ...profile });
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (isLoaded) setForm({ ...profile });
+  }, [isLoaded]);
 
   const F = (k: keyof ProfileSettings) => (e: any) => setForm((p) => ({ ...p, [k]: e.target.value }));
 
@@ -164,9 +168,13 @@ function ProfileTab({ toast }: { toast: any }) {
 
 /* ─── Business tab ─── */
 function BusinessTab({ toast }: { toast: any }) {
-  const { business, updateBusiness } = useSettings();
+  const { business, updateBusiness, isLoaded } = useSettings();
   const [form, setForm] = useState<BusinessSettings>({ ...business });
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (isLoaded) setForm({ ...business });
+  }, [isLoaded]);
 
   const F = (k: keyof BusinessSettings) => (e: any) => setForm((p) => ({ ...p, [k]: e.target.value }));
 
@@ -220,9 +228,13 @@ function BusinessTab({ toast }: { toast: any }) {
 
 /* ─── Notifications tab ─── */
 function NotificationsTab({ toast }: { toast: any }) {
-  const { notifications, updateNotifications } = useSettings();
+  const { notifications, updateNotifications, isLoaded } = useSettings();
   const [notifs, setNotifs] = useState<NotificationSettings>({ ...notifications });
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (isLoaded) setNotifs({ ...notifications });
+  }, [isLoaded]);
 
   const toggle = (k: keyof NotificationSettings) => (v: boolean) => setNotifs((p) => ({ ...p, [k]: v }));
 
@@ -288,9 +300,13 @@ function NotificationsTab({ toast }: { toast: any }) {
 
 /* ─── Appearance tab ─── */
 function AppearanceTab({ toast }: { toast: any }) {
-  const { appearance, updateAppearance } = useSettings();
+  const { appearance, updateAppearance, isLoaded } = useSettings();
   const [app, setApp] = useState<AppearanceSettings>({ ...appearance });
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (isLoaded) setApp({ ...appearance });
+  }, [isLoaded]);
 
   const set = (k: keyof AppearanceSettings, v: any) => {
     setApp((p) => ({ ...p, [k]: v }));
@@ -410,10 +426,14 @@ function AppearanceTab({ toast }: { toast: any }) {
 
 /* ─── Security tab ─── */
 function SecurityTab({ toast }: { toast: any }) {
-  const { security, updateSecurity } = useSettings();
+  const { security, updateSecurity, isLoaded } = useSettings();
   const [form, setForm] = useState({ current: "", next: "", confirm: "" });
   const [sec, setSec] = useState<SecuritySettings>({ ...security });
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (isLoaded) setSec({ ...security });
+  }, [isLoaded]);
 
   const F = (k: string) => (e: any) => setForm((p) => ({ ...p, [k]: e.target.value }));
 

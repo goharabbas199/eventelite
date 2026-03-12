@@ -10,6 +10,7 @@ import {
   Zap,
   ReceiptText,
 } from "lucide-react";
+import { useSettings } from "@/context/SettingsContext";
 
 const links = [
   { href: "/",           label: "Dashboard",  icon: LayoutDashboard },
@@ -23,6 +24,7 @@ const links = [
 
 export function Sidebar({ collapsed }: { collapsed: boolean }) {
   const [location] = useLocation();
+  const { business } = useSettings();
 
   return (
     <aside
@@ -46,7 +48,7 @@ export function Sidebar({ collapsed }: { collapsed: boolean }) {
         {!collapsed && (
           <div className="flex-1 min-w-0">
             <p className="font-bold text-[15px] tracking-tight text-white leading-none">EventElite</p>
-            <p className="text-[9px] text-white/30 font-medium mt-0.5 tracking-wide">Agency Dashboard</p>
+            <p className="text-[9px] text-white/30 font-medium mt-0.5 tracking-wide">{business.companyName}</p>
           </div>
         )}
       </div>
