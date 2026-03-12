@@ -1,0 +1,145 @@
+You are working on an existing React + TypeScript + Express + Drizzle + PostgreSQL SaaS project called **EventElite** (Event Management & Budget Planning ERP).
+
+The system already has these modules:
+
+* Clients
+* Vendors
+* Venues
+* Planned Services
+* Expenses
+* Budget overview (Budget, Expenses, Profit)
+
+Do NOT change architecture. Do NOT refactor large files. Do NOT break existing logic. Only extend the system safely.
+
+Follow these strict rules:
+
+* Minimal code changes
+* Modify only necessary files
+* Keep UI consistent with existing ShadCN + Tailwind components
+* Maintain existing TanStack Query hooks
+* Keep database schema consistent with Drizzle
+* Do not remove any working features
+
+Implement the following upgrades step-by-step.
+
+---
+
+FEATURE 1 — EDIT PLANNED SERVICE
+
+Allow users to edit a planned service cost.
+
+On the Client Details page:
+
+* Add an Edit (Pencil) button next to the delete button in the services table.
+* Clicking edit should allow updating:
+
+  * serviceName
+  * cost
+  * notes
+  * vendorId
+
+Use the existing mutation pattern used for create/delete services.
+
+---
+
+FEATURE 2 — CLIENT PAYMENT TRACKER
+
+Create a new table:
+
+payments
+
+* id
+* clientId
+* amount
+* paymentDate
+* paymentMethod
+* notes
+* createdAt
+
+Relationships:
+payment.clientId → clients.id
+
+Add UI to the Client Details page:
+
+Payments section showing:
+
+* Total Budget
+* Total Paid
+* Remaining Balance
+
+Allow:
+
+* Add payment
+* Delete payment
+
+Recalculate balance automatically.
+
+---
+
+FEATURE 3 — VENDOR PAYMENT TRACKER
+
+Create new table:
+
+vendorPayments
+
+* id
+* vendorId
+* clientId
+* serviceId
+* amount
+* status (Paid / Unpaid)
+* paymentDate
+* notes
+
+Add Vendor Payment section in Client Details page showing:
+
+Vendor | Amount | Status | Payment Date
+
+Allow:
+
+* Mark as paid
+* Add payment
+* Delete payment
+
+---
+
+FEATURE 4 — EVENT DASHBOARD SUMMARY
+
+Add an Event Financial Summary card on Client Details page showing:
+
+Client Budget
+Total Expenses
+Total Payments Received
+Vendor Payments Pending
+Profit
+Profit %
+
+Use existing calculations already present in the page.
+
+---
+
+FEATURE 5 — PROFIT IMPROVEMENT
+
+Profit calculation should use:
+
+Profit = Client Budget
+- Venue Cost
+- Planned Services Cost
+- Manual Expenses
+
+Ensure UI updates automatically when:
+
+* services change
+* expenses change
+* venue changes
+
+---
+
+IMPORTANT
+
+Do NOT rewrite large components.
+Do NOT change routing.
+Do NOT change layout system.
+Do NOT break existing hooks.
+
+Only extend the current system safely.

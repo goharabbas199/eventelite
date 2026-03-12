@@ -175,6 +175,54 @@ export const expensesRelations = relations(expenses, ({ one }) => ({
 }));
 
 // ======================================================
+// ==================== PAYMENTS ========================
+// ======================================================
+
+export const payments = pgTable("payments", {
+  id: serial("id").primaryKey(),
+  clientId: integer("client_id").notNull(),
+  amount: numeric("amount").notNull(),
+  paymentDate: timestamp("payment_date").notNull(),
+  paymentMethod: text("payment_method").notNull().default("Cash"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const paymentsRelations = relations(payments, ({ one }) => ({
+  client: one(clients, {
+    fields: [payments.clientId],
+    references: [clients.id],
+  }),
+}));
+
+// ======================================================
+// ================= VENDOR PAYMENTS ====================
+// ======================================================
+
+export const vendorPayments = pgTable("vendor_payments", {
+  id: serial("id").primaryKey(),
+  vendorId: integer("vendor_id").notNull(),
+  clientId: integer("client_id").notNull(),
+  serviceId: integer("service_id"),
+  amount: numeric("amount").notNull(),
+  status: text("status").notNull().default("Unpaid"),
+  paymentDate: timestamp("payment_date"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const vendorPaymentsRelations = relations(vendorPayments, ({ one }) => ({
+  vendor: one(vendors, {
+    fields: [vendorPayments.vendorId],
+    references: [vendors.id],
+  }),
+  client: one(clients, {
+    fields: [vendorPayments.clientId],
+    references: [clients.id],
+  }),
+}));
+
+// ======================================================
 // ======================= SCHEMAS ======================
 // ======================================================
 
@@ -221,6 +269,21 @@ export type PlannedService = typeof plannedServices.$inferSelect;
 export type InsertPlannedService = z.infer<typeof insertPlannedServiceSchema>;
 export type Expense = typeof expenses.$inferSelect;
 export type InsertExpense = z.infer<typeof insertExpenseSchema>;
+
+export const insertPaymentSchema = createInsertSchema(payments).omit({
+  id: true,
+  createdAt: true,
+  clientId: true,
+});
+export type Payment = typeof payments.$inferSelect;
+export type InsertPayment = z.infer<typeof insertPaymentSchema>;
+
+export const insertVendorPaymentSchema = createInsertSchema(vendorPayments).omit({
+  id: true,
+  createdAt: true,
+});
+export type VendorPayment = typeof vendorPayments.$inferSelect;
+export type InsertVendorPayment = z.infer<typeof insertVendorPaymentSchema>;
 
 export const insertVendorSchema = createInsertSchema(vendors).omit({
   id: true,

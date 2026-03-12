@@ -8,6 +8,8 @@ import {
   clients,
   plannedServices,
   expenses,
+  payments,
+  vendorPayments,
   type InsertVendor,
   type InsertVendorProduct,
   type InsertVenue,
@@ -15,6 +17,8 @@ import {
   type InsertClient,
   type InsertPlannedService,
   type InsertExpense,
+  type InsertPayment,
+  type InsertVendorPayment,
 } from "@shared/schema";
 import { eq, desc } from "drizzle-orm";
 
@@ -52,6 +56,17 @@ export interface IStorage {
   createExpense(expense: InsertExpense): Promise<any>;
   updateExpense(id: number, updates: Partial<InsertExpense>): Promise<any>;
   deleteExpense(id: number): Promise<void>;
+
+  // Payments
+  getPayments(clientId: number): Promise<any[]>;
+  createPayment(payment: InsertPayment & { clientId: number }): Promise<any>;
+  deletePayment(id: number): Promise<void>;
+
+  // Vendor Payments
+  getVendorPayments(clientId: number): Promise<any[]>;
+  createVendorPayment(payment: InsertVendorPayment): Promise<any>;
+  updateVendorPayment(id: number, updates: Partial<InsertVendorPayment>): Promise<any>;
+  deleteVendorPayment(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -215,10 +230,24 @@ export class DatabaseStorage implements IStorage {
       .from(expenses)
       .where(eq(expenses.clientId, id));
 
+    const clientPayments = await db
+      .select()
+      .from(payments)
+      .where(eq(payments.clientId, id))
+      .orderBy(desc(payments.createdAt));
+
+    const clientVendorPayments = await db
+      .select()
+      .from(vendorPayments)
+      .where(eq(vendorPayments.clientId, id))
+      .orderBy(desc(vendorPayments.createdAt));
+
     return {
       ...client[0],
       services: services ?? [],
       expenses: clientExpenses ?? [],
+      payments: clientPayments ?? [],
+      vendorPayments: clientVendorPayments ?? [],
     };
   }
 
@@ -331,6 +360,94 @@ export class DatabaseStorage implements IStorage {
 
   async deleteExpense(id: number) {
     await db.delete(expenses).where(eq(expenses.id, id));
+  }
+
+  // ================= PAYMENTS =================
+
+  async getPayments(clientId: number) {
+    return db
+      .select()
+      .from(payments)
+      .where(eq(payments.clientId, clientId))
+      .orderBy(desc(payments.createdAt));
+  }
+
+  async createPayment(payment: InsertPayment & { clientId: number }) {
+    const [newPayment] = await db
+      .insert(payments)
+      .values({
+        clientId: payment.clientId,
+        amount: String(payment.amount),
+        paymentDate: new Date(payment.paymentDate),
+        paymentMethod: payment.paymentMethod || "Cash",
+        notes: payment.notes || null,
+      })
+      .returning();
+    return newPayment;
+  }
+
+  async deletePayment(id: number) {
+    await db.delete(payments).where(eq(payments.id, id));
+  }
+
+  // ================= VENDOR PAYMENTS =================
+
+  async getVendorPayments(clientId: number) {
+    return db
+      .select()
+      .from(vendorPayments)
+      .where(eq(vendorPayments.clientId, clientId))
+      .orderBy(desc(vendorPayments.createdAt));
+  }
+
+  async createVendorPayment(payment: InsertVendorPayment) {
+    const [newPayment] = await db
+      .insert(vendorPayments)
+      .values({
+        vendorId: payment.vendorId,
+        clientId: payment.clientId,
+        serviceId: payment.serviceId || null,
+        amount: String(payment.amount),
+        status: payment.status || "Unpaid",
+        paymentDate: payment.paymentDate ? new Date(payment.paymentDate) : null,
+        notes: payment.notes || null,
+      })
+      .returning();
+    return newPayment;
+  }
+
+  async updateVendorPayment(id: number, updates: Partial<InsertVendorPayment>) {
+    const updateData: any = { ...updates };
+    if (updates.amount !== undefined) updateData.amount = String(updates.amount);
+    if (updates.paymentDate) updateData.paymentDate = new Date(updates.paymentDate as any);
+    const [updated] = await db
+      .update(vendorPayments)
+      .set(updateData)
+      .where(eq(vendorPayments.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteVendorPayment(id: number) {
+    await db.delete(vendorPayments).where(eq(vendorPayments.id, id));
+  }
+
+  async updateVenue(id: number, updates: Partial<InsertVenue>) {
+    const [updated] = await db
+      .update(venues)
+      .set(updates)
+      .where(eq(venues.id, id))
+      .returning();
+    return updated;
+  }
+
+  async updateVendor(id: number, updates: Partial<InsertVendor>) {
+    const [updated] = await db
+      .update(vendors)
+      .set(updates)
+      .where(eq(vendors.id, id))
+      .returning();
+    return updated;
   }
 }
 

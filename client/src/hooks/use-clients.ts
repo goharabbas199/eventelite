@@ -315,6 +315,130 @@ export function useUpdateExpense() {
 }
 
 
+export function useCreatePayment() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      clientId,
+      ...data
+    }: {
+      clientId: number;
+      amount: number | string;
+      paymentDate: string;
+      paymentMethod: string;
+      notes?: string;
+    }) => {
+      const res = await fetch(`/api/clients/${clientId}/payments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...data, amount: String(data.amount) }),
+      });
+      if (!res.ok) throw new Error("Failed to create payment");
+      return res.json();
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: [api.clients.get.path, variables.clientId],
+      });
+    },
+  });
+}
+
+export function useDeletePayment() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, clientId }: { id: number; clientId: number }) => {
+      const res = await fetch(`/api/payments/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete payment");
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: [api.clients.get.path, variables.clientId],
+      });
+    },
+  });
+}
+
+export function useCreateVendorPayment() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      clientId,
+      ...data
+    }: {
+      clientId: number;
+      vendorId: number;
+      serviceId?: number;
+      amount: number | string;
+      status?: string;
+      paymentDate?: string;
+      notes?: string;
+    }) => {
+      const res = await fetch(`/api/clients/${clientId}/vendor-payments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...data, clientId, amount: String(data.amount) }),
+      });
+      if (!res.ok) throw new Error("Failed to create vendor payment");
+      return res.json();
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: [api.clients.get.path, variables.clientId],
+      });
+    },
+  });
+}
+
+export function useUpdateVendorPayment() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      id,
+      clientId,
+      ...data
+    }: {
+      id: number;
+      clientId: number;
+      status?: string;
+      paymentDate?: string;
+    }) => {
+      const res = await fetch(`/api/vendor-payments/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error("Failed to update vendor payment");
+      return res.json();
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: [api.clients.get.path, variables.clientId],
+      });
+    },
+  });
+}
+
+export function useDeleteVendorPayment() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, clientId }: { id: number; clientId: number }) => {
+      const res = await fetch(`/api/vendor-payments/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete vendor payment");
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: [api.clients.get.path, variables.clientId],
+      });
+    },
+  });
+}
+
 export function useDeleteExpense() {
   const queryClient = useQueryClient();
 

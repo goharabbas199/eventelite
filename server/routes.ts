@@ -315,6 +315,65 @@ export async function registerRoutes(
     res.status(204).end();
   });
 
+  // ================= PAYMENTS ===========================
+
+  app.get("/api/clients/:clientId/payments", async (req, res) => {
+    const clientId = Number(req.params.clientId);
+    const result = await storage.getPayments(clientId);
+    res.json(result);
+  });
+
+  app.post("/api/clients/:clientId/payments", async (req, res) => {
+    try {
+      const clientId = Number(req.params.clientId);
+      const payment = await storage.createPayment({ ...req.body, clientId });
+      res.status(201).json(payment);
+    } catch (err) {
+      console.error("Create payment error:", err);
+      res.status(500).json({ message: "Failed to create payment" });
+    }
+  });
+
+  app.delete("/api/payments/:id", async (req, res) => {
+    await storage.deletePayment(Number(req.params.id));
+    res.status(204).end();
+  });
+
+  // ================= VENDOR PAYMENTS ====================
+
+  app.get("/api/clients/:clientId/vendor-payments", async (req, res) => {
+    const clientId = Number(req.params.clientId);
+    const result = await storage.getVendorPayments(clientId);
+    res.json(result);
+  });
+
+  app.post("/api/clients/:clientId/vendor-payments", async (req, res) => {
+    try {
+      const clientId = Number(req.params.clientId);
+      const payment = await storage.createVendorPayment({ ...req.body, clientId });
+      res.status(201).json(payment);
+    } catch (err) {
+      console.error("Create vendor payment error:", err);
+      res.status(500).json({ message: "Failed to create vendor payment" });
+    }
+  });
+
+  app.patch("/api/vendor-payments/:id", async (req, res) => {
+    try {
+      const id = Number(req.params.id);
+      const updated = await storage.updateVendorPayment(id, req.body);
+      res.json(updated);
+    } catch (err) {
+      console.error("Update vendor payment error:", err);
+      res.status(500).json({ message: "Failed to update vendor payment" });
+    }
+  });
+
+  app.delete("/api/vendor-payments/:id", async (req, res) => {
+    await storage.deleteVendorPayment(Number(req.params.id));
+    res.status(204).end();
+  });
+
   // ================= BOOKING OPTIONS ====================
 
   app.post(api.bookingOptions.create.path, async (req, res) => {
