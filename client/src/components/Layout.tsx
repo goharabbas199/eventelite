@@ -19,7 +19,7 @@ export function Layout({
   }, [collapsed]);
 
   return (
-    <div className="min-h-screen bg-[#f4f5f8]">
+    <div className="min-h-screen bg-[#f4f5f8] dark:bg-slate-950">
       <Sidebar collapsed={collapsed} />
 
       <div

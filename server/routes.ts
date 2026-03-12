@@ -688,5 +688,82 @@ export async function registerRoutes(
     res.status(204).end();
   });
 
+  // ===================== APP SETTINGS ========================
+
+  const DEFAULT_SETTINGS: Record<string, any> = {
+    profile: {
+      name: "Alex Morgan",
+      email: "alex@eventelite.com",
+      phone: "+1 555 0100",
+      role: "Administrator",
+      avatarUrl: "https://github.com/shadcn.png",
+      bio: "",
+    },
+    business: {
+      companyName: "EventElite Agency",
+      email: "hello@eventelite.com",
+      phone: "+1 555 0200",
+      website: "https://eventelite.com",
+      address: "123 Event Blvd, Suite 400",
+      city: "New York",
+      state: "NY",
+      country: "United States",
+      timezone: "America/New_York",
+      currency: "USD",
+      taxId: "",
+      logoUrl: "",
+    },
+    notifications: {
+      emailReminders: true,
+      upcomingEvents: true,
+      newClientAlert: true,
+      quoteAccepted: true,
+      quotePending: false,
+      paymentReceived: true,
+      vendorUpdates: false,
+      weeklyReport: true,
+      marketingTips: false,
+    },
+    appearance: {
+      theme: "light",
+      density: "comfortable",
+      accentColor: "indigo",
+      sidebarCollapsed: false,
+      animationsEnabled: true,
+    },
+    security: {
+      twofa: false,
+      sessionAlerts: true,
+    },
+  };
+
+  app.get("/api/settings", async (_req, res) => {
+    try {
+      const stored = await storage.getAllSettings();
+      const merged: Record<string, any> = {};
+      for (const key of Object.keys(DEFAULT_SETTINGS)) {
+        merged[key] = stored[key] ?? DEFAULT_SETTINGS[key];
+      }
+      res.json(merged);
+    } catch (err) {
+      res.status(500).json({ message: "Failed to load settings" });
+    }
+  });
+
+  app.put("/api/settings/:section", async (req, res) => {
+    try {
+      const { section } = req.params;
+      const allowed = Object.keys(DEFAULT_SETTINGS);
+      if (!allowed.includes(section)) {
+        return res.status(400).json({ message: "Unknown settings section" });
+      }
+      await storage.setSetting(section, req.body);
+      const value = await storage.getSetting(section);
+      res.json(value);
+    } catch (err) {
+      res.status(500).json({ message: "Failed to save settings" });
+    }
+  });
+
   return httpServer;
 }

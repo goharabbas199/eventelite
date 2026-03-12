@@ -382,3 +382,12 @@ export const insertTaskSchema = createInsertSchema(tasks).omit({
 });
 export type Task = typeof tasks.$inferSelect;
 export type InsertTask = z.infer<typeof insertTaskSchema>;
+
+// ======================================================
+// ================== APP SETTINGS =====================
+// ======================================================
+
+export const appSettings = pgTable("app_settings", {
+  key: text("key").primaryKey(),
+  value: text("value").notNull(),
+});

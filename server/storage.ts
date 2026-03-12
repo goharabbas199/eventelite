@@ -13,6 +13,7 @@ import {
   tasks,
   quotations,
   quotationItems,
+  appSettings,
   type InsertVendor,
   type InsertVendorProduct,
   type InsertVenue,
@@ -86,6 +87,11 @@ export interface IStorage {
   createQuotation(quotation: InsertQuotation, items: Omit<InsertQuotationItem, "quotationId">[]): Promise<any>;
   updateQuotation(id: number, updates: Partial<InsertQuotation>): Promise<any>;
   deleteQuotation(id: number): Promise<void>;
+
+  // App Settings
+  getAllSettings(): Promise<Record<string, any>>;
+  getSetting(key: string): Promise<any | undefined>;
+  setSetting(key: string, value: any): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -569,6 +575,29 @@ export class DatabaseStorage implements IStorage {
   async deleteQuotation(id: number) {
     await db.delete(quotationItems).where(eq(quotationItems.quotationId, id));
     await db.delete(quotations).where(eq(quotations.id, id));
+  }
+
+  async getAllSettings(): Promise<Record<string, any>> {
+    const rows = await db.select().from(appSettings);
+    const result: Record<string, any> = {};
+    for (const row of rows) {
+      try { result[row.key] = JSON.parse(row.value); } catch { result[row.key] = row.value; }
+    }
+    return result;
+  }
+
+  async getSetting(key: string): Promise<any | undefined> {
+    const [row] = await db.select().from(appSettings).where(eq(appSettings.key, key));
+    if (!row) return undefined;
+    try { return JSON.parse(row.value); } catch { return row.value; }
+  }
+
+  async setSetting(key: string, value: any): Promise<void> {
+    const serialized = JSON.stringify(value);
+    await db
+      .insert(appSettings)
+      .values({ key, value: serialized })
+      .onConflictDoUpdate({ target: appSettings.key, set: { value: serialized } });
   }
 }
 

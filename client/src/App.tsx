@@ -3,6 +3,7 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { SettingsProvider } from "@/context/SettingsContext";
 import NotFound from "@/pages/not-found";
 
 import Dashboard from "@/pages/Dashboard";
@@ -11,7 +12,7 @@ import CreateVendor from "@/pages/CreateVendor";
 import VendorDetails from "@/pages/VendorDetails";
 
 import Venues from "@/pages/Venues";
-import CreateVenue from "@/pages/CreateVenue"; // ✅ ADD THIS
+import CreateVenue from "@/pages/CreateVenue";
 import VenueDetails from "@/pages/VenueDetails";
 
 import Clients from "@/pages/Clients";
@@ -26,16 +27,12 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Dashboard} />
-      {/* Vendors */}
       <Route path="/vendors" component={Vendors} />
       <Route path="/vendors/new" component={CreateVendor} />
       <Route path="/vendors/:id" component={VendorDetails} />
-      {/* Venues */}
       <Route path="/venues" component={Venues} />
-      <Route path="/venues/create" component={CreateVenue} /> // 👈 MUST COME
-      BEFORE :id
+      <Route path="/venues/create" component={CreateVenue} />
       <Route path="/venues/:id" component={VenueDetails} />
-      {/* Clients */}
       <Route path="/clients" component={Clients} />
       <Route path="/clients/:id" component={ClientDetails} />
       <Route path="/quotations" component={Quotations} />
@@ -51,10 +48,12 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Router />
-      </TooltipProvider>
+      <SettingsProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Router />
+        </TooltipProvider>
+      </SettingsProvider>
     </QueryClientProvider>
   );
 }
