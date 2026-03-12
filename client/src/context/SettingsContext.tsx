@@ -82,7 +82,16 @@ interface SettingsContextType {
 
 const SettingsContext = createContext<SettingsContextType | null>(null);
 
-function applyTheme(theme: "light" | "system" | "dark") {
+const ACCENT_COLORS: Record<string, string> = {
+  indigo:  "238 76% 58%",
+  violet:  "263 70% 50%",
+  blue:    "217 91% 60%",
+  emerald: "160 84% 39%",
+  rose:    "347 77% 50%",
+  amber:   "38 92% 50%",
+};
+
+export function applyTheme(theme: "light" | "system" | "dark") {
   const root = document.documentElement;
   if (theme === "dark") {
     root.classList.add("dark");
@@ -93,6 +102,15 @@ function applyTheme(theme: "light" | "system" | "dark") {
     if (prefersDark) root.classList.add("dark");
     else root.classList.remove("dark");
   }
+}
+
+export function applyAccentColor(color: string) {
+  const value = ACCENT_COLORS[color];
+  if (!value) return;
+  const root = document.documentElement;
+  root.style.setProperty("--primary", value);
+  root.style.setProperty("--ring", value);
+  root.style.setProperty("--accent-foreground", value);
 }
 
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
@@ -136,6 +154,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         if (data.appearance) {
           setAppearance(data.appearance);
           applyTheme(data.appearance.theme);
+          applyAccentColor(data.appearance.accentColor);
         }
         if (data.security) setSecurity(data.security);
         setIsLoaded(true);

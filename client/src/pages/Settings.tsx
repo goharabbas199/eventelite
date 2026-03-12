@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { useSettings } from "@/context/SettingsContext";
+import { useSettings, applyTheme, applyAccentColor } from "@/context/SettingsContext";
 import type {
   ProfileSettings,
   BusinessSettings,
@@ -292,7 +292,11 @@ function AppearanceTab({ toast }: { toast: any }) {
   const [app, setApp] = useState<AppearanceSettings>({ ...appearance });
   const [saving, setSaving] = useState(false);
 
-  const set = (k: keyof AppearanceSettings, v: any) => setApp((p) => ({ ...p, [k]: v }));
+  const set = (k: keyof AppearanceSettings, v: any) => {
+    setApp((p) => ({ ...p, [k]: v }));
+    if (k === "theme") applyTheme(v);
+    if (k === "accentColor") applyAccentColor(v);
+  };
 
   const save_ = async () => {
     setSaving(true);
