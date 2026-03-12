@@ -5,10 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import {
-  User, Bell, Palette, Shield, CreditCard,
+  User, Bell, Palette, Shield,
   Building2, Globe, Phone, Mail, MapPin, Clock,
-  Check, Zap, Star, ChevronRight, ToggleLeft,
-  ToggleRight, Sun, Moon, Monitor, Lock, Download,
+  Check, Zap, Star, ChevronRight,
+  Sun, Moon, Monitor, Lock,
   HelpCircle, MessageSquare, ExternalLink,
 } from "lucide-react";
 
@@ -38,7 +38,6 @@ const TABS = [
   { id: "business",      label: "Business",      icon: Building2 },
   { id: "notifications", label: "Notifications", icon: Bell },
   { id: "appearance",    label: "Appearance",    icon: Palette },
-  { id: "plan",          label: "Plan & Billing", icon: CreditCard },
   { id: "security",      label: "Security",      icon: Shield },
   { id: "support",       label: "Support",       icon: HelpCircle },
 ] as const;
@@ -84,7 +83,6 @@ export default function Settings() {
           {tab === "business"      && <BusinessTab toast={toast} />}
           {tab === "notifications" && <NotificationsTab toast={toast} />}
           {tab === "appearance"    && <AppearanceTab toast={toast} />}
-          {tab === "plan"          && <PlanTab />}
           {tab === "security"      && <SecurityTab toast={toast} />}
           {tab === "support"       && <SupportTab />}
         </div>
@@ -379,126 +377,6 @@ function AppearanceTab({ toast }: { toast: any }) {
           </div>
 
           <SaveBtn onClick={save_} />
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
-
-/* ─── Plan tab ─── */
-function PlanTab() {
-  const plans = [
-    {
-      id: "starter", name: "Starter", price: "$29", period: "/mo",
-      desc: "Perfect for solo planners just getting started",
-      features: ["Up to 10 active clients", "Quotation builder", "Budget planner", "Basic analytics", "Email support"],
-      cta: "Downgrade", ctaVariant: "outline" as const,
-    },
-    {
-      id: "pro", name: "Professional", price: "$79", period: "/mo",
-      desc: "For growing event agencies managing multiple clients",
-      features: ["Unlimited clients & events", "Full quotation suite", "Advanced analytics & exports", "Vendor & venue management", "Priority support", "Team collaboration (3 seats)", "Custom branding"],
-      cta: "Current Plan", ctaVariant: "default" as const, current: true,
-    },
-    {
-      id: "agency", name: "Agency", price: "$199", period: "/mo",
-      desc: "For large agencies and enterprise event teams",
-      features: ["Everything in Pro", "Unlimited team seats", "White-label dashboard", "API access", "Dedicated account manager", "SLA guarantee", "Custom integrations"],
-      cta: "Upgrade", ctaVariant: "outline" as const,
-    },
-  ];
-
-  return (
-    <div className="space-y-5">
-      <SectionHeader title="Plan & Billing" description="Manage your subscription and billing information" />
-
-      {/* Current usage */}
-      <Card className="border border-indigo-200 bg-indigo-50 rounded-2xl shadow-sm">
-        <CardContent className="p-5">
-          <div className="flex items-start justify-between">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <Zap className="w-4 h-4 text-indigo-600" fill="currentColor" />
-                <span className="text-sm font-bold text-indigo-800">Professional Plan — Active</span>
-              </div>
-              <p className="text-xs text-indigo-600">Renews on April 12, 2026 · $79.00/month</p>
-            </div>
-            <span className="text-[10px] font-bold px-2.5 py-1 bg-indigo-600 text-white rounded-full">PRO</span>
-          </div>
-          <div className="mt-4 grid grid-cols-3 gap-3">
-            {[
-              { label: "Active Clients", used: 3, max: "Unlimited" },
-              { label: "Team Seats",     used: 1, max: 3 },
-              { label: "Storage Used",   used: "24 MB", max: "10 GB" },
-            ].map(({ label, used, max }) => (
-              <div key={label} className="bg-white/60 rounded-xl p-3">
-                <p className="text-[10px] font-semibold text-indigo-700 uppercase tracking-wide">{label}</p>
-                <p className="text-lg font-bold text-indigo-900 mt-0.5">{used}</p>
-                <p className="text-[10px] text-indigo-500">of {max}</p>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Plan cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {plans.map((plan) => (
-          <Card key={plan.id} className={`border rounded-2xl shadow-sm relative ${plan.current ? "border-indigo-300 bg-indigo-50/50 ring-2 ring-indigo-200" : "border-slate-100 bg-white"}`}>
-            {plan.current && (
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                <span className="text-[10px] font-bold px-3 py-1 bg-indigo-600 text-white rounded-full shadow-sm">Current</span>
-              </div>
-            )}
-            <CardContent className="p-5">
-              <p className="text-sm font-bold text-slate-900">{plan.name}</p>
-              <p className="text-xs text-slate-400 mt-0.5 mb-3">{plan.desc}</p>
-              <div className="flex items-baseline gap-0.5 mb-4">
-                <span className="text-2xl font-black text-slate-900">{plan.price}</span>
-                <span className="text-xs text-slate-400">{plan.period}</span>
-              </div>
-              <ul className="space-y-1.5 mb-4">
-                {plan.features.map((f) => (
-                  <li key={f} className="flex items-start gap-2">
-                    <Check className="w-3.5 h-3.5 text-emerald-500 mt-0.5 shrink-0" />
-                    <span className="text-xs text-slate-600">{f}</span>
-                  </li>
-                ))}
-              </ul>
-              <Button
-                variant={plan.ctaVariant}
-                disabled={plan.current}
-                className={`w-full h-9 rounded-xl text-sm font-semibold ${plan.current ? "bg-indigo-600 text-white opacity-80 cursor-default" : ""}`}
-              >
-                {plan.cta}
-              </Button>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Billing info */}
-      <Card className="border border-slate-100 rounded-2xl shadow-sm">
-        <CardHeader className="pb-2 pt-4 px-5">
-          <CardTitle className="text-[13px] font-bold text-slate-800">Billing Information</CardTitle>
-        </CardHeader>
-        <CardContent className="px-5 pb-5 space-y-3">
-          <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-6 bg-slate-800 rounded flex items-center justify-center">
-                <span className="text-[9px] font-bold text-white">VISA</span>
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-slate-800">Visa ending in 4242</p>
-                <p className="text-xs text-slate-400">Expires 09/2027</p>
-              </div>
-            </div>
-            <span className="text-[10px] font-bold px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded-full">Default</span>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" className="h-9 rounded-xl text-xs flex-1">Update Card</Button>
-            <Button variant="outline" className="h-9 rounded-xl text-xs flex-1"><Download className="w-3.5 h-3.5 mr-1.5" />Download Invoices</Button>
-          </div>
         </CardContent>
       </Card>
     </div>

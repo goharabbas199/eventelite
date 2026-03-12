@@ -9,7 +9,6 @@ import {
   Settings,
   Zap,
   ReceiptText,
-  ArrowUpRight,
 } from "lucide-react";
 
 const links = [
@@ -83,33 +82,6 @@ export function Sidebar({ collapsed }: { collapsed: boolean }) {
           );
         })}
       </nav>
-
-      {/* Plan upgrade banner */}
-      {!collapsed && (
-        <div className="px-2 pb-2">
-          <Link href="/settings">
-            <div
-              className="rounded-xl p-3 cursor-pointer hover:opacity-90 transition-opacity"
-              style={{
-                background: "linear-gradient(135deg, rgba(79,70,229,0.25) 0%, rgba(99,102,241,0.15) 100%)",
-                border: "1px solid rgba(79,70,229,0.3)",
-              }}
-            >
-              <div className="flex items-center gap-2 mb-1.5">
-                <div className="w-5 h-5 rounded-md gradient-indigo flex items-center justify-center shrink-0">
-                  <Zap className="w-2.5 h-2.5 text-white" fill="currentColor" />
-                </div>
-                <span className="text-[11px] font-bold text-white/90">Pro Plan</span>
-                <span className="ml-auto text-[8px] font-bold px-1.5 py-0.5 bg-indigo-500/40 text-indigo-200 rounded-md">ACTIVE</span>
-              </div>
-              <p className="text-[9px] text-white/35 leading-relaxed mb-2">Unlimited clients · Advanced analytics · Priority support</p>
-              <div className="flex items-center gap-1 text-[9px] font-semibold text-indigo-400">
-                Manage billing <ArrowUpRight className="w-2.5 h-2.5" />
-              </div>
-            </div>
-          </Link>
-        </div>
-      )}
 
       {/* Settings */}
       <div className="p-2" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
