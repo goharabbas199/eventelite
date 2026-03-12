@@ -11,6 +11,8 @@ import {
   payments,
   vendorPayments,
   tasks,
+  quotations,
+  quotationItems,
   type InsertVendor,
   type InsertVendorProduct,
   type InsertVenue,
@@ -21,6 +23,8 @@ import {
   type InsertPayment,
   type InsertVendorPayment,
   type InsertTask,
+  type InsertQuotation,
+  type InsertQuotationItem,
 } from "@shared/schema";
 import { eq, desc } from "drizzle-orm";
 
@@ -75,6 +79,13 @@ export interface IStorage {
   createTask(task: InsertTask & { clientId: number }): Promise<any>;
   updateTask(id: number, updates: Partial<InsertTask>): Promise<any>;
   deleteTask(id: number): Promise<void>;
+
+  // Quotations
+  getQuotations(): Promise<any[]>;
+  getQuotation(id: number): Promise<any | undefined>;
+  createQuotation(quotation: InsertQuotation, items: Omit<InsertQuotationItem, "quotationId">[]): Promise<any>;
+  updateQuotation(id: number, updates: Partial<InsertQuotation>): Promise<any>;
+  deleteQuotation(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -494,6 +505,70 @@ export class DatabaseStorage implements IStorage {
       .where(eq(vendors.id, id))
       .returning();
     return updated;
+  }
+
+  // ================= QUOTATIONS =================
+
+  async getQuotations() {
+    const rows = await db.select().from(quotations).orderBy(desc(quotations.createdAt));
+    return Promise.all(
+      rows.map(async (q) => {
+        const items = await db.select().from(quotationItems).where(eq(quotationItems.quotationId, q.id));
+        return { ...q, items };
+      })
+    );
+  }
+
+  async getQuotation(id: number) {
+    const [q] = await db.select().from(quotations).where(eq(quotations.id, id));
+    if (!q) return undefined;
+    const items = await db.select().from(quotationItems).where(eq(quotationItems.quotationId, id));
+    return { ...q, items };
+  }
+
+  async createQuotation(quotation: InsertQuotation, items: Omit<InsertQuotationItem, "quotationId">[]) {
+    const [newQ] = await db.insert(quotations).values({
+      clientId: quotation.clientId ?? null,
+      eventType: quotation.eventType || "",
+      guestCount: quotation.guestCount ?? null,
+      venueId: quotation.venueId ?? null,
+      totalCost: String(quotation.totalCost ?? 0),
+      markupPercentage: String(quotation.markupPercentage ?? 0),
+      discount: String(quotation.discount ?? 0),
+      tax: String(quotation.tax ?? 0),
+      finalPrice: String(quotation.finalPrice ?? 0),
+      status: quotation.status || "Draft",
+      notes: quotation.notes ?? null,
+    }).returning();
+
+    if (items.length > 0) {
+      await db.insert(quotationItems).values(
+        items.map((item) => ({
+          quotationId: newQ.id,
+          serviceName: item.serviceName,
+          cost: String(item.cost),
+        }))
+      );
+    }
+
+    return this.getQuotation(newQ.id);
+  }
+
+  async updateQuotation(id: number, updates: Partial<InsertQuotation>) {
+    const data: any = { ...updates };
+    if (data.totalCost !== undefined) data.totalCost = String(data.totalCost);
+    if (data.markupPercentage !== undefined) data.markupPercentage = String(data.markupPercentage);
+    if (data.discount !== undefined) data.discount = String(data.discount);
+    if (data.tax !== undefined) data.tax = String(data.tax);
+    if (data.finalPrice !== undefined) data.finalPrice = String(data.finalPrice);
+    const [updated] = await db.update(quotations).set(data).where(eq(quotations.id, id)).returning();
+    const items = await db.select().from(quotationItems).where(eq(quotationItems.quotationId, id));
+    return { ...updated, items };
+  }
+
+  async deleteQuotation(id: number) {
+    await db.delete(quotationItems).where(eq(quotationItems.quotationId, id));
+    await db.delete(quotations).where(eq(quotations.id, id));
   }
 }
 

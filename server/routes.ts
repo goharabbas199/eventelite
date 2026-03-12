@@ -651,5 +651,42 @@ export async function registerRoutes(
     }
   });
 
+  // ================= QUOTATIONS ===================
+
+  app.get("/api/quotations", async (_req, res) => {
+    const all = await storage.getQuotations();
+    res.json(all);
+  });
+
+  app.get("/api/quotations/:id", async (req, res) => {
+    const q = await storage.getQuotation(Number(req.params.id));
+    if (!q) return res.status(404).json({ message: "Quotation not found" });
+    res.json(q);
+  });
+
+  app.post("/api/quotations", async (req, res) => {
+    try {
+      const { items = [], ...quotationData } = req.body;
+      const q = await storage.createQuotation(quotationData, items);
+      res.status(201).json(q);
+    } catch (err: any) {
+      res.status(500).json({ message: err?.message || "Failed to create quotation" });
+    }
+  });
+
+  app.patch("/api/quotations/:id", async (req, res) => {
+    try {
+      const updated = await storage.updateQuotation(Number(req.params.id), req.body);
+      res.json(updated);
+    } catch (err: any) {
+      res.status(500).json({ message: err?.message || "Failed to update quotation" });
+    }
+  });
+
+  app.delete("/api/quotations/:id", async (req, res) => {
+    await storage.deleteQuotation(Number(req.params.id));
+    res.status(204).end();
+  });
+
   return httpServer;
 }

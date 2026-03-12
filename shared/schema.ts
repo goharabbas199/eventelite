@@ -243,6 +243,54 @@ export const tasksRelations = relations(tasks, ({ one }) => ({
 }));
 
 // ======================================================
+// ==================== QUOTATIONS ======================
+// ======================================================
+
+export const quotations = pgTable("quotations", {
+  id: serial("id").primaryKey(),
+  clientId: integer("client_id"),
+  eventType: text("event_type").notNull().default(""),
+  guestCount: integer("guest_count"),
+  venueId: integer("venue_id"),
+  totalCost: numeric("total_cost").default("0"),
+  markupPercentage: numeric("markup_percentage").default("0"),
+  discount: numeric("discount").default("0"),
+  tax: numeric("tax").default("0"),
+  finalPrice: numeric("final_price").default("0"),
+  status: text("status").notNull().default("Draft"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const quotationItems = pgTable("quotation_items", {
+  id: serial("id").primaryKey(),
+  quotationId: integer("quotation_id").notNull(),
+  serviceName: text("service_name").notNull(),
+  cost: numeric("cost").notNull(),
+});
+
+export const quotationsRelations = relations(quotations, ({ many, one }) => ({
+  items: many(quotationItems),
+}));
+
+export const quotationItemsRelations = relations(quotationItems, ({ one }) => ({
+  quotation: one(quotations, {
+    fields: [quotationItems.quotationId],
+    references: [quotations.id],
+  }),
+}));
+
+export const insertQuotationSchema = createInsertSchema(quotations).omit({
+  id: true,
+  createdAt: true,
+});
+export const insertQuotationItemSchema = createInsertSchema(quotationItems).omit({ id: true });
+export type Quotation = typeof quotations.$inferSelect;
+export type InsertQuotation = z.infer<typeof insertQuotationSchema>;
+export type QuotationItem = typeof quotationItems.$inferSelect;
+export type InsertQuotationItem = z.infer<typeof insertQuotationItemSchema>;
+
+// ======================================================
 // ======================= SCHEMAS ======================
 // ======================================================
 

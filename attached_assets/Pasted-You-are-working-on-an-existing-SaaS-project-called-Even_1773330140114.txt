@@ -1,0 +1,156 @@
+You are working on an existing SaaS project called EventElite.
+
+Tech stack:
+React + TypeScript + Tailwind + ShadCN UI
+Express + Drizzle ORM + PostgreSQL
+Charts: Recharts
+
+The system already includes:
+
+Clients
+Vendors
+Venues
+Planned Services
+Expenses
+Budget calculations
+Payments
+Vendor payments
+
+Your task is to extend the system with a **Quotation Builder page** that generates automatic event proposals.
+
+Important rules:
+
+* Do NOT refactor the architecture
+* Do NOT break existing features
+* Maintain the current professional SaaS UI
+* Use ShadCN components and Tailwind styling
+
+---
+
+FEATURE — QUOTATION BUILDER PAGE
+
+Create a new page: "Quotation Builder".
+
+Purpose:
+Automatically generate event quotations based on client event data.
+
+---
+
+DATABASE
+
+Create tables:
+
+quotations
+id
+clientId
+eventType
+guestCount
+venueId
+totalCost
+markupPercentage
+discount
+tax
+finalPrice
+status (Draft / Sent / Accepted / Rejected)
+createdAt
+
+quotationItems
+id
+quotationId
+serviceName
+cost
+
+---
+
+UI COMPONENTS
+
+The quotation page should include:
+
+SECTION 1 — Quote Builder
+
+Fields:
+
+Client
+Event Type
+Guest Count
+Venue
+Services
+Extra Charges
+Discount
+Tax
+Markup %
+
+All calculations must update automatically.
+
+---
+
+SECTION 2 — Quote Preview
+
+Show a professional quotation layout including:
+
+Client information
+Event details
+Services breakdown
+Total cost
+Tax
+Final price
+
+---
+
+SECTION 3 — Profit Calculation
+
+Display:
+
+Total Cost
+Suggested Price
+Expected Profit
+Profit Margin
+
+---
+
+SECTION 4 — ACTION BUTTONS
+
+Buttons:
+
+Save Quote
+Download PDF
+Send Quote
+Convert to Event
+
+---
+
+SECTION 5 — QUOTE STATUS
+
+Track status:
+
+Draft
+Sent
+Accepted
+Rejected
+
+If a quote is accepted, allow converting it into a client event.
+
+---
+
+UI REQUIREMENTS
+
+Maintain the professional SaaS style used in the project.
+
+Use:
+
+ShadCN cards
+Clean layout
+Responsive design
+Minimal colors
+Professional typography
+
+---
+
+The quotation system should integrate with existing data such as:
+
+Clients
+Venues
+Planned Services
+Expenses
+
+Do not break existing modules.

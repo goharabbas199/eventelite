@@ -20,6 +20,7 @@ import BudgetPlanner from "@/pages/BudgetPlanner";
 import SearchResults from "@/pages/SearchResults";
 import Settings from "@/pages/Settings";
 import Analytics from "@/pages/Analytics";
+import Quotations from "@/pages/Quotations";
 
 function Router() {
   return (
@@ -37,6 +38,7 @@ function Router() {
       {/* Clients */}
       <Route path="/clients" component={Clients} />
       <Route path="/clients/:id" component={ClientDetails} />
+      <Route path="/quotations" component={Quotations} />
       <Route path="/budget" component={BudgetPlanner} />
       <Route path="/analytics" component={Analytics} />
       <Route path="/search" component={SearchResults} />

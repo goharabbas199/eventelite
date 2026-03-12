@@ -8,15 +8,17 @@ import {
   BarChart2,
   Settings,
   Zap,
+  ReceiptText,
 } from "lucide-react";
 
 const links = [
-  { href: "/",          label: "Dashboard", icon: LayoutDashboard },
-  { href: "/clients",   label: "Clients",   icon: Users },
-  { href: "/vendors",   label: "Vendors",   icon: Store },
-  { href: "/venues",    label: "Venues",    icon: MapPin },
-  { href: "/budget",    label: "Budget",    icon: PieChart },
-  { href: "/analytics", label: "Analytics", icon: BarChart2 },
+  { href: "/",           label: "Dashboard",  icon: LayoutDashboard },
+  { href: "/clients",    label: "Clients",    icon: Users },
+  { href: "/vendors",    label: "Vendors",    icon: Store },
+  { href: "/venues",     label: "Venues",     icon: MapPin },
+  { href: "/quotations", label: "Quotes",     icon: ReceiptText },
+  { href: "/budget",     label: "Budget",     icon: PieChart },
+  { href: "/analytics",  label: "Analytics",  icon: BarChart2 },
 ];
 
 export function Sidebar({ collapsed }: { collapsed: boolean }) {
