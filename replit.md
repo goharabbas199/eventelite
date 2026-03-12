@@ -42,14 +42,18 @@
 - `/search` — Global search results
 
 ## Features Implemented
-1. **Dashboard** — KPI cards (Active Clients, Vendors, Venues, Revenue, Expenses, Net Profit), Revenue Overview chart, Upcoming Events list
-2. **Financial Summary** — 6 KPI cards per client (Budget, Total Expenses, Received, Balance Due, Vendor Pending, Net Profit)
-3. **Client Payment Tracker** — Track payments received from clients (date, amount, method, notes)
-4. **Vendor Payment Tracker** — Track payments to vendors, mark as Paid
-5. **Event Checklist** — Add/complete/delete tasks per event (keyboard-enter supported)
-6. **Event Templates** — Auto-create default services on new client based on event type (Wedding, Corporate, Birthday, etc.)
-7. **Profit Simulator** — Interactive markup % calculator in ClientDetails right column; shows Suggested Price, Expected Profit, Profit Margin with slider + preset buttons
-8. **Analytics/Reports Page** — Revenue by month, events by type (pie chart), revenue vs expenses per client, status breakdown, avg profit per event
+1. **Dashboard** — Quick action buttons (New Client, New Quote, Add Vendor, Budget View), KPI cards + performance KPIs (Win Rate, Avg Deal Size, Events This Month, Profit Margin), Revenue chart, Upcoming Events, Recent Clients list, Pipeline Status breakdown
+2. **Settings** — Full functional 7-tab settings page: Profile (editable name/email/role/bio), Business (company info, timezone, currency), Notifications (9 toggles per group), Appearance (theme/density/accent), Plan & Billing (3-tier plan cards, billing info), Security (password change, 2FA), Support (help links, feedback)
+3. **Analytics** — Revenue by month, events by type, revenue vs expenses per client, pipeline by status, Top Clients by revenue, CSV export, profit margin + completion rate KPIs
+4. **Sidebar** — Pro Plan badge with ACTIVE status, "Agency Dashboard" subtitle, Menu label, active-item dot indicator
+5. **Budget Planner** — Client health quick-switcher, 4 KPI cards (Budget/Committed/Paid Out/Remaining), tabbed view (Overview/Services/Expenses), category breakdown bars + pie chart
+6. **Quotation Builder** — Pipeline stats bar, readiness checklist, financial summary with profit/margin, saved quotes sidebar with search + status filter tabs, print preview
+7. **Financial Summary** — 6 KPI cards per client (Budget, Total Expenses, Received, Balance Due, Vendor Pending, Net Profit)
+8. **Client Payment Tracker** — Track payments received from clients (date, amount, method, notes)
+9. **Vendor Payment Tracker** — Track payments to vendors, mark as Paid
+10. **Event Checklist** — Add/complete/delete tasks per event (keyboard-enter supported)
+11. **Event Templates** — Auto-create default services on new client based on event type
+12. **Profit Simulator** — Interactive markup % calculator in ClientDetails right column
 
 ## Event Templates
 | Type | Default Services |
