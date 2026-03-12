@@ -3,7 +3,7 @@ import type { Server } from "http";
 import { storage } from "./storage";
 import { api } from "@shared/routes";
 import { z } from "zod";
-import cloudinary from "./cloudinary";
+import cloudinary, { cloudinaryConfigured } from "./cloudinary";
 import multer from "multer";
 
 const upload = multer({ storage: multer.memoryStorage() });
@@ -627,6 +627,9 @@ export async function registerRoutes(
   // ================= CLOUDINARY UPLOAD ==================
 
   app.post("/api/upload", upload.single("image"), async (req, res) => {
+    if (!cloudinaryConfigured) {
+      return res.status(503).json({ message: "Image upload is not configured. Please set Cloudinary environment variables." });
+    }
     try {
       if (!req.file) {
         return res.status(400).json({ message: "No image provided" });
