@@ -17,7 +17,7 @@ import {
 } from "@/hooks/use-clients";
 import { useVendors } from "@/hooks/use-vendors";
 import { useVenues } from "@/hooks/use-venues";
-import { Link, useRoute } from "wouter";
+import { Link, useRoute, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -46,6 +46,8 @@ import {
   Square,
   SquareCheck,
   ListChecks,
+  CalendarDays,
+  FileText,
 } from "lucide-react";
 import {
   Dialog,
@@ -84,6 +86,7 @@ import { Badge } from "@/components/ui/badge";
 
 export default function ClientDetails() {
   const [, params] = useRoute("/clients/:id");
+  const [, navigate] = useLocation();
   const id = Number(params?.id);
 
   const { data: client, isLoading } = useClient(id);
@@ -147,13 +150,31 @@ export default function ClientDetails() {
       {/* HEADER */}
       <div className="space-y-4">
         {/* Back nav + action */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2 flex-wrap">
           <Link href="/clients" className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-indigo-600 transition-colors">
             <ArrowLeft className="w-3.5 h-3.5" /> Back to Clients
           </Link>
-          <Link href="/clients">
-            <Button variant="outline" className="h-8 rounded-xl text-xs">Done</Button>
-          </Link>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              className="h-8 rounded-xl text-xs gap-1.5 border-indigo-200 text-indigo-700 hover:bg-indigo-50 dark:border-indigo-800 dark:text-indigo-300 dark:hover:bg-indigo-950/40"
+              onClick={() => navigate(`/events?clientId=${client.id}`)}
+              data-testid="button-create-event-from-client"
+            >
+              <CalendarDays className="w-3.5 h-3.5" /> Create Event
+            </Button>
+            <Button
+              variant="outline"
+              className="h-8 rounded-xl text-xs gap-1.5 border-violet-200 text-violet-700 hover:bg-violet-50 dark:border-violet-800 dark:text-violet-300 dark:hover:bg-violet-950/40"
+              onClick={() => navigate(`/quotations?clientId=${client.id}`)}
+              data-testid="button-create-quote-from-client"
+            >
+              <FileText className="w-3.5 h-3.5" /> New Quote
+            </Button>
+            <Link href="/clients">
+              <Button variant="outline" className="h-8 rounded-xl text-xs">Done</Button>
+            </Link>
+          </div>
         </div>
 
         {/* Profile card */}

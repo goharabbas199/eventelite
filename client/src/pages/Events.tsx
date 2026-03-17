@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Layout } from "@/components/Layout";
 import { useEvents, useCreateEvent, useUpdateEvent, useDeleteEvent } from "@/hooks/use-events";
 import { useClients } from "@/hooks/use-clients";
 import { useVenues } from "@/hooks/use-venues";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -86,12 +87,36 @@ export default function Events() {
   const deleteEvent = useDeleteEvent();
   const { toast } = useToast();
 
+  const [location] = useLocation();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<any>(null);
   const [form, setForm] = useState(emptyForm());
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
+
+  // Pre-select client from URL param (e.g. navigating from ClientDetails)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const preClientId = params.get("clientId");
+    if (!preClientId || !clients || (clients as any[]).length === 0) return;
+    const client = (clients as any[]).find((c) => String(c.id) === preClientId);
+    if (!client) return;
+    const updates: Partial<ReturnType<typeof emptyForm>> = { clientId: preClientId };
+    if (client.eventType && EVENT_TYPES.includes(client.eventType)) updates.eventType = client.eventType;
+    if (client.guestCount) updates.guestCount = String(client.guestCount);
+    if (client.eventDate) {
+      try { updates.eventDate = format(new Date(client.eventDate), "yyyy-MM-dd"); } catch {}
+    }
+    if (client.budget) updates.budget = String(client.budget);
+    if (client.venueId) updates.venueId = String(client.venueId);
+    updates.eventName = client.name;
+    setForm((f) => ({ ...f, ...updates }));
+    setEditingEvent(null);
+    setDialogOpen(true);
+    // Clean URL without reload
+    window.history.replaceState({}, "", window.location.pathname);
+  }, [clients, location]);
 
   const filtered = (events as any[]).filter((e) => {
     const client = (clients as any[]).find((c) => c.id === e.clientId);
@@ -141,6 +166,7 @@ export default function Events() {
       try { updates.eventDate = format(new Date(client.eventDate), "yyyy-MM-dd"); } catch {}
     }
     if (client.budget) updates.budget = String(client.budget);
+    if (client.venueId) updates.venueId = String(client.venueId);
     if (!form.eventName && client.name) updates.eventName = client.name;
     setForm((f) => ({ ...f, ...updates }));
   }

@@ -22,7 +22,7 @@ import {
   TrendingUp, Clock, Save, ArrowRight, ReceiptText, Users,
   Wand2, Building2, ShoppingBag, Calendar, X, AlertCircle,
   DollarSign, Star, Phone, Mail, Sparkles, ChevronRight,
-  CircleDollarSign, Target, Zap, Search, Filter,
+  CircleDollarSign, Target, Zap, Search, Filter, CalendarDays,
 } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
@@ -316,18 +316,54 @@ export default function Quotations() {
     return { checks, score };
   }, [clientId, eventType, guestCount, items, markup]);
 
-  // ── CLIENT AUTO-FILL ──────────────────────────────────────────────────────
-  function handleClientChange(newId: string) {
-    setClientId(newId);
-    const c = (clients as any[]).find((x) => String(x.id) === newId);
+  // ── URL PARAM PRE-SELECTION ───────────────────────────────────────────────
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const preClientId = params.get("clientId");
+    if (!preClientId || !clients || (clients as any[]).length === 0) return;
+    const c = (clients as any[]).find((x) => String(x.id) === preClientId);
     if (!c) return;
-    if (c.eventType && EVENT_TYPES.some((e) => c.eventType?.includes(e))) {
-      const matched = EVENT_TYPES.find((e) => c.eventType?.includes(e)) || eventType;
+    setClientId(preClientId);
+    if (c.eventType && EVENT_TYPES.some((e: string) => c.eventType?.includes(e))) {
+      const matched = EVENT_TYPES.find((e: string) => c.eventType?.includes(e)) || "Wedding";
       setEventType(matched);
     }
     if (c.guestCount) setGuestCount(String(c.guestCount));
     if (c.eventDate) {
       try { setEventDate(format(new Date(c.eventDate), "yyyy-MM-dd")); } catch {}
+    }
+    if (c.venueId) {
+      const venue = (venues as any[]).find((v) => String(v.id) === String(c.venueId));
+      if (venue) {
+        setVenueId(String(c.venueId));
+        setItems((prev) => [{ id: uid(), serviceName: `Venue — ${venue.name}`, cost: String(Number(venue.basePrice)), tag: "venue" }, ...prev.filter((i) => (i as any).tag !== "venue")]);
+      }
+    }
+    setTemplateDismissed(false);
+    setShowTemplateBanner(true);
+    window.history.replaceState({}, "", window.location.pathname);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clients]);
+
+  // ── CLIENT AUTO-FILL ──────────────────────────────────────────────────────
+  function handleClientChange(newId: string) {
+    setClientId(newId);
+    const c = (clients as any[]).find((x) => String(x.id) === newId);
+    if (!c) return;
+    if (c.eventType && EVENT_TYPES.some((e: string) => c.eventType?.includes(e))) {
+      const matched = EVENT_TYPES.find((e: string) => c.eventType?.includes(e)) || eventType;
+      setEventType(matched);
+    }
+    if (c.guestCount) setGuestCount(String(c.guestCount));
+    if (c.eventDate) {
+      try { setEventDate(format(new Date(c.eventDate), "yyyy-MM-dd")); } catch {}
+    }
+    if (c.venueId) {
+      const venue = (venues as any[]).find((v) => String(v.id) === String(c.venueId));
+      if (venue) {
+        setVenueId(String(c.venueId));
+        setItems((prev) => [{ id: uid(), serviceName: `Venue — ${venue.name}`, cost: String(Number(venue.basePrice)), tag: "venue" }, ...prev.filter((i) => (i as any).tag !== "venue")]);
+      }
     }
     setTemplateDismissed(false);
   }
@@ -1385,6 +1421,19 @@ export default function Quotations() {
                           </div>
                           <div className="shrink-0 flex items-center gap-1.5">
                             <span className="text-xs font-bold text-indigo-600">{fmt(Number(q.finalPrice))}</span>
+                            {q.status === "Accepted" && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate(`/events?clientId=${q.clientId}`);
+                                }}
+                                title="Create Event from this quote"
+                                data-testid={`button-quote-to-event-${q.id}`}
+                                className="opacity-0 group-hover:opacity-100 text-emerald-500 hover:text-emerald-700 transition-all"
+                              >
+                                <CalendarDays className="w-3.5 h-3.5" />
+                              </button>
+                            )}
                             <button
                               onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(q.id); }}
                               className="opacity-0 group-hover:opacity-100 text-slate-300 hover:text-red-500 transition-all"

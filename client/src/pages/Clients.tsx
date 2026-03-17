@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/table";
 import {
   Plus, Eye, Trash2, ArrowUp, ArrowDown, Users,
-  Calendar, DollarSign, AlertCircle, Clock,
+  Calendar, DollarSign, AlertCircle, Clock, CalendarDays, FileText,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
@@ -288,6 +288,24 @@ export default function Clients() {
                       </TableCell>
                       <TableCell className="pr-5" onClick={(e) => e.stopPropagation()}>
                         <div className="flex gap-1">
+                          <Button
+                            variant="ghost" size="icon"
+                            className="h-8 w-8 rounded-lg text-indigo-500 hover:text-indigo-700 hover:bg-indigo-50 dark:hover:bg-indigo-950/40"
+                            title="Create Event"
+                            data-testid={`button-create-event-${client.id}`}
+                            onClick={() => setLocation(`/events?clientId=${client.id}`)}
+                          >
+                            <CalendarDays className="w-3.5 h-3.5" />
+                          </Button>
+                          <Button
+                            variant="ghost" size="icon"
+                            className="h-8 w-8 rounded-lg text-violet-500 hover:text-violet-700 hover:bg-violet-50 dark:hover:bg-violet-950/40"
+                            title="New Quote"
+                            data-testid={`button-create-quote-${client.id}`}
+                            onClick={() => setLocation(`/quotations?clientId=${client.id}`)}
+                          >
+                            <FileText className="w-3.5 h-3.5" />
+                          </Button>
                           <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" onClick={() => setLocation(`/clients/${client.id}`)}>
                             <Eye className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
                           </Button>
@@ -340,6 +358,22 @@ export default function Clients() {
                   <p className="text-sm font-bold text-slate-800 dark:text-slate-200">
                     {client.budget ? `$${Number(client.budget).toLocaleString()}` : "—"}
                   </p>
+                </div>
+                <div className="flex gap-2 mt-3 pt-3 border-t border-slate-100 dark:border-slate-700" onClick={(e) => e.stopPropagation()}>
+                  <button
+                    onClick={() => setLocation(`/events?clientId=${client.id}`)}
+                    data-testid={`button-mobile-create-event-${client.id}`}
+                    className="flex-1 flex items-center justify-center gap-1.5 py-1.5 text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/40 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-950/60 transition-colors"
+                  >
+                    <CalendarDays className="w-3 h-3" /> Create Event
+                  </button>
+                  <button
+                    onClick={() => setLocation(`/quotations?clientId=${client.id}`)}
+                    data-testid={`button-mobile-create-quote-${client.id}`}
+                    className="flex-1 flex items-center justify-center gap-1.5 py-1.5 text-[11px] font-semibold text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-950/40 rounded-lg hover:bg-violet-100 dark:hover:bg-violet-950/60 transition-colors"
+                  >
+                    <FileText className="w-3 h-3" /> New Quote
+                  </button>
                 </div>
               </div>
             );
