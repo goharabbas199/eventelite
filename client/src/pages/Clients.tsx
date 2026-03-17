@@ -166,7 +166,7 @@ export default function Clients() {
               <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">{label}</p>
               <Icon className={`w-4 h-4 ${cls} opacity-60`} />
             </div>
-            <p className={`text-2xl font-bold tracking-tight ${cls}`}>{value}</p>
+            <p className={`text-xl md:text-2xl font-bold tracking-tight ${cls}`}>{value}</p>
           </div>
         ))}
       </div>
@@ -174,27 +174,29 @@ export default function Clients() {
       {/* Filter bar */}
       <Card className="border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm bg-white dark:bg-slate-800/80">
         <div className="p-4 md:p-5">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="flex flex-col gap-2 md:flex-row md:gap-3">
             <Input
               placeholder="Search clients..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="h-9 rounded-xl text-sm"
+              className="h-9 rounded-xl text-sm md:flex-1"
             />
-            {[
-              { value: filter, onChange: setFilter, options: [["All", "All Priority"], ["High", "High"], ["Medium", "Medium"], ["Low", "Low"], ["Overdue", "Overdue"]] },
-              { value: statusFilter, onChange: setStatusFilter, options: [["All", "All Status"], ["Lead", "Lead"], ["Pending", "Pending"], ["Confirmed", "Confirmed"], ["Completed", "Completed"]] },
-              { value: typeFilter, onChange: setTypeFilter, options: [["All", "All Types"], ["Wedding", "Wedding"], ["Corporate", "Corporate"], ["Birthday", "Birthday"], ["Engagement", "Engagement"], ["Conference", "Conference"]] },
-            ].map(({ value, onChange, options }, i) => (
-              <select
-                key={i}
-                className={selectCls}
-                value={value}
-                onChange={(e) => onChange(e.target.value)}
-              >
-                {options.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-              </select>
-            ))}
+            <div className="grid grid-cols-3 gap-2 md:contents">
+              {[
+                { value: filter, onChange: setFilter, options: [["All", "All Priority"], ["High", "High"], ["Medium", "Medium"], ["Low", "Low"], ["Overdue", "Overdue"]] },
+                { value: statusFilter, onChange: setStatusFilter, options: [["All", "All Status"], ["Lead", "Lead"], ["Pending", "Pending"], ["Confirmed", "Confirmed"], ["Completed", "Completed"]] },
+                { value: typeFilter, onChange: setTypeFilter, options: [["All", "All Types"], ["Wedding", "Wedding"], ["Corporate", "Corporate"], ["Birthday", "Birthday"], ["Engagement", "Engagement"], ["Conference", "Conference"]] },
+              ].map(({ value, onChange, options }, i) => (
+                <select
+                  key={i}
+                  className={selectCls}
+                  value={value}
+                  onChange={(e) => onChange(e.target.value)}
+                >
+                  {options.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+                </select>
+              ))}
+            </div>
           </div>
           <div className="flex items-center justify-between mt-3">
             <p className="text-xs text-slate-400 font-medium">Showing {filteredCount} of {totalClients} clients</p>

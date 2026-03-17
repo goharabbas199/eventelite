@@ -269,7 +269,7 @@ function ClientBudgetView({
               <DollarSign className="w-3.5 h-3.5 text-slate-600" />
             </div>
           </div>
-          <p className="text-2xl font-bold text-slate-800 dark:text-slate-200">{fmt(initialBudget)}</p>
+          <p className="text-xl md:text-2xl font-bold text-slate-800 dark:text-slate-200">{fmt(initialBudget)}</p>
           <p className="text-[11px] text-slate-400 mt-1">{eventType}</p>
         </div>
 
@@ -280,7 +280,7 @@ function ClientBudgetView({
               <Layers className="w-3.5 h-3.5 text-indigo-600" />
             </div>
           </div>
-          <p className="text-2xl font-bold text-indigo-600">{fmt(totalCommitted)}</p>
+          <p className="text-xl md:text-2xl font-bold text-indigo-600">{fmt(totalCommitted)}</p>
           <p className="text-[11px] text-slate-400 mt-1">
             {services.length} service{services.length !== 1 ? "s" : ""} + {expenses.length} expense{expenses.length !== 1 ? "s" : ""}
           </p>
@@ -293,7 +293,7 @@ function ClientBudgetView({
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
             </div>
           </div>
-          <p className="text-2xl font-bold text-emerald-600">{fmt(totalPaid)}</p>
+          <p className="text-xl md:text-2xl font-bold text-emerald-600">{fmt(totalPaid)}</p>
           <p className="text-[11px] text-slate-400 mt-1">{fmt(unpaidExpenses)} unpaid</p>
         </div>
 
@@ -309,7 +309,7 @@ function ClientBudgetView({
               }
             </div>
           </div>
-          <p className={`text-2xl font-bold ${isOverBudget ? "text-red-600" : "text-emerald-600"}`}>
+          <p className={`text-xl md:text-2xl font-bold ${isOverBudget ? "text-red-600" : "text-emerald-600"}`}>
             {fmt(Math.abs(remaining))}
           </p>
           <p className="text-[11px] text-slate-400 mt-1">{fmt(totalReceived)} received from client</p>

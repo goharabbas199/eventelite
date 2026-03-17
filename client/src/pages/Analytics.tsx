@@ -162,44 +162,44 @@ export default function Analytics() {
                 <Icon className={`w-3.5 h-3.5 ${color}`} />
               </div>
             </div>
-            <p className={`text-2xl font-bold tracking-tight ${color}`}>{value}</p>
+            <p className={`text-xl md:text-2xl font-bold tracking-tight ${color}`}>{value}</p>
           </div>
         ))}
       </div>
 
       {/* Secondary KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div className="bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700 rounded-2xl px-5 py-4 shadow-sm flex items-center justify-between">
-          <div>
+        <div className="bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700 rounded-2xl px-4 py-3 shadow-sm flex items-center justify-between gap-2">
+          <div className="min-w-0">
             <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">Avg Profit / Event</p>
-            <p className="text-xs text-slate-400 mt-0.5">Across all {totalEvents} events</p>
+            <p className="text-xs text-slate-400 mt-0.5 hidden sm:block">Across all {totalEvents} events</p>
           </div>
-          <span className={`text-2xl font-bold ${avgProfit >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-500 dark:text-red-400"}`}>
+          <span className={`text-lg md:text-2xl font-bold shrink-0 ${avgProfit >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-500 dark:text-red-400"}`}>
             {fmtMoney(avgProfit)}
           </span>
         </div>
 
-        <div className="bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700 rounded-2xl px-5 py-4 shadow-sm flex items-center justify-between">
-          <div>
+        <div className="bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700 rounded-2xl px-4 py-3 shadow-sm flex items-center justify-between gap-2">
+          <div className="min-w-0">
             <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">Profit Margin</p>
-            <p className="text-xs text-slate-400 mt-0.5">Revenue vs. total expenses</p>
+            <p className="text-xs text-slate-400 mt-0.5 hidden sm:block">Revenue vs. total expenses</p>
           </div>
-          <div className="flex items-center gap-1">
-            <Percent className="w-4 h-4 text-indigo-400" />
-            <span className={`text-2xl font-bold ${profitMargin >= 30 ? "text-emerald-600 dark:text-emerald-400" : profitMargin >= 0 ? "text-amber-600 dark:text-amber-400" : "text-red-500 dark:text-red-400"}`}>
+          <div className="flex items-center gap-1 shrink-0">
+            <Percent className="w-3.5 h-3.5 text-indigo-400" />
+            <span className={`text-lg md:text-2xl font-bold ${profitMargin >= 30 ? "text-emerald-600 dark:text-emerald-400" : profitMargin >= 0 ? "text-amber-600 dark:text-amber-400" : "text-red-500 dark:text-red-400"}`}>
               {profitMargin}%
             </span>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700 rounded-2xl px-5 py-4 shadow-sm flex items-center justify-between">
-          <div>
+        <div className="bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700 rounded-2xl px-4 py-3 shadow-sm flex items-center justify-between gap-2">
+          <div className="min-w-0">
             <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">Completion Rate</p>
-            <p className="text-xs text-slate-400 mt-0.5">{completedCount} events completed</p>
+            <p className="text-xs text-slate-400 mt-0.5 hidden sm:block">{completedCount} events completed</p>
           </div>
-          <div className="flex items-center gap-1">
-            <Trophy className="w-4 h-4 text-amber-400" />
-            <span className={`text-2xl font-bold ${winRate >= 50 ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400"}`}>
+          <div className="flex items-center gap-1 shrink-0">
+            <Trophy className="w-3.5 h-3.5 text-amber-400" />
+            <span className={`text-lg md:text-2xl font-bold ${winRate >= 50 ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400"}`}>
               {winRate}%
             </span>
           </div>

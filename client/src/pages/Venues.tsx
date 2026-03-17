@@ -90,7 +90,7 @@ export default function Venues() {
               </div>
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">{label}</p>
-                <p className={`text-xl font-bold ${cls}`}>{value}</p>
+                <p className={`text-base sm:text-xl font-bold ${cls}`}>{value}</p>
               </div>
             </div>
           </div>

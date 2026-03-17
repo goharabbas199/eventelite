@@ -47,7 +47,7 @@ export function Layout({
       >
         <Header title={title} collapsed={collapsed} setCollapsed={setCollapsed} />
 
-        <main className="flex-1 px-4 md:px-6 py-5 pb-24 md:pb-6 space-y-5">
+        <main className="flex-1 px-3 md:px-6 py-4 md:py-5 pb-24 md:pb-6 space-y-4 md:space-y-5">
           {children}
         </main>
       </div>

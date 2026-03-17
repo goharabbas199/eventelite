@@ -212,7 +212,7 @@ export default function ClientDetails() {
         ].map(({ label, value, cls }) => (
           <div key={label} className="stat-card">
             <p className="eyebrow mb-1.5">{label}</p>
-            <p className={`text-[18px] font-bold tracking-tight leading-none ${cls}`}>{value}</p>
+            <p className={`text-sm md:text-[18px] font-bold tracking-tight leading-none ${cls}`}>{value}</p>
           </div>
         ))}
       </div>
@@ -247,6 +247,7 @@ export default function ClientDetails() {
               </Dialog>
             </CardHeader>
             <CardContent className="p-0">
+              <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -315,6 +316,7 @@ export default function ClientDetails() {
                   )}
                 </TableBody>
               </Table>
+              </div>
             </CardContent>
           </Card>
 
@@ -350,6 +352,7 @@ export default function ClientDetails() {
               {(!client.payments || client.payments.length === 0) ? (
                 <p className="text-sm text-slate-400 text-center py-6">No payments recorded yet.</p>
               ) : (
+                <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -383,6 +386,7 @@ export default function ClientDetails() {
                     ))}
                   </TableBody>
                 </Table>
+                </div>
               )}
             </CardContent>
           </Card>
@@ -419,6 +423,7 @@ export default function ClientDetails() {
               {(!client.vendorPayments || client.vendorPayments.length === 0) ? (
                 <p className="text-sm text-slate-400 text-center py-6">No vendor payments recorded yet.</p>
               ) : (
+                <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>

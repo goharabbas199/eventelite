@@ -28,7 +28,7 @@ export function StatsCard({ title, value, icon: Icon, color = "blue", subtitle, 
     >
       <div className="min-w-0 flex-1">
         <p className="eyebrow mb-1.5">{title}</p>
-        <p className="text-[22px] font-bold tracking-tight text-slate-900 dark:text-white leading-none">{value}</p>
+        <p className="text-lg md:text-[22px] font-bold tracking-tight text-slate-900 dark:text-white leading-none">{value}</p>
         {subtitle && <p className="text-[11px] text-slate-400 font-medium mt-1.5 leading-none">{subtitle}</p>}
       </div>
       <div className={`p-2.5 rounded-xl ${cfg.icon} shrink-0`}>

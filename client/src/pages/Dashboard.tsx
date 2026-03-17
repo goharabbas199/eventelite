@@ -147,7 +147,7 @@ export default function Dashboard() {
           <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400 mb-0.5">
             {format(new Date(), "EEEE, MMMM do")}
           </p>
-          <h2 className="text-xl font-bold text-slate-900 dark:text-white">Welcome back, {profile.name.split(" ")[0]} 👋</h2>
+          <h2 className="text-base md:text-xl font-bold text-slate-900 dark:text-white">Welcome back, {profile.name.split(" ")[0]} 👋</h2>
         </div>
         <div className="hidden sm:flex flex-col items-end">
           <p className="eyebrow mb-1">Pipeline value</p>
@@ -166,11 +166,11 @@ export default function Dashboard() {
           <button
             key={label}
             onClick={() => navigate(href)}
-            className={`flex items-center gap-2.5 px-4 py-3 rounded-2xl bg-gradient-to-r ${color} text-white text-sm font-semibold shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 transition-all duration-150`}
+            className={`flex items-center gap-1.5 md:gap-2.5 px-3 md:px-4 py-2.5 md:py-3 rounded-2xl bg-gradient-to-r ${color} text-white text-xs md:text-sm font-semibold shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 transition-all duration-150`}
           >
-            <Icon className="w-4 h-4 shrink-0" />
+            <Icon className="w-3.5 h-3.5 md:w-4 md:h-4 shrink-0" />
             <span className="truncate">{label}</span>
-            <ArrowRight className="w-3.5 h-3.5 ml-auto shrink-0 opacity-70" />
+            <ArrowRight className="w-3 h-3 md:w-3.5 md:h-3.5 ml-auto shrink-0 opacity-70 hidden sm:block" />
           </button>
         ))}
       </div>
@@ -234,7 +234,7 @@ export default function Dashboard() {
                 <Icon className={`w-3.5 h-3.5 ${color}`} />
               </div>
             </div>
-            <p className={`text-2xl font-black tracking-tight ${color}`}>{value}</p>
+            <p className={`text-xl md:text-2xl font-black tracking-tight ${color}`}>{value}</p>
             <p className="text-[10px] text-slate-400 mt-0.5">{desc}</p>
           </div>
         ))}
