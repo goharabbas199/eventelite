@@ -15,19 +15,35 @@ import {
 } from "@/components/ui/dialog";
 import {
   Plus, CalendarDays, Users, MapPin, DollarSign, Trash2,
-  Search, Edit2, CheckCircle, Clock, Zap, AlertCircle,
+  Search, Edit2, CheckCircle, Clock, Zap, AlertCircle, Timer,
 } from "lucide-react";
-import { format } from "date-fns";
+import { format, differenceInDays } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 
 const EVENT_TYPES = ["Wedding", "Corporate", "Birthday", "Engagement", "Conference", "Gala", "Other"];
 const EVENT_STATUSES = ["lead", "pending", "confirmed", "completed"];
 
-const STATUS_CONFIG: Record<string, { label: string; color: string; icon: any }> = {
-  lead:      { label: "Lead",      color: "bg-amber-100 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300",   icon: AlertCircle },
-  pending:   { label: "Pending",   color: "bg-blue-100 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300",       icon: Clock },
-  confirmed: { label: "Confirmed", color: "bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300", icon: CheckCircle },
-  completed: { label: "Completed", color: "bg-slate-100 dark:bg-slate-700/60 text-slate-600 dark:text-slate-300",   icon: Zap },
+const STATUS_CONFIG: Record<string, {
+  label: string;
+  badgeColor: string;
+  borderColor: string;
+  dotColor: string;
+  icon: any;
+}> = {
+  lead:      { label: "Lead",      badgeColor: "bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300",      borderColor: "border-l-amber-400",   dotColor: "bg-amber-400",   icon: AlertCircle },
+  pending:   { label: "Pending",   badgeColor: "bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300",          borderColor: "border-l-blue-500",    dotColor: "bg-blue-500",    icon: Clock },
+  confirmed: { label: "Confirmed", badgeColor: "bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300", borderColor: "border-l-emerald-500", dotColor: "bg-emerald-500", icon: CheckCircle },
+  completed: { label: "Completed", badgeColor: "bg-slate-100 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400",      borderColor: "border-l-slate-400",   dotColor: "bg-slate-400",   icon: Zap },
+};
+
+const EVENT_TYPE_EMOJI: Record<string, string> = {
+  Wedding: "💍",
+  Corporate: "🏢",
+  Birthday: "🎂",
+  Engagement: "💐",
+  Conference: "🎤",
+  Gala: "✨",
+  Other: "📅",
 };
 
 function emptyForm() {
@@ -41,6 +57,24 @@ function emptyForm() {
     budget: "",
     status: "lead",
   };
+}
+
+function CountdownBadge({ eventDate, status }: { eventDate: string; status: string }) {
+  if (status === "completed") return null;
+  const days = differenceInDays(new Date(eventDate), new Date());
+  if (days < 0) return null;
+
+  let cls = "bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400";
+  if (days <= 3)  cls = "bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400";
+  else if (days <= 14) cls = "bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400";
+  else if (days <= 30) cls = "bg-indigo-100 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400";
+
+  return (
+    <span className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full ${cls}`}>
+      <Timer className="w-2.5 h-2.5" />
+      {days === 0 ? "Today!" : `${days}d`}
+    </span>
+  );
 }
 
 export default function Events() {
@@ -70,6 +104,7 @@ export default function Events() {
   const stats = {
     total: (events as any[]).length,
     lead: (events as any[]).filter((e) => e.status === "lead").length,
+    pending: (events as any[]).filter((e) => e.status === "pending").length,
     confirmed: (events as any[]).filter((e) => e.status === "confirmed").length,
     completed: (events as any[]).filter((e) => e.status === "completed").length,
   };
@@ -106,6 +141,7 @@ export default function Events() {
       try { updates.eventDate = format(new Date(client.eventDate), "yyyy-MM-dd"); } catch {}
     }
     if (client.budget) updates.budget = String(client.budget);
+    if (!form.eventName && client.name) updates.eventName = client.name;
     setForm((f) => ({ ...f, ...updates }));
   }
 
@@ -147,6 +183,14 @@ export default function Events() {
   const getClient = (id: number) => (clients as any[]).find((c) => c.id === id);
   const getVenue = (id: number) => (venues as any[]).find((v) => v.id === id);
 
+  const statusPills = [
+    { key: "All", label: "All", count: stats.total },
+    { key: "lead", label: "Leads", count: stats.lead },
+    { key: "pending", label: "Pending", count: stats.pending },
+    { key: "confirmed", label: "Confirmed", count: stats.confirmed },
+    { key: "completed", label: "Completed", count: stats.completed },
+  ];
+
   return (
     <Layout>
       <div className="p-6 space-y-6">
@@ -154,7 +198,7 @@ export default function Events() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Events</h1>
-            <p className="text-sm text-slate-500 mt-0.5">Manage all your events in one place</p>
+            <p className="text-sm text-slate-500 mt-0.5">{stats.total} event{stats.total !== 1 ? "s" : ""} total · {stats.confirmed} confirmed</p>
           </div>
           <Button onClick={openCreate} data-testid="button-create-event" className="gap-2">
             <Plus className="w-4 h-4" /> New Event
@@ -164,134 +208,179 @@ export default function Events() {
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { label: "Total Events", value: stats.total, color: "text-slate-700 dark:text-slate-200" },
-            { label: "Leads", value: stats.lead, color: "text-amber-600" },
-            { label: "Confirmed", value: stats.confirmed, color: "text-emerald-600" },
-            { label: "Completed", value: stats.completed, color: "text-slate-500" },
-          ].map((s) => (
-            <Card key={s.label} className="border border-slate-100 dark:border-slate-700 shadow-sm">
-              <CardContent className="p-4">
-                <p className="text-xs text-slate-400 font-medium">{s.label}</p>
-                <p className={`text-3xl font-bold mt-1 ${s.color}`}>{s.value}</p>
-              </CardContent>
-            </Card>
-          ))}
+            { label: "Total Events",   value: stats.total,     color: "text-slate-700 dark:text-slate-200",   icon: CalendarDays },
+            { label: "Leads",          value: stats.lead,      color: "text-amber-600 dark:text-amber-400",   icon: AlertCircle },
+            { label: "Confirmed",      value: stats.confirmed, color: "text-emerald-600 dark:text-emerald-400", icon: CheckCircle },
+            { label: "Completed",      value: stats.completed, color: "text-slate-400 dark:text-slate-500",   icon: Zap },
+          ].map((s) => {
+            const Icon = s.icon;
+            return (
+              <Card key={s.label} className="border border-slate-100 dark:border-slate-700 shadow-sm">
+                <CardContent className="p-4 flex items-center gap-3">
+                  <div className="rounded-lg p-2 bg-slate-50 dark:bg-slate-800">
+                    <Icon className={`w-4 h-4 ${s.color}`} />
+                  </div>
+                  <div>
+                    <p className="text-xs text-slate-400 font-medium">{s.label}</p>
+                    <p className={`text-2xl font-bold leading-none mt-0.5 ${s.color}`}>{s.value}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
 
-        {/* Filters */}
+        {/* Search + status pills */}
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <Input
-              placeholder="Search events…"
+              placeholder="Search events, clients…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9"
               data-testid="input-search-events"
             />
           </div>
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-40" data-testid="select-status-filter">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="All">All Statuses</SelectItem>
-              {EVENT_STATUSES.map((s) => (
-                <SelectItem key={s} value={s}>{STATUS_CONFIG[s]?.label || s}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="flex gap-1.5 flex-wrap">
+            {statusPills.map((p) => (
+              <button
+                key={p.key}
+                onClick={() => setStatusFilter(p.key)}
+                data-testid={`filter-status-${p.key}`}
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors flex items-center gap-1.5 ${
+                  statusFilter === p.key
+                    ? "bg-indigo-600 text-white shadow-sm"
+                    : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
+                }`}
+              >
+                {p.label}
+                <span className={`px-1.5 py-0 rounded-full text-[10px] font-bold ${statusFilter === p.key ? "bg-white/20" : "bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400"}`}>
+                  {p.count}
+                </span>
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Event Cards */}
         {isLoading ? (
-          <div className="text-center py-16 text-slate-400">Loading events…</div>
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="h-44 rounded-xl bg-slate-100 dark:bg-slate-800 animate-pulse" />
+            ))}
+          </div>
         ) : filtered.length === 0 ? (
-          <div className="text-center py-16">
-            <CalendarDays className="w-12 h-12 text-slate-200 dark:text-slate-700 mx-auto mb-3" />
-            <p className="text-slate-400 font-medium">No events found</p>
-            <p className="text-slate-300 dark:text-slate-600 text-sm mt-1">Create your first event to get started</p>
+          <div className="text-center py-20">
+            <div className="w-16 h-16 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-4">
+              <CalendarDays className="w-8 h-8 text-slate-300 dark:text-slate-600" />
+            </div>
+            <p className="text-slate-500 font-semibold">No events found</p>
+            <p className="text-slate-400 text-sm mt-1">
+              {search || statusFilter !== "All" ? "Try adjusting your filters" : "Create your first event to get started"}
+            </p>
+            {!search && statusFilter === "All" && (
+              <Button onClick={openCreate} className="mt-4 gap-2" size="sm">
+                <Plus className="w-3.5 h-3.5" /> New Event
+              </Button>
+            )}
           </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {filtered.map((event) => {
-              const client = getClient(event.clientId);
-              const venue = event.venueId ? getVenue(event.venueId) : null;
-              const sc = STATUS_CONFIG[event.status] || STATUS_CONFIG.lead;
-              const StatusIcon = sc.icon;
-              return (
-                <Card
-                  key={event.id}
-                  data-testid={`card-event-${event.id}`}
-                  className="border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow"
-                >
-                  <CardHeader className="pb-2">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1 min-w-0">
-                        <CardTitle className="text-base truncate">{event.eventName}</CardTitle>
-                        <p className="text-xs text-slate-400 mt-0.5">{event.eventType}</p>
+            {filtered
+              .sort((a: any, b: any) => {
+                if (a.status === "completed" && b.status !== "completed") return 1;
+                if (b.status === "completed" && a.status !== "completed") return -1;
+                return new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime();
+              })
+              .map((event) => {
+                const client = getClient(event.clientId);
+                const venue = event.venueId ? getVenue(event.venueId) : null;
+                const sc = STATUS_CONFIG[event.status] || STATUS_CONFIG.lead;
+                const StatusIcon = sc.icon;
+                const emoji = EVENT_TYPE_EMOJI[event.eventType] || "📅";
+
+                return (
+                  <Card
+                    key={event.id}
+                    data-testid={`card-event-${event.id}`}
+                    className={`border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow border-l-4 ${sc.borderColor}`}
+                  >
+                    <CardHeader className="pb-2 pt-4">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-start gap-2 flex-1 min-w-0">
+                          <span className="text-xl leading-none mt-0.5 shrink-0">{emoji}</span>
+                          <div className="min-w-0">
+                            <CardTitle className="text-sm font-bold truncate leading-snug">{event.eventName}</CardTitle>
+                            <p className="text-[11px] text-slate-400 mt-0.5">{event.eventType}</p>
+                          </div>
+                        </div>
+                        <div className="flex flex-col items-end gap-1 shrink-0">
+                          <Badge className={`text-[10px] px-2 py-0.5 flex items-center gap-1 ${sc.badgeColor}`}>
+                            <StatusIcon className="w-2.5 h-2.5" />
+                            {sc.label}
+                          </Badge>
+                          {event.eventDate && (
+                            <CountdownBadge eventDate={event.eventDate} status={event.status} />
+                          )}
+                        </div>
                       </div>
-                      <Badge className={`text-[10px] px-2 py-0.5 flex items-center gap-1 shrink-0 ${sc.color}`}>
-                        <StatusIcon className="w-2.5 h-2.5" />
-                        {sc.label}
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pt-0 space-y-2">
-                    {client && (
-                      <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-                        <Users className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                        <span className="truncate">{client.name}</span>
-                      </div>
-                    )}
-                    <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-                      <CalendarDays className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                      <span>{event.eventDate ? format(new Date(event.eventDate), "MMM dd, yyyy") : "—"}</span>
-                    </div>
-                    {venue && (
-                      <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-                        <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                        <span className="truncate">{venue.name}</span>
-                      </div>
-                    )}
-                    <div className="flex items-center gap-4 text-sm text-slate-600 dark:text-slate-400">
-                      {event.guestCount && (
-                        <span className="flex items-center gap-1">
-                          <Users className="w-3.5 h-3.5 text-slate-400" />
-                          {event.guestCount} guests
-                        </span>
+                    </CardHeader>
+                    <CardContent className="pt-0 space-y-1.5 pb-3">
+                      {client && (
+                        <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                          <Users className="w-3.5 h-3.5 text-slate-300 dark:text-slate-600 shrink-0" />
+                          <span className="truncate">{client.name}</span>
+                        </div>
                       )}
-                      {event.budget && (
-                        <span className="flex items-center gap-1">
-                          <DollarSign className="w-3.5 h-3.5 text-slate-400" />
-                          ${Number(event.budget).toLocaleString()}
-                        </span>
+                      <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                        <CalendarDays className="w-3.5 h-3.5 text-slate-300 dark:text-slate-600 shrink-0" />
+                        <span>{event.eventDate ? format(new Date(event.eventDate), "EEE, MMM d, yyyy") : "—"}</span>
+                      </div>
+                      {venue && (
+                        <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                          <MapPin className="w-3.5 h-3.5 text-slate-300 dark:text-slate-600 shrink-0" />
+                          <span className="truncate">{venue.name}</span>
+                        </div>
                       )}
-                    </div>
-                    <div className="flex items-center gap-2 pt-1">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="flex-1 h-7 text-xs gap-1"
-                        onClick={() => openEdit(event)}
-                        data-testid={`button-edit-event-${event.id}`}
-                      >
-                        <Edit2 className="w-3 h-3" /> Edit
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-7 text-xs text-red-500 hover:text-red-600 hover:border-red-300"
-                        onClick={() => setConfirmDeleteId(event.id)}
-                        data-testid={`button-delete-event-${event.id}`}
-                      >
-                        <Trash2 className="w-3 h-3" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
+                      <div className="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400 pt-0.5">
+                        {event.guestCount && (
+                          <span className="flex items-center gap-1">
+                            <Users className="w-3 h-3 text-slate-300 dark:text-slate-600" />
+                            {event.guestCount} guests
+                          </span>
+                        )}
+                        {event.budget && (
+                          <span className="flex items-center gap-1 font-semibold text-slate-600 dark:text-slate-300">
+                            <DollarSign className="w-3 h-3 text-slate-300 dark:text-slate-600" />
+                            ${Number(event.budget).toLocaleString()}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 pt-2 border-t border-slate-50 dark:border-slate-800">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="flex-1 h-7 text-xs gap-1"
+                          onClick={() => openEdit(event)}
+                          data-testid={`button-edit-event-${event.id}`}
+                        >
+                          <Edit2 className="w-3 h-3" /> Edit
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-7 text-xs text-red-500 hover:text-red-600 hover:border-red-300 dark:hover:border-red-700"
+                          onClick={() => setConfirmDeleteId(event.id)}
+                          data-testid={`button-delete-event-${event.id}`}
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
           </div>
         )}
       </div>
@@ -334,7 +423,7 @@ export default function Events() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {EVENT_TYPES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                    {EVENT_TYPES.map((t) => <SelectItem key={t} value={t}>{EVENT_TYPE_EMOJI[t] || "📅"} {t}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
