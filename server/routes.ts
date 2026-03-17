@@ -187,134 +187,6 @@ export async function registerRoutes(
     }
   });
 
-  // ================= CLIENTS ============================
-
-  app.get(api.clients.list.path, async (_req, res) => {
-    const result = await storage.getClients();
-    res.json(result);
-  });
-
-  app.post(api.clients.create.path, async (req, res) => {
-    try {
-      const input = api.clients.create.input.parse(req.body);
-      const client = await storage.createClient(input);
-      res.status(201).json(client);
-    } catch (err) {
-      if (err instanceof z.ZodError) {
-        return res.status(400).json({ message: err.errors[0].message });
-      }
-      console.error("Create client error:", err);
-      res.status(500).json({ message: "Failed to create client" });
-    }
-  });
-
-  app.get(api.clients.get.path, async (req, res) => {
-    const client = await storage.getClient(Number(req.params.id));
-    if (!client) return res.status(404).json({ message: "Client not found" });
-    res.json(client);
-  });
-
-  app.patch(api.clients.update.path, async (req, res) => {
-    try {
-      const id = Number(req.params.id);
-      const input = api.clients.update.input.parse(req.body);
-      const client = await storage.updateClient(id, input);
-      if (!client) return res.status(404).json({ message: "Client not found" });
-      res.json(client);
-    } catch (err) {
-      if (err instanceof z.ZodError) {
-        return res.status(400).json({ message: err.errors[0].message });
-      }
-      console.error("Update client error:", err);
-      res.status(500).json({ message: "Failed to update client" });
-    }
-  });
-
-  app.delete(api.clients.delete.path, async (req, res) => {
-    await storage.deleteClient(Number(req.params.id));
-    res.status(204).end();
-  });
-
-  // ================= PLANNED SERVICES ===================
-
-  app.post(api.plannedServices.create.path, async (req, res) => {
-    try {
-      const clientId = Number(req.params.clientId);
-      const input = api.plannedServices.create.input.parse(req.body);
-      const service = await storage.createPlannedService({ ...input, clientId });
-      res.status(201).json(service);
-    } catch (err) {
-      if (err instanceof z.ZodError) {
-        return res.status(400).json({ message: err.errors[0].message });
-      }
-      console.error("Create planned service error:", err);
-      res.status(500).json({ message: "Failed to create service" });
-    }
-  });
-
-  app.patch("/api/services/:id", async (req, res) => {
-    try {
-      const id = Number(req.params.id);
-      const updates = req.body;
-      if (updates.cost !== undefined) updates.cost = String(updates.cost);
-      const service = await storage.updatePlannedService(id, updates);
-      res.json(service);
-    } catch (err) {
-      console.error("Update service error:", err);
-      res.status(500).json({ message: "Failed to update service" });
-    }
-  });
-
-  app.delete(api.plannedServices.delete.path, async (req, res) => {
-    await storage.deletePlannedService(Number(req.params.id));
-    res.status(204).end();
-  });
-
-  // ================= EXPENSES ===========================
-
-  app.get(api.expenses.list.path, async (req, res) => {
-    const clientId = Number(req.params.clientId);
-    const result = await storage.getExpenses(clientId);
-    res.json(result);
-  });
-
-  app.post(api.expenses.create.path, async (req, res) => {
-    try {
-      const clientId = Number(req.params.clientId);
-      const input = api.expenses.create.input.parse(req.body);
-      const expense = await storage.createExpense({ ...input, clientId, cost: String(input.cost) });
-      res.status(201).json(expense);
-    } catch (err) {
-      if (err instanceof z.ZodError) {
-        return res.status(400).json({ message: err.errors[0].message });
-      }
-      console.error("Create expense error:", err);
-      res.status(500).json({ message: "Failed to create expense" });
-    }
-  });
-
-  app.patch(api.expenses.update.path, async (req, res) => {
-    try {
-      const id = Number(req.params.id);
-      const input = api.expenses.update.input.parse(req.body);
-      const updates: any = { ...input };
-      if (updates.cost !== undefined) updates.cost = String(updates.cost);
-      const expense = await storage.updateExpense(id, updates);
-      res.json(expense);
-    } catch (err) {
-      if (err instanceof z.ZodError) {
-        return res.status(400).json({ message: err.errors[0].message });
-      }
-      console.error("Update expense error:", err);
-      res.status(500).json({ message: "Failed to update expense" });
-    }
-  });
-
-  app.delete(api.expenses.delete.path, async (req, res) => {
-    await storage.deleteExpense(Number(req.params.id));
-    res.status(204).end();
-  });
-
   // ================= PAYMENTS ===========================
 
   app.get("/api/clients/:clientId/payments", async (req, res) => {
@@ -503,19 +375,40 @@ export async function registerRoutes(
     }
   });
 
-  // DELETE PLANNED SERVICE
+  // UPDATE PLANNED SERVICE
+  app.patch("/api/services/:id", async (req, res) => {
+    try {
+      const id = Number(req.params.id);
+      const updates = req.body;
+      if (updates.cost !== undefined) updates.cost = String(updates.cost);
+      if (updates.vendorCost !== undefined) updates.vendorCost = String(updates.vendorCost);
+      if (updates.clientPrice !== undefined) updates.clientPrice = String(updates.clientPrice);
+      const service = await storage.updatePlannedService(id, updates);
+      res.json(service);
+    } catch (err) {
+      console.error("Update service error:", err);
+      res.status(500).json({ message: "Failed to update service" });
+    }
+  });
+
+  // DELETE PLANNED SERVICE (both paths for compatibility)
+  app.delete("/api/services/:id", async (req, res) => {
+    try {
+      const serviceId = Number(req.params.id);
+      if (isNaN(serviceId)) return res.status(400).json({ message: "Invalid service id" });
+      await storage.deletePlannedService(serviceId);
+      res.status(204).end();
+    } catch (err) {
+      console.error("Delete planned service error:", err);
+      res.status(500).json({ message: "Failed to delete service" });
+    }
+  });
+
   app.delete("/api/planned-services/:id", async (req, res) => {
     try {
       const serviceId = Number(req.params.id);
-
-      if (isNaN(serviceId)) {
-        return res.status(400).json({
-          message: "Invalid service id",
-        });
-      }
-
+      if (isNaN(serviceId)) return res.status(400).json({ message: "Invalid service id" });
       await storage.deletePlannedService(serviceId);
-
       res.status(204).end();
     } catch (err) {
       console.error("Delete planned service error:", err);

@@ -320,6 +320,9 @@ export class DatabaseStorage implements IStorage {
         vendorId,
         serviceName: service.serviceName,
         cost: costValue,
+        vendorCost: service.vendorCost != null ? String(service.vendorCost) : null,
+        clientPrice: service.clientPrice != null ? String(service.clientPrice) : null,
+        status: service.status ?? "Planned",
         notes: service.notes ?? null,
       })
       .returning();
