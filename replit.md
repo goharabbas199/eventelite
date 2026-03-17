@@ -26,6 +26,8 @@
 | payments | Client payment records |
 | vendor_payments | Vendor payment records |
 | tasks | Event checklist items per client |
+| events | Central event entity (clientId, eventName, eventType, eventDate, venueId, guestCount, budget, status) |
+| invoices | Invoice records (clientId, quotationId, invoiceNumber, amount, status, dueDate) |
 
 ## Modules / Pages
 - `/` — Dashboard (KPIs, recent activity)
@@ -36,6 +38,10 @@
 - `/venues/:id` — Venue details + booking options
 - `/clients` — Client list with filters, sort, CSV export
 - `/clients/:id` — Client details (Financial Summary, Planned Services, Expenses, Payments, Vendor Payments, Task Checklist)
+- `/events` — Events management (CRUD, status tracking: lead/pending/confirmed/completed)
+- `/calendar` — Monthly event calendar view, click-to-view event details
+- `/invoices` — Invoice management, generate from accepted quote, client portal link
+- `/portal/:id` — Public client portal (view invoice + event details, print/PDF)
 - `/budget` — Budget Planner
 - `/analytics` — Analytics dashboard (revenue, expenses, profit charts)
 - `/settings` — Settings page
@@ -54,6 +60,10 @@
 10. **Event Checklist** — Add/complete/delete tasks per event (keyboard-enter supported)
 11. **Event Templates** — Auto-create default services on new client based on event type
 12. **Profit Simulator** — Interactive markup % calculator in ClientDetails right column
+13. **Events Module** — Full CRUD for events entity; status pipeline (lead → pending → confirmed → completed); auto-fills from client (eventType, guestCount, eventDate, budget); venue linking
+14. **Event Calendar** — Monthly calendar grid view; events shown as color-coded chips by status; click to open event detail modal; scrollable list of events for current month
+15. **Invoice System** — Create invoices manually or generate from an accepted quote (auto-fills client + amount); status tracking (unpaid/paid/overdue); mark-as-paid action; linked to client portal
+16. **Client Portal** — Public URL at `/portal/:invoiceId`; shows invoice amount, status, client details, event info, and linked quote items; print/PDF button
 
 ## Event Templates
 | Type | Default Services |

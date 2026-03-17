@@ -384,6 +384,82 @@ export type Task = typeof tasks.$inferSelect;
 export type InsertTask = z.infer<typeof insertTaskSchema>;
 
 // ======================================================
+// ====================== EVENTS ========================
+// ======================================================
+
+export const events = pgTable("events", {
+  id: serial("id").primaryKey(),
+  clientId: integer("client_id").notNull(),
+  eventName: text("event_name").notNull(),
+  eventType: text("event_type").notNull(),
+  eventDate: timestamp("event_date").notNull(),
+  venueId: integer("venue_id"),
+  guestCount: integer("guest_count"),
+  budget: numeric("budget"),
+  status: text("status").notNull().default("lead"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const eventsRelations = relations(events, ({ one }) => ({
+  client: one(clients, {
+    fields: [events.clientId],
+    references: [clients.id],
+  }),
+  venue: one(venues, {
+    fields: [events.venueId],
+    references: [venues.id],
+  }),
+}));
+
+export const insertEventSchema = createInsertSchema(events).omit({
+  id: true,
+  createdAt: true,
+}).extend({
+  budget: z.union([z.string(), z.number()]).optional().transform((val) => {
+    if (val === "" || val === undefined) return null;
+    return String(val);
+  }),
+  guestCount: z.union([z.string(), z.number()]).optional().transform((val) => {
+    if (val === "" || val === undefined) return null;
+    return Number(val);
+  }),
+});
+export type Event = typeof events.$inferSelect;
+export type InsertEvent = z.infer<typeof insertEventSchema>;
+
+// ======================================================
+// ==================== INVOICES ========================
+// ======================================================
+
+export const invoices = pgTable("invoices", {
+  id: serial("id").primaryKey(),
+  clientId: integer("client_id").notNull(),
+  quotationId: integer("quotation_id"),
+  invoiceNumber: text("invoice_number").notNull(),
+  amount: numeric("amount").notNull(),
+  status: text("status").notNull().default("unpaid"),
+  dueDate: timestamp("due_date"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const invoicesRelations = relations(invoices, ({ one }) => ({
+  client: one(clients, {
+    fields: [invoices.clientId],
+    references: [clients.id],
+  }),
+}));
+
+export const insertInvoiceSchema = createInsertSchema(invoices).omit({
+  id: true,
+  createdAt: true,
+}).extend({
+  amount: z.union([z.string(), z.number()]).transform((val) => String(val)),
+});
+export type Invoice = typeof invoices.$inferSelect;
+export type InsertInvoice = z.infer<typeof insertInvoiceSchema>;
+
+// ======================================================
 // ================== APP SETTINGS =====================
 // ======================================================
 

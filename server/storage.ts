@@ -13,6 +13,8 @@ import {
   tasks,
   quotations,
   quotationItems,
+  events,
+  invoices,
   appSettings,
   type InsertVendor,
   type InsertVendorProduct,
@@ -26,6 +28,8 @@ import {
   type InsertTask,
   type InsertQuotation,
   type InsertQuotationItem,
+  type InsertEvent,
+  type InsertInvoice,
 } from "@shared/schema";
 import { eq, desc } from "drizzle-orm";
 
@@ -87,6 +91,22 @@ export interface IStorage {
   createQuotation(quotation: InsertQuotation, items: Omit<InsertQuotationItem, "quotationId">[]): Promise<any>;
   updateQuotation(id: number, updates: Partial<InsertQuotation>): Promise<any>;
   deleteQuotation(id: number): Promise<void>;
+
+  // Events
+  getEvents(): Promise<any[]>;
+  getEvent(id: number): Promise<any | undefined>;
+  getEventsByClient(clientId: number): Promise<any[]>;
+  createEvent(event: InsertEvent): Promise<any>;
+  updateEvent(id: number, updates: Partial<InsertEvent>): Promise<any>;
+  deleteEvent(id: number): Promise<void>;
+
+  // Invoices
+  getInvoices(): Promise<any[]>;
+  getInvoice(id: number): Promise<any | undefined>;
+  getInvoicesByClient(clientId: number): Promise<any[]>;
+  createInvoice(invoice: InsertInvoice): Promise<any>;
+  updateInvoice(id: number, updates: Partial<InsertInvoice>): Promise<any>;
+  deleteInvoice(id: number): Promise<void>;
 
   // App Settings
   getAllSettings(): Promise<Record<string, any>>;
@@ -578,6 +598,87 @@ export class DatabaseStorage implements IStorage {
   async deleteQuotation(id: number) {
     await db.delete(quotationItems).where(eq(quotationItems.quotationId, id));
     await db.delete(quotations).where(eq(quotations.id, id));
+  }
+
+  // ================= EVENTS =================
+
+  async getEvents() {
+    return db.select().from(events).orderBy(desc(events.eventDate));
+  }
+
+  async getEvent(id: number) {
+    const [event] = await db.select().from(events).where(eq(events.id, id));
+    return event;
+  }
+
+  async getEventsByClient(clientId: number) {
+    return db.select().from(events).where(eq(events.clientId, clientId)).orderBy(desc(events.eventDate));
+  }
+
+  async createEvent(insertEvent: InsertEvent) {
+    const [event] = await db.insert(events).values({
+      clientId: insertEvent.clientId,
+      eventName: insertEvent.eventName,
+      eventType: insertEvent.eventType,
+      eventDate: new Date(insertEvent.eventDate as any),
+      venueId: insertEvent.venueId ?? null,
+      guestCount: insertEvent.guestCount ?? null,
+      budget: insertEvent.budget != null ? String(insertEvent.budget) : null,
+      status: insertEvent.status || "lead",
+    }).returning();
+    return event;
+  }
+
+  async updateEvent(id: number, updates: Partial<InsertEvent>) {
+    const data: any = { ...updates };
+    if (data.eventDate) data.eventDate = new Date(data.eventDate);
+    if (data.budget !== undefined) data.budget = data.budget != null ? String(data.budget) : null;
+    const [updated] = await db.update(events).set(data).where(eq(events.id, id)).returning();
+    return updated;
+  }
+
+  async deleteEvent(id: number) {
+    await db.delete(events).where(eq(events.id, id));
+  }
+
+  // ================= INVOICES =================
+
+  async getInvoices() {
+    return db.select().from(invoices).orderBy(desc(invoices.createdAt));
+  }
+
+  async getInvoice(id: number) {
+    const [invoice] = await db.select().from(invoices).where(eq(invoices.id, id));
+    return invoice;
+  }
+
+  async getInvoicesByClient(clientId: number) {
+    return db.select().from(invoices).where(eq(invoices.clientId, clientId)).orderBy(desc(invoices.createdAt));
+  }
+
+  async createInvoice(insertInvoice: InsertInvoice) {
+    const [invoice] = await db.insert(invoices).values({
+      clientId: insertInvoice.clientId,
+      quotationId: insertInvoice.quotationId ?? null,
+      invoiceNumber: insertInvoice.invoiceNumber,
+      amount: String(insertInvoice.amount),
+      status: insertInvoice.status || "unpaid",
+      dueDate: insertInvoice.dueDate ? new Date(insertInvoice.dueDate as any) : null,
+      notes: insertInvoice.notes ?? null,
+    }).returning();
+    return invoice;
+  }
+
+  async updateInvoice(id: number, updates: Partial<InsertInvoice>) {
+    const data: any = { ...updates };
+    if (data.amount !== undefined) data.amount = String(data.amount);
+    if (data.dueDate) data.dueDate = new Date(data.dueDate);
+    const [updated] = await db.update(invoices).set(data).where(eq(invoices.id, id)).returning();
+    return updated;
+  }
+
+  async deleteInvoice(id: number) {
+    await db.delete(invoices).where(eq(invoices.id, id));
   }
 
   async getAllSettings(): Promise<Record<string, any>> {

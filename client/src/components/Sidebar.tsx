@@ -9,15 +9,21 @@ import {
   Settings,
   Zap,
   ReceiptText,
+  CalendarDays,
+  Calendar,
+  FileText,
 } from "lucide-react";
 import { useSettings } from "@/context/SettingsContext";
 
 const links = [
   { href: "/",           label: "Dashboard",  icon: LayoutDashboard },
   { href: "/clients",    label: "Clients",    icon: Users },
+  { href: "/events",     label: "Events",     icon: CalendarDays },
+  { href: "/calendar",   label: "Calendar",   icon: Calendar },
   { href: "/vendors",    label: "Vendors",    icon: Store },
   { href: "/venues",     label: "Venues",     icon: MapPin },
   { href: "/quotations", label: "Quotes",     icon: ReceiptText },
+  { href: "/invoices",   label: "Invoices",   icon: FileText },
   { href: "/budget",     label: "Budget",     icon: PieChart },
   { href: "/analytics",  label: "Analytics",  icon: BarChart2 },
 ];

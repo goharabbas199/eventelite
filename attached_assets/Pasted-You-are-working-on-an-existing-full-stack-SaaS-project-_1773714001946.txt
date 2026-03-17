@@ -1,0 +1,192 @@
+You are working on an existing full-stack SaaS project called "EventElite".
+
+Tech Stack:
+Frontend: React + Vite + TypeScript + TanStack Query + Wouter + ShadCN + Tailwind
+Backend: Node.js + Express + Drizzle ORM
+Database: PostgreSQL
+Validation: Zod
+Forms: React Hook Form
+
+The system already has these modules:
+
+- Dashboard
+- Clients
+- Vendors (with vendor products & pricing)
+- Venues (with venue packages)
+- Quotes (Quotation Builder)
+- Budget Planner
+- Analytics
+- Settings
+
+Your task is to IMPROVE the system by implementing PHASE 1 and PHASE 2 features without breaking existing architecture.
+
+Do NOT rebuild the project. Extend the existing structure.
+
+Follow current coding patterns in the repository.
+
+----------------------------------
+
+PHASE 1 — Core Architecture Improvements
+
+1. Create a new central database entity called "events".
+
+Database table: events
+
+Fields:
+- id
+- clientId (foreign key -> clients)
+- eventName
+- eventType
+- eventDate
+- venueId (optional foreign key -> venues)
+- guestCount
+- budget
+- status (lead, pending, confirmed, completed)
+- createdAt
+
+Update Drizzle schema and migrations.
+
+----------------------------------
+
+2. Connect existing modules to events
+
+Modify system relationships:
+
+Client
+   → can have multiple Events
+
+Event
+   → belongs to a Client
+   → can have a Venue
+   → can have multiple Vendor Services
+   → can have a Quote
+   → can have Budget entries
+
+Update backend routes to support:
+
+GET /events
+POST /events
+GET /events/:id
+PATCH /events/:id
+DELETE /events/:id
+
+----------------------------------
+
+3. Improve Quotation Builder automation
+
+When user creates a quote:
+
+Selecting a Client should auto-fill:
+- event type
+- guest count
+- event date
+
+Selecting a Venue should automatically load:
+- venue packages
+- base venue pricing
+
+Add vendor automation:
+
+When user selects a vendor product that is priced "per guest":
+
+Example:
+Vendor Product: Buffet
+Price: $20 per guest
+
+If guest count = 150
+
+Auto calculate:
+150 × 20 = $3000
+
+Add this automatically to quote total.
+
+----------------------------------
+
+4. Improve vendor catalog usage
+
+In quotation builder:
+
+User flow should be:
+
+Select Vendor
+→ Select Vendor Product
+→ System auto-fills price
+→ If "per guest" option enabled, multiply by guest count.
+
+----------------------------------
+
+PHASE 2 — Product Features
+
+1. Event Calendar
+
+Create a new page:
+
+/calendar
+
+Display events using calendar view.
+
+Features:
+- monthly calendar
+- show events by date
+- click event → open event details
+
+----------------------------------
+
+2. Invoice System
+
+Create a new entity:
+
+invoices
+
+Fields:
+
+- id
+- eventId
+- clientId
+- invoiceNumber
+- amount
+- status (unpaid, paid, overdue)
+- dueDate
+- createdAt
+
+Add UI to:
+
+Generate invoice from quote.
+
+----------------------------------
+
+3. Payment Tracking
+
+Extend client payment system.
+
+Allow:
+
+- recording payments
+- showing payment history
+- calculating remaining balance
+
+----------------------------------
+
+4. Client Portal (Basic)
+
+Create a public link system.
+
+Clients can:
+
+- view quote
+- download PDF
+- see event details
+- see payment status
+
+----------------------------------
+
+General Rules
+
+- Do not remove existing features.
+- Follow existing UI style using ShadCN.
+- Follow existing folder structure.
+- Use existing API patterns.
+- Use TanStack Query for data fetching.
+- Use Zod validation.
+
+Deliver changes incrementally and keep code clean and modular.

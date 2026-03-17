@@ -581,6 +581,107 @@ export async function registerRoutes(
     res.status(204).end();
   });
 
+  // ====================== EVENTS ==========================
+
+  app.get("/api/events", async (_req, res) => {
+    const all = await storage.getEvents();
+    res.json(all);
+  });
+
+  app.get("/api/events/:id", async (req, res) => {
+    const event = await storage.getEvent(Number(req.params.id));
+    if (!event) return res.status(404).json({ message: "Event not found" });
+    res.json(event);
+  });
+
+  app.get("/api/clients/:clientId/events", async (req, res) => {
+    const clientId = Number(req.params.clientId);
+    const all = await storage.getEventsByClient(clientId);
+    res.json(all);
+  });
+
+  app.post("/api/events", async (req, res) => {
+    try {
+      const body = { ...req.body, eventDate: new Date(req.body.eventDate) };
+      const event = await storage.createEvent(body);
+      res.status(201).json(event);
+    } catch (err: any) {
+      console.error("Create event error:", err);
+      res.status(500).json({ message: err?.message || "Failed to create event" });
+    }
+  });
+
+  app.patch("/api/events/:id", async (req, res) => {
+    try {
+      const updated = await storage.updateEvent(Number(req.params.id), req.body);
+      res.json(updated);
+    } catch (err: any) {
+      res.status(500).json({ message: err?.message || "Failed to update event" });
+    }
+  });
+
+  app.delete("/api/events/:id", async (req, res) => {
+    await storage.deleteEvent(Number(req.params.id));
+    res.status(204).end();
+  });
+
+  // ====================== INVOICES ==========================
+
+  app.get("/api/invoices", async (_req, res) => {
+    const all = await storage.getInvoices();
+    res.json(all);
+  });
+
+  app.get("/api/invoices/:id", async (req, res) => {
+    const invoice = await storage.getInvoice(Number(req.params.id));
+    if (!invoice) return res.status(404).json({ message: "Invoice not found" });
+    res.json(invoice);
+  });
+
+  app.get("/api/clients/:clientId/invoices", async (req, res) => {
+    const clientId = Number(req.params.clientId);
+    const all = await storage.getInvoicesByClient(clientId);
+    res.json(all);
+  });
+
+  app.post("/api/invoices", async (req, res) => {
+    try {
+      const invoice = await storage.createInvoice(req.body);
+      res.status(201).json(invoice);
+    } catch (err: any) {
+      console.error("Create invoice error:", err);
+      res.status(500).json({ message: err?.message || "Failed to create invoice" });
+    }
+  });
+
+  app.patch("/api/invoices/:id", async (req, res) => {
+    try {
+      const updated = await storage.updateInvoice(Number(req.params.id), req.body);
+      res.json(updated);
+    } catch (err: any) {
+      res.status(500).json({ message: err?.message || "Failed to update invoice" });
+    }
+  });
+
+  app.delete("/api/invoices/:id", async (req, res) => {
+    await storage.deleteInvoice(Number(req.params.id));
+    res.status(204).end();
+  });
+
+  // ================== CLIENT PORTAL (public) ====================
+
+  app.get("/api/portal/invoice/:id", async (req, res) => {
+    try {
+      const invoice = await storage.getInvoice(Number(req.params.id));
+      if (!invoice) return res.status(404).json({ message: "Invoice not found" });
+      const client = await storage.getClient(invoice.clientId);
+      const quotation = invoice.quotationId ? await storage.getQuotation(invoice.quotationId) : null;
+      res.json({ invoice, client, quotation });
+    } catch (err) {
+      res.status(500).json({ message: "Failed to load portal data" });
+    }
+  });
+
   // ===================== APP SETTINGS ========================
 
   const DEFAULT_SETTINGS: Record<string, any> = {

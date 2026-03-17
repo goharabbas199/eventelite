@@ -23,6 +23,10 @@ import SearchResults from "@/pages/SearchResults";
 import Settings from "@/pages/Settings";
 import Analytics from "@/pages/Analytics";
 import Quotations from "@/pages/Quotations";
+import Events from "@/pages/Events";
+import Calendar from "@/pages/Calendar";
+import Invoices from "@/pages/Invoices";
+import ClientPortal from "@/pages/ClientPortal";
 
 function isAuthenticated() {
   return localStorage.getItem("ee_auth") === "1";
@@ -85,6 +89,16 @@ function Router() {
       <Route path="/settings">
         <AuthGuard><Settings /></AuthGuard>
       </Route>
+      <Route path="/events">
+        <AuthGuard><Events /></AuthGuard>
+      </Route>
+      <Route path="/calendar">
+        <AuthGuard><Calendar /></AuthGuard>
+      </Route>
+      <Route path="/invoices">
+        <AuthGuard><Invoices /></AuthGuard>
+      </Route>
+      <Route path="/portal/:id" component={ClientPortal} />
       <Route component={NotFound} />
     </Switch>
   );
