@@ -149,7 +149,7 @@ export default function Settings() {
   return (
     <Layout title="Settings">
       {/* Full-bleed two-panel layout */}
-      <div className="flex -mx-4 md:-mx-6 -mt-5 rounded-2xl overflow-hidden border border-slate-100 dark:border-slate-800 shadow-sm bg-white dark:bg-slate-900" style={{ minHeight: "calc(100vh - 130px)" }}>
+      <div className="flex -mx-3 md:-mx-6 -mt-4 md:-mt-5 rounded-2xl overflow-hidden border border-slate-100 dark:border-slate-800 shadow-sm bg-white dark:bg-slate-900" style={{ minHeight: "calc(100vh - 130px)" }}>
 
         {/* ── Left sidebar ── */}
         {/* Desktop: always visible */}

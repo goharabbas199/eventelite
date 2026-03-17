@@ -218,15 +218,14 @@ export default function Events() {
   ];
 
   return (
-    <Layout>
-      <div className="p-6 space-y-6">
+    <Layout title="Events">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Events</h1>
-            <p className="text-sm text-slate-500 mt-0.5">{stats.total} event{stats.total !== 1 ? "s" : ""} total · {stats.confirmed} confirmed</p>
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400 mb-0.5">Management</p>
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white">Events</h2>
           </div>
-          <Button onClick={openCreate} data-testid="button-create-event" className="gap-2">
+          <Button onClick={openCreate} data-testid="button-create-event" className="h-9 rounded-xl bg-indigo-600 hover:bg-indigo-700 shadow-sm shadow-indigo-900/20 text-sm gap-1.5">
             <Plus className="w-4 h-4" /> New Event
           </Button>
         </div>
@@ -409,7 +408,6 @@ export default function Events() {
               })}
           </div>
         )}
-      </div>
 
       {/* Create / Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>

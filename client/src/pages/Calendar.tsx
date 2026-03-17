@@ -72,13 +72,13 @@ export default function Calendar() {
     .slice(0, 3);
 
   return (
-    <Layout>
-      <div className="p-6 space-y-6">
+    <Layout title="Calendar">
         {/* Header */}
-        <div className="flex items-center justify-between flex-wrap gap-4">
+        <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Event Calendar</h1>
-            <p className="text-sm text-slate-500 mt-0.5">
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400 mb-0.5">Schedule</p>
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white">Event Calendar</h2>
+            <p className="text-sm text-slate-500 mt-0.5 hidden sm:block">
               {eventsThisMonth.length === 0
                 ? "No events this month"
                 : `${eventsThisMonth.length} event${eventsThisMonth.length !== 1 ? "s" : ""} in ${format(currentMonth, "MMMM")}`}
@@ -100,8 +100,8 @@ export default function Calendar() {
           </div>
         </div>
 
-        {/* Legend */}
-        <div className="flex flex-wrap gap-4">
+        {/* Legend — desktop only */}
+        <div className="hidden sm:flex flex-wrap gap-4">
           {Object.entries(STATUS_CONFIG).map(([key, cfg]) => (
             <div key={key} className="flex items-center gap-1.5">
               <div className={`w-2 h-2 rounded-full ${cfg.dot}`} />
@@ -110,8 +110,8 @@ export default function Calendar() {
           ))}
         </div>
 
-        {/* Calendar Grid */}
-        <Card className="border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden">
+        {/* Calendar Grid — desktop only (too cramped on mobile) */}
+        <Card className="hidden sm:block border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden">
           <CardContent className="p-0">
             <div className="grid grid-cols-7 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-700">
               {WEEKDAYS.map((d) => (
@@ -259,7 +259,6 @@ export default function Calendar() {
             )}
           </div>
         )}
-      </div>
 
       {/* Event Detail Dialog */}
       {selectedEvent && (
