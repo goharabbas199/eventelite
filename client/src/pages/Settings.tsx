@@ -33,21 +33,37 @@ function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void 
   );
 }
 
-/* ─── Tabs ─── */
-const TABS = [
-  { id: "profile",       label: "Profile",       icon: User },
-  { id: "business",      label: "Business",      icon: Building2 },
-  { id: "notifications", label: "Notifications", icon: Bell },
-  { id: "appearance",    label: "Appearance",    icon: Palette },
-  { id: "security",      label: "Security",      icon: Shield },
-  { id: "support",       label: "Support",       icon: HelpCircle },
+/* ─── Nav config ─── */
+const NAV_SECTIONS = [
+  {
+    group: "Account",
+    items: [
+      { id: "profile",  label: "Profile",       desc: "Name, email, avatar & bio",        icon: User },
+      { id: "business", label: "Business",       desc: "Agency info & contact details",    icon: Building2 },
+      { id: "security", label: "Security",       desc: "Password & two-factor auth",       icon: Shield },
+    ],
+  },
+  {
+    group: "Preferences",
+    items: [
+      { id: "notifications", label: "Notifications", desc: "Alerts, reminders & reports", icon: Bell },
+      { id: "appearance",    label: "Appearance",    desc: "Theme, colors & layout",       icon: Palette },
+    ],
+  },
+  {
+    group: "Help",
+    items: [
+      { id: "support", label: "Support & Help", desc: "Docs, chat & changelog",           icon: HelpCircle },
+    ],
+  },
 ] as const;
 
-type TabId = typeof TABS[number]["id"];
+type TabId = "profile" | "business" | "security" | "notifications" | "appearance" | "support";
 
 export default function Settings() {
   const { toast } = useToast();
-  const [tab, setTab] = useState<TabId>("profile");
+  const { profile } = useSettings();
+  const [tab, setTab] = useState<TabId | null>(null);
   const [, navigate] = useLocation();
 
   const handleLogout = () => {
@@ -55,51 +71,162 @@ export default function Settings() {
     navigate("/login");
   };
 
-  return (
-    <Layout title="Settings">
-      <div>
-        <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400 mb-0.5">Account</p>
-        <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">Settings</h2>
-        <p className="text-sm text-slate-400 mt-1">Manage your workspace preferences and account configuration</p>
+  const activeItem = NAV_SECTIONS.flatMap((s) => s.items).find((i) => i.id === tab);
+
+  /* ── Sidebar panel ── */
+  const sidebar = (
+    <div className="flex flex-col h-full">
+      {/* Profile summary */}
+      <div className="p-5 border-b border-slate-100 dark:border-slate-800">
+        <div className="flex items-center gap-3">
+          <div className="relative shrink-0">
+            <img
+              src={profile.avatarUrl || "https://github.com/shadcn.png"}
+              alt="avatar"
+              className="w-10 h-10 rounded-xl object-cover ring-2 ring-indigo-100 dark:ring-indigo-900"
+              onError={(e) => { (e.target as HTMLImageElement).src = "https://github.com/shadcn.png"; }}
+            />
+            <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white dark:border-slate-900" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">{profile.name}</p>
+            <p className="text-xs text-slate-400 truncate">{profile.role}</p>
+          </div>
+        </div>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-6">
-        <aside className="md:w-52 shrink-0">
-          <nav className="space-y-0.5">
-            {TABS.map(({ id, label, icon: Icon }) => (
-              <button
-                key={id}
-                onClick={() => setTab(id)}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-left ${
-                  tab === id
-                    ? "bg-indigo-600 text-white shadow-sm shadow-indigo-900/20"
-                    : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
-                }`}
-              >
-                <Icon className="w-4 h-4 shrink-0" />
-                {label}
-              </button>
-            ))}
-            <div className="pt-2 mt-2 border-t border-slate-100 dark:border-slate-800">
-              <button
-                onClick={handleLogout}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-left text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-600 dark:hover:text-red-400"
-                data-testid="button-logout"
-              >
-                <LogOut className="w-4 h-4 shrink-0" />
-                Sign Out
-              </button>
+      {/* Nav */}
+      <nav className="flex-1 overflow-y-auto py-3 px-3 space-y-5">
+        {NAV_SECTIONS.map(({ group, items }) => (
+          <div key={group}>
+            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500 px-2 mb-1.5">{group}</p>
+            <div className="space-y-0.5">
+              {items.map(({ id, label, desc, icon: Icon }) => {
+                const active = tab === id;
+                return (
+                  <button
+                    key={id}
+                    onClick={() => setTab(id)}
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all group ${
+                      active
+                        ? "bg-indigo-600 shadow-sm shadow-indigo-900/20"
+                        : "hover:bg-slate-100 dark:hover:bg-slate-800/70"
+                    }`}
+                  >
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all ${
+                      active ? "bg-white/20" : "bg-slate-100 dark:bg-slate-800 group-hover:bg-slate-200 dark:group-hover:bg-slate-700"
+                    }`}>
+                      <Icon className={`w-4 h-4 ${active ? "text-white" : "text-slate-500 dark:text-slate-400"}`} />
+                    </div>
+                    <div className="min-w-0">
+                      <p className={`text-sm font-semibold leading-none ${active ? "text-white" : "text-slate-800 dark:text-slate-200"}`}>{label}</p>
+                      <p className={`text-[11px] mt-0.5 truncate ${active ? "text-white/70" : "text-slate-400"}`}>{desc}</p>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
-          </nav>
-        </aside>
+          </div>
+        ))}
+      </nav>
 
-        <div className="flex-1 min-w-0">
-          {tab === "profile"       && <ProfileTab toast={toast} />}
-          {tab === "business"      && <BusinessTab toast={toast} />}
-          {tab === "notifications" && <NotificationsTab toast={toast} />}
-          {tab === "appearance"    && <AppearanceTab toast={toast} />}
-          {tab === "security"      && <SecurityTab toast={toast} />}
-          {tab === "support"       && <SupportTab />}
+      {/* Sign out */}
+      <div className="p-3 border-t border-slate-100 dark:border-slate-800">
+        <button
+          onClick={handleLogout}
+          data-testid="button-logout"
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 hover:text-red-600 transition-all text-left"
+        >
+          <div className="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-950/40 flex items-center justify-center shrink-0">
+            <LogOut className="w-4 h-4 text-red-500" />
+          </div>
+          <span>Sign Out</span>
+        </button>
+      </div>
+    </div>
+  );
+
+  return (
+    <Layout title="Settings">
+      {/* Full-bleed two-panel layout */}
+      <div className="flex -mx-4 md:-mx-6 -mt-5 rounded-2xl overflow-hidden border border-slate-100 dark:border-slate-800 shadow-sm bg-white dark:bg-slate-900" style={{ minHeight: "calc(100vh - 130px)" }}>
+
+        {/* ── Left sidebar ── */}
+        {/* Desktop: always visible */}
+        <div className={`hidden md:flex flex-col w-64 shrink-0 border-r border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/80`}>
+          <div className="h-14 flex items-center px-5 border-b border-slate-100 dark:border-slate-800">
+            <p className="text-[13px] font-bold text-slate-800 dark:text-slate-200 tracking-tight">Settings</p>
+          </div>
+          {sidebar}
+        </div>
+
+        {/* Mobile: list view (shown when no tab selected) */}
+        <div className={`md:hidden flex flex-col w-full border-r border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/80 ${tab ? "hidden" : "flex"}`}>
+          <div className="h-14 flex items-center px-5 border-b border-slate-100 dark:border-slate-800">
+            <p className="text-[13px] font-bold text-slate-800 dark:text-slate-200 tracking-tight">Settings</p>
+          </div>
+          {sidebar}
+        </div>
+
+        {/* ── Right content panel ── */}
+        {/* Desktop: always visible */}
+        <div className="hidden md:flex flex-col flex-1 min-w-0 bg-white dark:bg-slate-950">
+          <div className="h-14 flex items-center px-6 border-b border-slate-100 dark:border-slate-800 shrink-0">
+            {activeItem ? (
+              <div className="flex items-center gap-2.5">
+                <activeItem.icon className="w-4 h-4 text-indigo-500" />
+                <div>
+                  <p className="text-[13px] font-bold text-slate-800 dark:text-slate-200 leading-none">{activeItem.label}</p>
+                  <p className="text-[11px] text-slate-400 mt-0.5">{activeItem.desc}</p>
+                </div>
+              </div>
+            ) : (
+              <p className="text-[13px] text-slate-400">Select a settings category</p>
+            )}
+          </div>
+          <div className="flex-1 overflow-y-auto p-6">
+            {!tab && (
+              <div className="flex flex-col items-center justify-center h-full text-center py-16">
+                <div className="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 flex items-center justify-center mb-4">
+                  <Palette className="w-6 h-6 text-indigo-500" />
+                </div>
+                <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">Choose a setting</p>
+                <p className="text-xs text-slate-400 mt-1 max-w-[200px]">Select a category from the left to get started</p>
+              </div>
+            )}
+            {tab === "profile"       && <ProfileTab toast={toast} />}
+            {tab === "business"      && <BusinessTab toast={toast} />}
+            {tab === "notifications" && <NotificationsTab toast={toast} />}
+            {tab === "appearance"    && <AppearanceTab toast={toast} />}
+            {tab === "security"      && <SecurityTab toast={toast} />}
+            {tab === "support"       && <SupportTab />}
+          </div>
+        </div>
+
+        {/* Mobile: content view (shown when tab is selected) */}
+        <div className={`md:hidden flex-col flex-1 min-w-0 bg-white dark:bg-slate-950 ${tab ? "flex" : "hidden"}`}>
+          <div className="h-14 flex items-center gap-3 px-4 border-b border-slate-100 dark:border-slate-800 shrink-0">
+            <button
+              onClick={() => setTab(null)}
+              className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
+            >
+              <ChevronRight className="w-4 h-4 text-slate-500 rotate-180" />
+            </button>
+            {activeItem && (
+              <div>
+                <p className="text-[13px] font-bold text-slate-800 dark:text-slate-200 leading-none">{activeItem.label}</p>
+                <p className="text-[11px] text-slate-400 mt-0.5">{activeItem.desc}</p>
+              </div>
+            )}
+          </div>
+          <div className="flex-1 overflow-y-auto p-4 pb-24">
+            {tab === "profile"       && <ProfileTab toast={toast} />}
+            {tab === "business"      && <BusinessTab toast={toast} />}
+            {tab === "notifications" && <NotificationsTab toast={toast} />}
+            {tab === "appearance"    && <AppearanceTab toast={toast} />}
+            {tab === "security"      && <SecurityTab toast={toast} />}
+            {tab === "support"       && <SupportTab />}
+          </div>
         </div>
       </div>
     </Layout>
