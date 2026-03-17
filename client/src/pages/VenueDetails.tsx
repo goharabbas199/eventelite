@@ -139,7 +139,7 @@ export default function VenueDetails() {
 
   return (
     <Layout title="Venue Details">
-      <div className="space-y-10">
+      <div className="space-y-6 md:space-y-10">
         <Link
           href="/venues"
           className="text-sm text-slate-500 hover:text-blue-600 flex items-center"
@@ -147,7 +147,7 @@ export default function VenueDetails() {
           <ArrowLeft className="w-4 h-4 mr-1" /> Back to Venues
         </Link>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12">
           {/* LEFT */}
           <div className="space-y-6">
             <div className="flex gap-3">

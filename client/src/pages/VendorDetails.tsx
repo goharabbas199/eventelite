@@ -107,9 +107,9 @@ export default function VendorDetails() {
         {/* HEADER CARD */}
         <Card className="border-none shadow-md">
           <CardContent className="p-6">
-            <div className="flex items-start justify-between">
+            <div className="flex flex-col sm:flex-row items-start sm:justify-between gap-4">
               {/* LEFT SIDE */}
-              <div className="max-w-xl">
+              <div className="max-w-xl w-full sm:w-auto">
                 <div className="flex items-center gap-3">
                   <Store className="w-8 h-8 text-blue-600" />
                   <h1 className="text-3xl font-bold tracking-tight">

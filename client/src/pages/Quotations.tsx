@@ -823,7 +823,7 @@ export default function Quotations() {
                       Add from Vendor Catalog
                     </span>
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <Select value={quickVendorId} onValueChange={(v) => { setQuickVendorId(v); setQuickProductId(""); }}>
                       <SelectTrigger className="h-8 rounded-lg text-xs bg-white dark:bg-slate-800" data-testid="select-quick-vendor">
                         <SelectValue placeholder="Select vendor…" />

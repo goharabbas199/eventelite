@@ -178,7 +178,7 @@ export default function CreateVenue() {
                   )}
                 />
 
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                   <FormField
                     control={form.control}
                     name="capacity"
@@ -231,7 +231,7 @@ export default function CreateVenue() {
 
                 {/* BOOKING CONTACT INFO */}
 
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                   <FormField
                     control={form.control}
                     name="bookingPhone"
@@ -308,7 +308,7 @@ export default function CreateVenue() {
                   />
 
                   {imageUrls.length > 0 && (
-                    <div className="grid grid-cols-4 gap-4 mt-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mt-4">
                       {imageUrls.map((url, index) => (
                         <div key={index} className="relative">
                           <img
