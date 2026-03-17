@@ -149,7 +149,7 @@ export default function BudgetPlanner() {
               data-testid={`client-health-${c.id}`}
               className={`flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-xl border text-left transition-all ${
                 String(c.id) === selectedClientId
-                  ? "border-indigo-400 bg-indigo-50 shadow-sm"
+                  ? "border-indigo-400 bg-indigo-50 dark:bg-indigo-950/40 shadow-sm"
                   : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600"
               }`}
             >
@@ -158,7 +158,7 @@ export default function BudgetPlanner() {
                 c.status === "Lead" ? "bg-amber-400" : "bg-slate-300"
               }`} />
               <div>
-                <p className="text-xs font-bold text-slate-800 whitespace-nowrap">{c.name.split(" ").slice(0, 2).join(" ")}</p>
+                <p className="text-xs font-bold text-slate-800 dark:text-slate-200 whitespace-nowrap">{c.name.split(" ").slice(0, 2).join(" ")}</p>
                 <p className="text-[10px] text-slate-400">{fmt(c.budget)}</p>
               </div>
               {String(c.id) === selectedClientId && (
@@ -557,22 +557,22 @@ function ClientBudgetView({
                 <p className="text-xs text-slate-300">Click "Add Expense" to track spending</p>
               </div>
             ) : (
-              <div className="divide-y divide-slate-50">
+              <div className="divide-y divide-slate-50 dark:divide-slate-700/40">
                 {expenses.map((expense) => {
                   const color = CATEGORY_COLORS[expense.category] || "#94a3b8";
                   return (
                     <div
                       key={expense.id}
-                      className="flex items-center gap-3 px-5 py-3.5 hover:bg-slate-50 transition-colors group"
+                      className="flex items-center gap-3 px-5 py-3.5 hover:bg-slate-50 dark:hover:bg-slate-700/40 transition-colors group"
                       data-testid={`expense-row-${expense.id}`}
                     >
                       <div className="w-1 h-8 rounded-full shrink-0" style={{ backgroundColor: color }} />
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-slate-800 truncate">{expense.item}</p>
+                        <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate">{expense.item}</p>
                         <p className="text-[11px] text-slate-400">{expense.category}</p>
                       </div>
                       <div className="flex items-center gap-2.5 ml-3 shrink-0">
-                        <p className="text-sm font-bold text-slate-800">{fmt(Number(expense.cost))}</p>
+                        <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{fmt(Number(expense.cost))}</p>
                         <PaidToggle expense={expense} clientId={clientId} />
                         <button
                           onClick={() => handleDelete(expense.id)}
@@ -606,8 +606,8 @@ function PaidToggle({ expense, clientId }: { expense: any; clientId: number }) {
       data-testid={`toggle-paid-${expense.id}`}
       className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold border transition-all ${
         expense.isPaid
-          ? "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
-          : "bg-slate-50 text-slate-500 border-slate-200 hover:bg-amber-50 hover:text-amber-700 hover:border-amber-200"
+          ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-900/50 hover:bg-emerald-100 dark:hover:bg-emerald-950/60"
+          : "bg-slate-50 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-600 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-700 dark:hover:text-amber-300 hover:border-amber-200 dark:hover:border-amber-900/50"
       }`}
     >
       {expense.isPaid
@@ -707,7 +707,7 @@ function CreateExpenseForm({ clientId, onSuccess }: { clientId: number; onSucces
                   data-testid="toggle-expense-ispaid"
                   className={`w-10 h-5 rounded-full transition-all relative ${field.value ? "bg-emerald-500" : "bg-slate-200"}`}
                 >
-                  <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all ${field.value ? "left-5" : "left-0.5"}`} />
+                  <div className={`absolute top-0.5 w-4 h-4 bg-white dark:bg-slate-200 rounded-full shadow transition-all ${field.value ? "left-5" : "left-0.5"}`} />
                 </button>
                 <FormLabel className={labelCls}>Mark as paid</FormLabel>
               </div>

@@ -136,7 +136,7 @@ export default function Vendors() {
               <div
                 key={vendor.id}
                 onClick={() => navigate(`/vendors/${vendor.id}`)}
-                className="bg-white border border-slate-100 rounded-2xl px-4 py-4 shadow-sm hover:shadow-md hover:border-indigo-200 transition-all duration-150 cursor-pointer group"
+                className="bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700 rounded-2xl px-4 py-4 shadow-sm hover:shadow-md hover:border-indigo-200 dark:hover:border-indigo-700 transition-all duration-150 cursor-pointer group"
               >
                 <div className="flex items-center justify-between gap-3">
                   {/* Left info */}

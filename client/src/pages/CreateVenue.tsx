@@ -288,7 +288,7 @@ export default function CreateVenue() {
 
                   <div
                     onClick={openFileDialog}
-                    className="border-2 border-dashed rounded-xl p-8 text-center bg-slate-50 hover:bg-slate-100 transition cursor-pointer"
+                    className="border-2 border-dashed rounded-xl p-8 text-center bg-slate-50 dark:bg-slate-700/40 hover:bg-slate-100 dark:hover:bg-slate-700/60 transition cursor-pointer"
                   >
                     <Upload className="mx-auto w-8 h-8 text-slate-400 mb-2" />
                     <p className="text-sm text-slate-500">

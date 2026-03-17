@@ -31,16 +31,16 @@ import { useLocation } from "wouter";
 
 const STATUS_STYLES: Record<string, { chip: string; dot: string; bar: string }> = {
   Draft:    { chip: "bg-slate-100 dark:bg-slate-700/60 text-slate-600 dark:text-slate-300",     dot: "bg-slate-400",    bar: "bg-slate-300" },
-  Sent:     { chip: "bg-blue-100 text-blue-700",       dot: "bg-blue-500",     bar: "bg-blue-400" },
-  Accepted: { chip: "bg-emerald-100 text-emerald-700", dot: "bg-emerald-500",  bar: "bg-emerald-500" },
-  Rejected: { chip: "bg-red-100 text-red-600",         dot: "bg-red-400",      bar: "bg-red-400" },
+  Sent:     { chip: "bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300",       dot: "bg-blue-500",     bar: "bg-blue-400" },
+  Accepted: { chip: "bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300", dot: "bg-emerald-500",  bar: "bg-emerald-500" },
+  Rejected: { chip: "bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400",         dot: "bg-red-400",      bar: "bg-red-400" },
 };
 
 const CLIENT_STATUS_STYLES: Record<string, string> = {
-  Lead:      "bg-amber-100 text-amber-700",
-  Confirmed: "bg-emerald-100 text-emerald-700",
+  Lead:      "bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300",
+  Confirmed: "bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300",
   Completed: "bg-slate-100 dark:bg-slate-700/60 text-slate-600 dark:text-slate-300",
-  Cancelled: "bg-red-100 text-red-600",
+  Cancelled: "bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400",
 };
 
 const STATUSES = ["Draft", "Sent", "Accepted", "Rejected"];
@@ -918,7 +918,7 @@ export default function Quotations() {
             </Card>
 
             {/* ── CARD 3: Print Preview ── */}
-            <Card className="border border-slate-100 shadow-sm" id="quote-preview" ref={printRef}>
+            <Card className="border border-slate-100 dark:border-slate-700 shadow-sm" id="quote-preview" ref={printRef}>
               <CardHeader className="border-b border-slate-100 dark:border-slate-700 pb-3">
                 <div className="flex items-center gap-2">
                   <div className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
@@ -952,10 +952,10 @@ export default function Quotations() {
                 </div>
 
                 {/* Divider */}
-                <div className="h-px bg-slate-100" />
+                <div className="h-px bg-slate-100 dark:bg-slate-700" />
 
                 {/* Client + Event block */}
-                <div className="grid grid-cols-2 gap-4 bg-slate-50 rounded-xl p-4">
+                <div className="grid grid-cols-2 gap-4 bg-slate-50 dark:bg-slate-700/30 rounded-xl p-4">
                   <div>
                     <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Prepared For</p>
                     {selectedClient ? (
@@ -1006,7 +1006,7 @@ export default function Quotations() {
                     items.filter((i) => i.serviceName.trim()).map((item, idx) => (
                       <div
                         key={item.id}
-                        className={`grid grid-cols-12 py-2.5 border-b border-slate-50 ${idx % 2 === 0 ? "" : "bg-slate-50/40"}`}
+                        className={`grid grid-cols-12 py-2.5 border-b border-slate-50 dark:border-slate-700/40 ${idx % 2 === 0 ? "" : "bg-slate-50/40 dark:bg-slate-700/20"}`}
                       >
                         <div className="col-span-8 flex items-center gap-2">
                           {item.tag === "venue"  && <Building2  className="w-3 h-3 text-blue-400 shrink-0" />}
@@ -1027,7 +1027,7 @@ export default function Quotations() {
                 </div>
 
                 {/* Cost breakdown */}
-                <div className="space-y-2 pt-3 border-t border-slate-100">
+                <div className="space-y-2 pt-3 border-t border-slate-100 dark:border-slate-700">
                   <div className="flex justify-between text-sm text-slate-600">
                     <span>Subtotal</span>
                     <span className="font-semibold">{fmtFull(calc.totalCost)}</span>
@@ -1050,8 +1050,8 @@ export default function Quotations() {
                       <span className="font-semibold">+{fmtFull(calc.markupAmt)}</span>
                     </div>
                   )}
-                  <div className="flex justify-between items-center pt-3 border-t-2 border-slate-900 mt-2">
-                    <span className="text-base font-bold text-slate-900">Total</span>
+                  <div className="flex justify-between items-center pt-3 border-t-2 border-slate-900 dark:border-slate-500 mt-2">
+                    <span className="text-base font-bold text-slate-900 dark:text-white">Total</span>
                     <span className="text-xl font-bold text-indigo-600">{fmtFull(calc.finalPrice)}</span>
                   </div>
                   {calc.perGuest > 0 && (
@@ -1063,9 +1063,9 @@ export default function Quotations() {
 
                 {/* Notes */}
                 {notes && (
-                  <div className="bg-slate-50 rounded-xl p-4 border border-slate-100">
+                  <div className="bg-slate-50 dark:bg-slate-700/30 rounded-xl p-4 border border-slate-100 dark:border-slate-700">
                     <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Notes & Terms</p>
-                    <p className="text-sm text-slate-600 whitespace-pre-wrap leading-relaxed">{notes}</p>
+                    <p className="text-sm text-slate-600 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">{notes}</p>
                   </div>
                 )}
 
@@ -1164,7 +1164,7 @@ export default function Quotations() {
                 />
                 {completeness.checks.map(({ label, done }) => (
                   <div key={label} className="flex items-center gap-2.5">
-                    <div className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 transition-colors ${done ? "bg-emerald-500" : "bg-slate-100"}`}>
+                    <div className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 transition-colors ${done ? "bg-emerald-500" : "bg-slate-100 dark:bg-slate-700"}`}>
                       {done && <CheckCircle className="w-2.5 h-2.5 text-white" />}
                     </div>
                     <span className={`text-xs ${done ? "text-slate-700" : "text-slate-400"}`}>{label}</span>
@@ -1232,7 +1232,7 @@ export default function Quotations() {
                       className={`text-xs font-semibold px-3 py-2 rounded-xl border transition-all disabled:opacity-40 flex items-center justify-center gap-1.5 ${
                         status === s
                           ? `${STATUS_STYLES[s]?.chip} border-current shadow-sm`
-                          : "border-slate-200 text-slate-500 hover:border-slate-300 hover:bg-slate-50"
+                          : "border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700/50"
                       }`}
                       data-testid={`button-status-${s.toLowerCase()}`}
                     >
@@ -1246,7 +1246,7 @@ export default function Quotations() {
 
             {/* ── Saved quotes ── */}
             <Card className="border border-slate-100 dark:border-slate-700 shadow-sm dark:bg-slate-800/80">
-              <CardHeader className="border-b border-slate-100 pb-3 space-y-3">
+              <CardHeader className="border-b border-slate-100 dark:border-slate-700 pb-3 space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <CardTitle className="text-sm">Saved Quotes</CardTitle>
@@ -1282,7 +1282,7 @@ export default function Quotations() {
                         className={`flex-shrink-0 text-[10px] font-semibold px-2.5 py-1 rounded-lg transition-all ${
                           quoteStatusFilter === s
                             ? "bg-indigo-600 text-white"
-                            : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                            : "bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600"
                         }`}
                       >
                         {s} {count > 0 && <span className="opacity-70">({count})</span>}
@@ -1305,7 +1305,7 @@ export default function Quotations() {
                     </p>
                   </div>
                 ) : (
-                  <ul className="divide-y divide-slate-50 max-h-[420px] overflow-y-auto">
+                  <ul className="divide-y divide-slate-50 dark:divide-slate-700/40 max-h-[420px] overflow-y-auto">
                     {filteredQuotations.map((q: any) => {
                       const c = (clients as any[]).find((x) => x.id === q.clientId);
                       const isActive = selectedQuoteId === q.id;
@@ -1313,7 +1313,7 @@ export default function Quotations() {
                         <li
                           key={q.id}
                           onClick={() => loadQuote(q)}
-                          className={`flex items-center gap-2.5 px-4 py-3 cursor-pointer hover:bg-slate-50 transition-colors group ${isActive ? "bg-indigo-50/60 border-l-[3px] border-indigo-500" : ""}`}
+                          className={`flex items-center gap-2.5 px-4 py-3 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors group ${isActive ? "bg-indigo-50/60 dark:bg-indigo-950/40 border-l-[3px] border-indigo-500" : ""}`}
                           data-testid={`quote-item-${q.id}`}
                         >
                           {/* Status bar indicator */}
@@ -1366,7 +1366,7 @@ export default function Quotations() {
               <p className="text-sm text-slate-500">
                 This will create planned services for <strong>{selectedClient?.name}</strong> and mark this quote as <strong>Accepted</strong>.
               </p>
-              <div className="bg-slate-50 rounded-xl p-3 space-y-1.5 border border-slate-100">
+              <div className="bg-slate-50 dark:bg-slate-700/30 rounded-xl p-3 space-y-1.5 border border-slate-100 dark:border-slate-700">
                 <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-2">Services to create</p>
                 {items.filter((i) => i.serviceName.trim()).map((i) => (
                   <div key={i.id} className="flex justify-between text-xs text-slate-600">

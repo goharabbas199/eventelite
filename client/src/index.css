@@ -161,7 +161,7 @@
 
   /* Glass card */
   .glass {
-    @apply bg-white/80 backdrop-blur-md;
+    @apply bg-white/80 dark:bg-slate-800/80 backdrop-blur-md;
   }
 
   /* Focus ring */
@@ -171,7 +171,7 @@
 
   /* Input base */
   .input-base {
-    @apply h-9 rounded-xl border-slate-200 bg-white text-sm placeholder:text-slate-400 transition-all;
+    @apply h-9 rounded-xl border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 transition-all;
     --tw-ring-color: hsl(var(--primary) / 0.15);
     border-color: inherit;
   }
