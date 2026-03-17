@@ -319,22 +319,26 @@ function NotificationsTab({ toast }: { toast: any }) {
 function AppearanceTab({ toast }: { toast: any }) {
   const { appearance, updateAppearance, isLoaded } = useSettings();
   const [app, setApp] = useState<AppearanceSettings>({ ...appearance });
-  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     if (isLoaded) setApp({ ...appearance });
   }, [isLoaded]);
 
-  const set = (k: keyof AppearanceSettings, v: any) => {
-    setApp((p) => ({ ...p, [k]: v }));
-    if (k === "theme") applyTheme(v);
+  const set = async (k: keyof AppearanceSettings, v: any) => {
+    const newApp = { ...app, [k]: v };
+    setApp(newApp);
+    if (k === "theme") applyTheme(v as AppearanceSettings["theme"]);
     if (k === "accentColor") applyAccentColor(v);
+    await updateAppearance(newApp);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
   };
 
   const save_ = async () => {
-    setSaving(true);
     await updateAppearance(app);
-    setSaving(false);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
     toast({ title: "Appearance settings saved", description: `Theme set to ${app.theme}` });
   };
 
@@ -434,7 +438,7 @@ function AppearanceTab({ toast }: { toast: any }) {
             ))}
           </div>
 
-          <SaveBtn onClick={save_} loading={saving} />
+          <SaveBtn onClick={save_} />
         </CardContent>
       </Card>
     </div>
