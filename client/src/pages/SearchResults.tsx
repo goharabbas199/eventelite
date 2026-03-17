@@ -74,7 +74,7 @@ export default function SearchResults() {
             <CardContent className="space-y-2">
               {filteredVendors.map((vendor) => (
                 <Link key={vendor.id} href={`/vendors/${vendor.id}`}>
-                  <div className="p-3 rounded-lg hover:bg-slate-100 cursor-pointer transition">
+                  <div className="p-3 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/50 cursor-pointer transition">
                     <div className="font-medium">{vendor.name}</div>
                     <div className="text-sm text-muted-foreground">
                       {vendor.category}
@@ -95,7 +95,7 @@ export default function SearchResults() {
             <CardContent className="space-y-2">
               {filteredVenues.map((venue) => (
                 <Link key={venue.id} href={`/venues/${venue.id}`}>
-                  <div className="p-3 rounded-lg hover:bg-slate-100 cursor-pointer transition">
+                  <div className="p-3 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/50 cursor-pointer transition">
                     <div className="font-medium">{venue.name}</div>
                     <div className="text-sm text-muted-foreground">
                       {venue.location}
@@ -116,7 +116,7 @@ export default function SearchResults() {
             <CardContent className="space-y-2">
               {filteredClients.map((client) => (
                 <Link key={client.id} href={`/clients/${client.id}`}>
-                  <div className="p-3 rounded-lg hover:bg-slate-100 cursor-pointer transition">
+                  <div className="p-3 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/50 cursor-pointer transition">
                     <div className="font-medium">{client.name}</div>
                     <div className="text-sm text-muted-foreground">
                       {client.eventType} • {client.status}

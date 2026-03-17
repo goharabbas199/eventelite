@@ -12,6 +12,7 @@ import {
   Download, Percent, Trophy, ArrowUpRight,
 } from "lucide-react";
 import { format } from "date-fns";
+import { useSettings } from "@/context/SettingsContext";
 
 const PIE_COLORS = ["#4f46e5", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
 
@@ -24,8 +25,8 @@ function fmtMoney(n: number) {
 const CustomBarTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-white border border-slate-100 rounded-xl shadow-lg px-4 py-3 text-xs">
-      <p className="font-semibold text-slate-600 mb-1.5">{label}</p>
+    <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl shadow-lg px-4 py-3 text-xs">
+      <p className="font-semibold text-slate-600 dark:text-slate-300 mb-1.5">{label}</p>
       {payload.map((p: any) => (
         <p key={p.name} className="flex items-center gap-2 font-medium" style={{ color: p.fill }}>
           <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: p.fill }} />
@@ -37,7 +38,11 @@ const CustomBarTooltip = ({ active, payload, label }: any) => {
 };
 
 export default function Analytics() {
+  const { appearance } = useSettings();
   const { data: clients = [], isLoading } = useClients();
+  const isDark = appearance.theme === "dark" ||
+    (appearance.theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  const axisColor = isDark ? "#475569" : "#94a3b8";
 
   const { data: allClients = [], isLoading: loadingFull } = useQuery({
     queryKey: ["/api/clients/full"],
@@ -93,7 +98,6 @@ export default function Analytics() {
     return acc;
   }, {});
 
-  // Top clients by revenue
   const topClients = [...allClients]
     .sort((a: any, b: any) => Number(b.budget || 0) - Number(a.budget || 0))
     .slice(0, 5);
@@ -108,19 +112,9 @@ export default function Analytics() {
       const budget = Number(c.budget || 0);
       const profit = budget - expenses;
       const margin = budget > 0 ? `${Math.round((profit / budget) * 100)}%` : "0%";
-      return [
-        c.name,
-        c.eventType || "",
-        c.eventDate ? format(new Date(c.eventDate), "yyyy-MM-dd") : "",
-        c.status || "",
-        budget,
-        expenses,
-        profit,
-        margin,
-      ];
+      return [c.name, c.eventType || "", c.eventDate ? format(new Date(c.eventDate), "yyyy-MM-dd") : "", c.status || "", budget, expenses, profit, margin];
     });
-    const csv = "data:text/csv;charset=utf-8,"
-      + [headers, ...rows].map((r) => r.map((v) => `"${v}"`).join(",")).join("\n");
+    const csv = "data:text/csv;charset=utf-8," + [headers, ...rows].map((r) => r.map((v) => `"${v}"`).join(",")).join("\n");
     const link = document.createElement("a");
     link.href = encodeURI(csv);
     link.download = `eventelite_analytics_${format(new Date(), "yyyy-MM-dd")}.csv`;
@@ -130,10 +124,12 @@ export default function Analytics() {
   };
 
   const kpis = [
-    { label: "Total Events",   value: String(totalEvents),      icon: Users,      color: "text-slate-800",  bg: "bg-slate-100" },
-    { label: "Total Revenue",  value: fmtMoney(totalRevenue),   icon: DollarSign, color: "text-indigo-600", bg: "bg-indigo-50" },
-    { label: "Total Expenses", value: fmtMoney(totalExpenses),  icon: Activity,   color: "text-amber-600",  bg: "bg-amber-50"  },
-    { label: "Net Profit",     value: fmtMoney(totalProfit),    icon: TrendingUp, color: totalProfit >= 0 ? "text-emerald-600" : "text-red-500", bg: totalProfit >= 0 ? "bg-emerald-50" : "bg-red-50" },
+    { label: "Total Events",   value: String(totalEvents),      icon: Users,      color: "text-slate-800 dark:text-slate-200",  bg: "bg-slate-100 dark:bg-slate-700/50" },
+    { label: "Total Revenue",  value: fmtMoney(totalRevenue),   icon: DollarSign, color: "text-indigo-600 dark:text-indigo-400", bg: "bg-indigo-50 dark:bg-indigo-950/40" },
+    { label: "Total Expenses", value: fmtMoney(totalExpenses),  icon: Activity,   color: "text-amber-600 dark:text-amber-400",  bg: "bg-amber-50 dark:bg-amber-950/40"  },
+    { label: "Net Profit",     value: fmtMoney(totalProfit),    icon: TrendingUp,
+      color: totalProfit >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-500 dark:text-red-400",
+      bg:    totalProfit >= 0 ? "bg-emerald-50 dark:bg-emerald-950/40" : "bg-red-50 dark:bg-red-950/40" },
   ];
 
   return (
@@ -142,13 +138,13 @@ export default function Analytics() {
       <div className="flex items-center justify-between">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400 mb-0.5">Insights</p>
-          <h2 className="text-xl font-bold text-slate-900">Analytics Overview</h2>
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white">Analytics Overview</h2>
           <p className="text-sm text-slate-400 mt-1">Performance across all {totalEvents} events</p>
         </div>
         <Button
           onClick={handleExportCSV}
           variant="outline"
-          className="h-9 rounded-xl text-xs font-semibold flex items-center gap-2 border-slate-200 hover:border-indigo-300 hover:text-indigo-600"
+          className="h-9 rounded-xl text-xs font-semibold flex items-center gap-2"
           disabled={allClients.length === 0}
         >
           <Download className="w-3.5 h-3.5" />
@@ -173,37 +169,37 @@ export default function Analytics() {
 
       {/* Secondary KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div className="bg-white border border-slate-100 rounded-2xl px-5 py-4 shadow-sm flex items-center justify-between">
+        <div className="bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700 rounded-2xl px-5 py-4 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">Avg Profit / Event</p>
             <p className="text-xs text-slate-400 mt-0.5">Across all {totalEvents} events</p>
           </div>
-          <span className={`text-2xl font-bold ${avgProfit >= 0 ? "text-emerald-600" : "text-red-500"}`}>
+          <span className={`text-2xl font-bold ${avgProfit >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-500 dark:text-red-400"}`}>
             {fmtMoney(avgProfit)}
           </span>
         </div>
 
-        <div className="bg-white border border-slate-100 rounded-2xl px-5 py-4 shadow-sm flex items-center justify-between">
+        <div className="bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700 rounded-2xl px-5 py-4 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">Profit Margin</p>
             <p className="text-xs text-slate-400 mt-0.5">Revenue vs. total expenses</p>
           </div>
           <div className="flex items-center gap-1">
             <Percent className="w-4 h-4 text-indigo-400" />
-            <span className={`text-2xl font-bold ${profitMargin >= 30 ? "text-emerald-600" : profitMargin >= 0 ? "text-amber-600" : "text-red-500"}`}>
+            <span className={`text-2xl font-bold ${profitMargin >= 30 ? "text-emerald-600 dark:text-emerald-400" : profitMargin >= 0 ? "text-amber-600 dark:text-amber-400" : "text-red-500 dark:text-red-400"}`}>
               {profitMargin}%
             </span>
           </div>
         </div>
 
-        <div className="bg-white border border-slate-100 rounded-2xl px-5 py-4 shadow-sm flex items-center justify-between">
+        <div className="bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700 rounded-2xl px-5 py-4 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">Completion Rate</p>
             <p className="text-xs text-slate-400 mt-0.5">{completedCount} events completed</p>
           </div>
           <div className="flex items-center gap-1">
             <Trophy className="w-4 h-4 text-amber-400" />
-            <span className={`text-2xl font-bold ${winRate >= 50 ? "text-emerald-600" : "text-amber-600"}`}>
+            <span className={`text-2xl font-bold ${winRate >= 50 ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400"}`}>
               {winRate}%
             </span>
           </div>
@@ -213,9 +209,9 @@ export default function Analytics() {
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* Revenue by Month */}
-        <Card className="border border-slate-100 rounded-2xl shadow-sm bg-white">
+        <Card className="border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm bg-white dark:bg-slate-800/80">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-bold text-slate-900">Revenue by Event Month</CardTitle>
+            <CardTitle className="text-sm font-bold text-slate-900 dark:text-slate-100">Revenue by Event Month</CardTitle>
           </CardHeader>
           <CardContent>
             {barData.length === 0 ? (
@@ -223,8 +219,8 @@ export default function Analytics() {
             ) : (
               <ResponsiveContainer width="100%" height={220}>
                 <BarChart data={barData} margin={{ top: 4, right: 8, left: -10, bottom: 4 }}>
-                  <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
-                  <YAxis tickFormatter={fmtMoney} tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
+                  <XAxis dataKey="month" tick={{ fontSize: 11, fill: axisColor }} axisLine={false} tickLine={false} />
+                  <YAxis tickFormatter={fmtMoney} tick={{ fontSize: 11, fill: axisColor }} axisLine={false} tickLine={false} />
                   <Tooltip content={<CustomBarTooltip />} />
                   <Bar dataKey="revenue" fill="#4f46e5" radius={[6, 6, 0, 0]} />
                 </BarChart>
@@ -234,9 +230,9 @@ export default function Analytics() {
         </Card>
 
         {/* Events by Type */}
-        <Card className="border border-slate-100 rounded-2xl shadow-sm bg-white">
+        <Card className="border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm bg-white dark:bg-slate-800/80">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-bold text-slate-900">Events by Type</CardTitle>
+            <CardTitle className="text-sm font-bold text-slate-900 dark:text-slate-100">Events by Type</CardTitle>
           </CardHeader>
           <CardContent>
             {pieData.length === 0 ? (
@@ -265,17 +261,17 @@ export default function Analytics() {
 
         {/* Revenue vs Expenses per Client */}
         {revExpData.length > 0 && (
-          <Card className="border border-slate-100 rounded-2xl shadow-sm bg-white lg:col-span-2">
+          <Card className="border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm bg-white dark:bg-slate-800/80 lg:col-span-2">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-bold text-slate-900">Revenue vs Expenses per Client</CardTitle>
+              <CardTitle className="text-sm font-bold text-slate-900 dark:text-slate-100">Revenue vs Expenses per Client</CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={220}>
                 <BarChart data={revExpData} margin={{ top: 4, right: 8, left: -10, bottom: 4 }}>
-                  <XAxis dataKey="name" tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
-                  <YAxis tickFormatter={fmtMoney} tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
+                  <XAxis dataKey="name" tick={{ fontSize: 11, fill: axisColor }} axisLine={false} tickLine={false} />
+                  <YAxis tickFormatter={fmtMoney} tick={{ fontSize: 11, fill: axisColor }} axisLine={false} tickLine={false} />
                   <Tooltip content={<CustomBarTooltip />} />
-                  <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11 }} />
+                  <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11, color: axisColor }} />
                   <Bar dataKey="Revenue"  fill="#4f46e5" radius={[4, 4, 0, 0]} />
                   <Bar dataKey="Expenses" fill="#f59e0b" radius={[4, 4, 0, 0]} />
                   <Bar dataKey="Profit"   fill="#10b981" radius={[4, 4, 0, 0]} />
@@ -285,26 +281,23 @@ export default function Analytics() {
           </Card>
         )}
 
-        {/* Status Breakdown + Top Clients side by side */}
+        {/* Status Breakdown */}
         {Object.keys(byStatus).length > 0 && (
-          <Card className="border border-slate-100 rounded-2xl shadow-sm bg-white">
+          <Card className="border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm bg-white dark:bg-slate-800/80">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-bold text-slate-900">Pipeline by Status</CardTitle>
+              <CardTitle className="text-sm font-bold text-slate-900 dark:text-slate-100">Pipeline by Status</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
                 {Object.entries(byStatus).map(([status, count], i) => (
                   <div key={status} className="flex items-center gap-3">
                     <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }} />
-                    <span className="text-sm text-slate-600 flex-1 font-medium">{status}</span>
-                    <span className="text-sm font-bold text-slate-800">{count as number}</span>
-                    <div className="w-24 bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                    <span className="text-sm text-slate-600 dark:text-slate-400 flex-1 font-medium">{status}</span>
+                    <span className="text-sm font-bold text-slate-800 dark:text-slate-200">{count as number}</span>
+                    <div className="w-24 bg-slate-100 dark:bg-slate-700 rounded-full h-1.5 overflow-hidden">
                       <div
                         className="h-full rounded-full transition-all"
-                        style={{
-                          width: `${((count as number / totalEvents) * 100).toFixed(0)}%`,
-                          backgroundColor: PIE_COLORS[i % PIE_COLORS.length],
-                        }}
+                        style={{ width: `${((count as number / totalEvents) * 100).toFixed(0)}%`, backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }}
                       />
                     </div>
                   </div>
@@ -316,10 +309,10 @@ export default function Analytics() {
 
         {/* Top Clients by Revenue */}
         {topClients.length > 0 && (
-          <Card className="border border-slate-100 rounded-2xl shadow-sm bg-white">
+          <Card className="border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm bg-white dark:bg-slate-800/80">
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-bold text-slate-900">Top Clients by Revenue</CardTitle>
+                <CardTitle className="text-sm font-bold text-slate-900 dark:text-slate-100">Top Clients by Revenue</CardTitle>
                 <Trophy className="w-4 h-4 text-amber-400" />
               </div>
             </CardHeader>
@@ -334,21 +327,18 @@ export default function Analytics() {
                       <div className="flex items-center justify-between mb-1">
                         <div className="flex items-center gap-2">
                           <span className="text-[10px] font-bold text-slate-400 w-4 text-center">#{i + 1}</span>
-                          <span className="text-sm font-semibold text-slate-700 truncate max-w-[140px]">{c.name}</span>
+                          <span className="text-sm font-semibold text-slate-700 dark:text-slate-300 truncate max-w-[140px]">{c.name}</span>
                         </div>
                         <div className="flex items-center gap-1.5">
                           <span className="text-[10px] text-slate-400">{c.eventType}</span>
-                          <span className="text-sm font-bold text-indigo-600">{fmtMoney(budget)}</span>
+                          <span className="text-sm font-bold text-indigo-600 dark:text-indigo-400">{fmtMoney(budget)}</span>
                           <ArrowUpRight className="w-3 h-3 text-emerald-500" />
                         </div>
                       </div>
-                      <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                      <div className="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-1.5 overflow-hidden">
                         <div
                           className="h-full rounded-full transition-all duration-500"
-                          style={{
-                            width: `${pct}%`,
-                            backgroundColor: PIE_COLORS[i % PIE_COLORS.length],
-                          }}
+                          style={{ width: `${pct}%`, backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }}
                         />
                       </div>
                     </div>
@@ -366,8 +356,8 @@ export default function Analytics() {
 function EmptyChart({ message }: { message: string }) {
   return (
     <div className="flex items-center justify-center h-48 flex-col gap-2">
-      <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center">
-        <Activity className="w-5 h-5 text-slate-300" />
+      <div className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-700/50 flex items-center justify-center">
+        <Activity className="w-5 h-5 text-slate-300 dark:text-slate-500" />
       </div>
       <p className="text-sm text-slate-400">{message}</p>
     </div>

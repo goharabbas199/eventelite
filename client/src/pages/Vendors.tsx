@@ -26,12 +26,12 @@ const ITEMS_PER_PAGE = 8;
 
 const categoryColors: Record<string, string> = {};
 const palette = [
-  "bg-indigo-100 text-indigo-700",
-  "bg-emerald-100 text-emerald-700",
-  "bg-purple-100 text-purple-700",
-  "bg-amber-100 text-amber-700",
-  "bg-pink-100 text-pink-700",
-  "bg-sky-100 text-sky-700",
+  "bg-indigo-100 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300",
+  "bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300",
+  "bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300",
+  "bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300",
+  "bg-pink-100 dark:bg-pink-950/60 text-pink-700 dark:text-pink-300",
+  "bg-sky-100 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300",
 ];
 
 function getCategoryColor(cat: string): string {
@@ -80,7 +80,7 @@ export default function Vendors() {
       <div className="flex items-center justify-between">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400 mb-0.5">Management</p>
-          <h2 className="text-xl font-bold text-slate-900">Vendors</h2>
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white">Vendors</h2>
         </div>
         <Link href="/vendors/new">
           <Button className="h-9 rounded-xl bg-indigo-600 hover:bg-indigo-700 shadow-sm shadow-indigo-900/20 text-sm">
@@ -91,7 +91,7 @@ export default function Vendors() {
       </div>
 
       {/* Filter bar */}
-      <Card className="border border-slate-100 rounded-2xl shadow-sm bg-white">
+      <Card className="border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm bg-white dark:bg-slate-800/80">
         <CardContent className="p-4 flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
@@ -120,11 +120,11 @@ export default function Vendors() {
           {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-20 w-full rounded-2xl" />)}
         </div>
       ) : filteredVendors.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-slate-100 gap-3">
-          <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center">
+        <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-slate-800/80 rounded-2xl border border-slate-100 dark:border-slate-700 gap-3">
+          <div className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
             <Store className="w-7 h-7 text-slate-400" />
           </div>
-          <p className="text-sm font-semibold text-slate-600">No vendors found</p>
+          <p className="text-sm font-semibold text-slate-600 dark:text-slate-400">No vendors found</p>
           <p className="text-xs text-slate-400">Try a different search or category</p>
         </div>
       ) : (
@@ -141,11 +141,11 @@ export default function Vendors() {
                 <div className="flex items-center justify-between gap-3">
                   {/* Left info */}
                   <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 flex items-center justify-center shrink-0">
                       <Store className="w-5 h-5 text-indigo-500" />
                     </div>
                     <div className="min-w-0">
-                      <p className="font-bold text-slate-800 text-sm group-hover:text-indigo-600 transition-colors truncate">{vendor.name}</p>
+                      <p className="font-bold text-slate-800 dark:text-slate-200 text-sm group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate">{vendor.name}</p>
                       <Badge className={`${getCategoryColor(vendor.category)} text-[10px] px-2 py-0 font-semibold mt-0.5`}>
                         {vendor.category}
                       </Badge>
@@ -215,7 +215,7 @@ export default function Vendors() {
           <DialogHeader>
             <DialogTitle>Delete Vendor</DialogTitle>
           </DialogHeader>
-          <p className="text-sm text-slate-500 mt-2">Are you sure? This action cannot be undone.</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">Are you sure? This action cannot be undone.</p>
           <div className="flex justify-end gap-2 mt-4">
             <Button variant="outline" onClick={() => setDeletingId(null)} className="rounded-xl">Cancel</Button>
             <Button

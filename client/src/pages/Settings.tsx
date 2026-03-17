@@ -17,8 +17,9 @@ import {
   Building2, Globe, Phone, Mail, MapPin, Clock,
   Check, Zap, Star, ChevronRight,
   Sun, Moon, Monitor, Lock,
-  HelpCircle, MessageSquare, ExternalLink,
+  HelpCircle, MessageSquare, ExternalLink, LogOut,
 } from "lucide-react";
+import { useLocation } from "wouter";
 
 /* ─── Toggle switch ─── */
 function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void }) {
@@ -47,6 +48,12 @@ type TabId = typeof TABS[number]["id"];
 export default function Settings() {
   const { toast } = useToast();
   const [tab, setTab] = useState<TabId>("profile");
+  const [, navigate] = useLocation();
+
+  const handleLogout = () => {
+    localStorage.removeItem("ee_auth");
+    navigate("/login");
+  };
 
   return (
     <Layout title="Settings">
@@ -73,6 +80,16 @@ export default function Settings() {
                 {label}
               </button>
             ))}
+            <div className="pt-2 mt-2 border-t border-slate-100 dark:border-slate-800">
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-left text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-600 dark:hover:text-red-400"
+                data-testid="button-logout"
+              >
+                <LogOut className="w-4 h-4 shrink-0" />
+                Sign Out
+              </button>
+            </div>
           </nav>
         </aside>
 

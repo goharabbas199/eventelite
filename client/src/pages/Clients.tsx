@@ -2,7 +2,7 @@ import { Layout } from "@/components/Layout";
 import { useClients, useCreateClient, useCreatePlannedService } from "@/hooks/use-clients";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -31,17 +31,17 @@ import { useLocation } from "wouter";
 function getPriority(eventDate: Date) {
   const today = new Date();
   const daysLeft = differenceInDays(eventDate, today);
-  if (daysLeft < 0)   return { label: "Overdue", color: "bg-slate-100 text-slate-600", text: `${Math.abs(daysLeft)}d ago`, level: "Overdue" };
-  if (daysLeft <= 7)  return { label: "High",    color: "bg-red-100 text-red-700",     text: `${daysLeft}d left`,          level: "High"    };
-  if (daysLeft <= 30) return { label: "Medium",  color: "bg-amber-100 text-amber-700", text: `${daysLeft}d left`,          level: "Medium"  };
-  return                     { label: "Low",     color: "bg-green-100 text-green-700", text: `${daysLeft}d left`,          level: "Low"     };
+  if (daysLeft < 0)   return { label: "Overdue", color: "badge-slate",  text: `${Math.abs(daysLeft)}d ago`, level: "Overdue" };
+  if (daysLeft <= 7)  return { label: "High",    color: "badge-red",    text: `${daysLeft}d left`,          level: "High"    };
+  if (daysLeft <= 30) return { label: "Medium",  color: "badge-amber",  text: `${daysLeft}d left`,          level: "Medium"  };
+  return                     { label: "Low",     color: "badge-green",  text: `${daysLeft}d left`,          level: "Low"     };
 }
 
 const statusStyle: Record<string, string> = {
-  Lead:      "bg-slate-100 text-slate-700",
-  Pending:   "bg-amber-100 text-amber-700",
-  Confirmed: "bg-green-100 text-green-700",
-  Completed: "bg-indigo-100 text-indigo-700",
+  Lead:      "badge-slate",
+  Pending:   "badge-amber",
+  Confirmed: "badge-green",
+  Completed: "badge-indigo",
 };
 
 export default function Clients() {
@@ -122,13 +122,15 @@ export default function Clients() {
     else { setSortBy(col); setSortOrder("asc"); }
   };
 
+  const selectCls = "h-9 border border-slate-100 dark:border-slate-700 rounded-xl px-3 text-sm bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20";
+
   return (
     <Layout title="Clients">
       {/* Header row */}
       <div className="flex items-center justify-between">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400 mb-0.5">Management</p>
-          <h2 className="text-xl font-bold text-slate-900">Client Events</h2>
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white">Client Events</h2>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={handleExportCSV} className="h-9 text-xs rounded-xl hidden sm:flex">
@@ -154,10 +156,10 @@ export default function Clients() {
       {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
-          { label: "Total Clients",    value: totalClients,                           icon: Users,        cls: "text-slate-800" },
-          { label: "High Priority",    value: highPriorityCount,                      icon: AlertCircle,  cls: "text-red-600"   },
-          { label: "Upcoming (30d)",   value: upcomingCount,                          icon: Calendar,     cls: "text-amber-600" },
-          { label: "Pipeline Budget",  value: `$${totalPipelineBudget.toLocaleString()}`, icon: DollarSign, cls: "text-indigo-600" },
+          { label: "Total Clients",    value: totalClients,                               icon: Users,        cls: "text-slate-800 dark:text-slate-200" },
+          { label: "High Priority",    value: highPriorityCount,                          icon: AlertCircle,  cls: "text-red-600 dark:text-red-400"   },
+          { label: "Upcoming (30d)",   value: upcomingCount,                              icon: Calendar,     cls: "text-amber-600 dark:text-amber-400" },
+          { label: "Pipeline Budget",  value: `$${totalPipelineBudget.toLocaleString()}`, icon: DollarSign,   cls: "text-indigo-600 dark:text-indigo-400" },
         ].map(({ label, value, icon: Icon, cls }) => (
           <div key={label} className="stat-card">
             <div className="flex items-center justify-between mb-2">
@@ -170,8 +172,8 @@ export default function Clients() {
       </div>
 
       {/* Filter bar */}
-      <Card className="border border-slate-100 rounded-2xl shadow-sm bg-white">
-        <CardContent className="p-4 md:p-5">
+      <Card className="border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm bg-white dark:bg-slate-800/80">
+        <div className="p-4 md:p-5">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
             <Input
               placeholder="Search clients..."
@@ -186,7 +188,7 @@ export default function Clients() {
             ].map(({ value, onChange, options }, i) => (
               <select
                 key={i}
-                className="h-9 border border-slate-100 rounded-xl px-3 text-sm bg-background text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                className={selectCls}
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
               >
@@ -199,118 +201,116 @@ export default function Clients() {
             {(filter !== "All" || statusFilter !== "All" || typeFilter !== "All" || search) && (
               <button
                 onClick={() => { setFilter("All"); setStatusFilter("All"); setTypeFilter("All"); setSearch(""); }}
-                className="text-xs text-indigo-600 hover:text-indigo-700 font-semibold"
+                className="text-xs text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 font-semibold"
               >
                 Clear filters
               </button>
             )}
           </div>
-        </CardContent>
+        </div>
       </Card>
 
       {/* Desktop Table */}
-      <Card className="border border-slate-100 rounded-2xl shadow-sm bg-white hidden md:block">
-        <CardContent className="p-0">
-          <div className="overflow-auto">
-            <Table>
-              <TableHeader>
-                <TableRow className="border-b border-slate-100 bg-slate-50/80">
-                  <TableHead className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 pl-5">Name</TableHead>
-                  <TableHead className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 cursor-pointer hover:text-indigo-600 select-none" onClick={() => toggleSort("date")}>
-                    <div className="flex items-center gap-1">Date <SortIcon col="date" /></div>
-                  </TableHead>
-                  <TableHead className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 cursor-pointer hover:text-indigo-600 select-none" onClick={() => toggleSort("priority")}>
-                    <div className="flex items-center gap-1">Priority <SortIcon col="priority" /></div>
-                  </TableHead>
-                  <TableHead className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Type</TableHead>
-                  <TableHead className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 cursor-pointer hover:text-indigo-600 text-right select-none" onClick={() => toggleSort("budget")}>
-                    <div className="flex items-center justify-end gap-1">Budget <SortIcon col="budget" /></div>
-                  </TableHead>
-                  <TableHead className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Status</TableHead>
-                  <TableHead className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 pr-5">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {isLoading ? (
-                  [...Array(4)].map((_, i) => (
-                    <TableRow key={i}>
-                      <TableCell colSpan={7} className="py-4">
-                        <div className="h-5 w-full bg-slate-100 animate-pulse rounded-lg" />
-                      </TableCell>
-                    </TableRow>
-                  ))
-                ) : !filteredClients?.length ? (
-                  <TableRow>
-                    <TableCell colSpan={7}>
-                      <div className="flex flex-col items-center justify-center py-16 gap-3">
-                        <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center">
-                          <Users className="w-7 h-7 text-slate-400" />
-                        </div>
-                        <p className="text-sm font-semibold text-slate-600">No clients found</p>
-                        <p className="text-xs text-slate-400">Try adjusting your filters</p>
-                      </div>
+      <Card className="border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm bg-white dark:bg-slate-800/80 hidden md:block">
+        <div className="overflow-auto">
+          <Table>
+            <TableHeader>
+              <TableRow className="border-b border-slate-100 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-700/30">
+                <TableHead className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 pl-5">Name</TableHead>
+                <TableHead className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 cursor-pointer hover:text-indigo-600 select-none" onClick={() => toggleSort("date")}>
+                  <div className="flex items-center gap-1">Date <SortIcon col="date" /></div>
+                </TableHead>
+                <TableHead className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 cursor-pointer hover:text-indigo-600 select-none" onClick={() => toggleSort("priority")}>
+                  <div className="flex items-center gap-1">Priority <SortIcon col="priority" /></div>
+                </TableHead>
+                <TableHead className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Type</TableHead>
+                <TableHead className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 cursor-pointer hover:text-indigo-600 text-right select-none" onClick={() => toggleSort("budget")}>
+                  <div className="flex items-center justify-end gap-1">Budget <SortIcon col="budget" /></div>
+                </TableHead>
+                <TableHead className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Status</TableHead>
+                <TableHead className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 pr-5">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {isLoading ? (
+                [...Array(4)].map((_, i) => (
+                  <TableRow key={i}>
+                    <TableCell colSpan={7} className="py-4">
+                      <div className="h-5 w-full bg-slate-100 dark:bg-slate-700 animate-pulse rounded-lg" />
                     </TableCell>
                   </TableRow>
-                ) : (
-                  filteredClients.map((client) => {
-                    const priority = getPriority(new Date(client.eventDate));
-                    return (
-                      <TableRow
-                        key={client.id}
-                        className="border-b border-slate-100 hover:bg-slate-50/80 transition-colors cursor-pointer group"
-                        onClick={() => setLocation(`/clients/${client.id}`)}
-                      >
-                        <TableCell className="font-semibold text-slate-800 pl-5 group-hover:text-indigo-600 transition-colors">
-                          {client.name}
-                        </TableCell>
-                        <TableCell className="text-sm text-slate-500">
-                          {format(new Date(client.eventDate), "MMM d, yyyy")}
-                        </TableCell>
-                        <TableCell>
-                          <div>
-                            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${priority.color}`}>
-                              {priority.label}
-                            </span>
-                            <p className="text-[10px] text-slate-400 mt-0.5">{priority.text}</p>
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-sm text-slate-500">{client.eventType}</TableCell>
-                        <TableCell className="text-right font-bold text-slate-800">
-                          {client.budget ? `$${Number(client.budget).toLocaleString()}` : "—"}
-                        </TableCell>
-                        <TableCell>
-                          <span className={`text-[10px] font-semibold px-2.5 py-0.5 rounded-full ${statusStyle[client.status] || "bg-slate-100 text-slate-600"}`}>
-                            {client.status}
+                ))
+              ) : !filteredClients?.length ? (
+                <TableRow>
+                  <TableCell colSpan={7}>
+                    <div className="flex flex-col items-center justify-center py-16 gap-3">
+                      <div className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
+                        <Users className="w-7 h-7 text-slate-400 dark:text-slate-500" />
+                      </div>
+                      <p className="text-sm font-semibold text-slate-600 dark:text-slate-400">No clients found</p>
+                      <p className="text-xs text-slate-400">Try adjusting your filters</p>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filteredClients.map((client) => {
+                  const priority = getPriority(new Date(client.eventDate));
+                  return (
+                    <TableRow
+                      key={client.id}
+                      className="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50/80 dark:hover:bg-slate-700/30 transition-colors cursor-pointer group"
+                      onClick={() => setLocation(`/clients/${client.id}`)}
+                    >
+                      <TableCell className="font-semibold text-slate-800 dark:text-slate-200 pl-5 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                        {client.name}
+                      </TableCell>
+                      <TableCell className="text-sm text-slate-500 dark:text-slate-400">
+                        {format(new Date(client.eventDate), "MMM d, yyyy")}
+                      </TableCell>
+                      <TableCell>
+                        <div>
+                          <span className={`chip ${priority.color}`}>
+                            {priority.label}
                           </span>
-                        </TableCell>
-                        <TableCell className="pr-5" onClick={(e) => e.stopPropagation()}>
-                          <div className="flex gap-1">
-                            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" onClick={() => setLocation(`/clients/${client.id}`)}>
-                              <Eye className="w-3.5 h-3.5 text-slate-500" />
-                            </Button>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" onClick={() => setDeleteId(client.id)}>
-                              <Trash2 className="w-3.5 h-3.5 text-red-400" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
+                          <p className="text-[10px] text-slate-400 mt-0.5">{priority.text}</p>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-sm text-slate-500 dark:text-slate-400">{client.eventType}</TableCell>
+                      <TableCell className="text-right font-bold text-slate-800 dark:text-slate-200">
+                        {client.budget ? `$${Number(client.budget).toLocaleString()}` : "—"}
+                      </TableCell>
+                      <TableCell>
+                        <span className={`chip ${statusStyle[client.status] || "badge-slate"}`}>
+                          {client.status}
+                        </span>
+                      </TableCell>
+                      <TableCell className="pr-5" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex gap-1">
+                          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" onClick={() => setLocation(`/clients/${client.id}`)}>
+                            <Eye className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" onClick={() => setDeleteId(client.id)}>
+                            <Trash2 className="w-3.5 h-3.5 text-red-400" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </Card>
 
       {/* Mobile Card List */}
       <div className="md:hidden space-y-3">
         {isLoading ? (
-          [...Array(3)].map((_, i) => <div key={i} className="h-28 bg-white rounded-2xl animate-pulse border border-slate-100" />)
+          [...Array(3)].map((_, i) => <div key={i} className="h-28 bg-white dark:bg-slate-800 rounded-2xl animate-pulse border border-slate-100 dark:border-slate-700" />)
         ) : !filteredClients?.length ? (
-          <div className="flex flex-col items-center justify-center py-16 gap-3 bg-white rounded-2xl border border-slate-100">
-            <Users className="w-10 h-10 text-slate-300" />
-            <p className="text-sm font-medium text-slate-500">No clients found</p>
+          <div className="flex flex-col items-center justify-center py-16 gap-3 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700">
+            <Users className="w-10 h-10 text-slate-300 dark:text-slate-600" />
+            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">No clients found</p>
           </div>
         ) : (
           filteredClients.map((client) => {
@@ -319,23 +319,23 @@ export default function Clients() {
               <div
                 key={client.id}
                 onClick={() => setLocation(`/clients/${client.id}`)}
-                className="bg-white rounded-2xl border border-slate-100 p-4 shadow-sm active:scale-[0.98] transition-all cursor-pointer"
+                className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 p-4 shadow-sm active:scale-[0.98] transition-all cursor-pointer"
               >
                 <div className="flex items-start justify-between mb-2">
                   <div>
-                    <p className="font-bold text-slate-800 text-sm">{client.name}</p>
+                    <p className="font-bold text-slate-800 dark:text-slate-200 text-sm">{client.name}</p>
                     <p className="text-xs text-slate-400 mt-0.5">{client.eventType}</p>
                   </div>
-                  <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${statusStyle[client.status] || "bg-slate-100 text-slate-600"}`}>
+                  <span className={`chip ${statusStyle[client.status] || "badge-slate"}`}>
                     {client.status}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3 text-xs text-slate-400">
                     <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />{format(new Date(client.eventDate), "MMM d, yyyy")}</span>
-                    <span className={`font-semibold px-1.5 py-0.5 rounded-md ${priority.color} text-[10px]`}>{priority.label}</span>
+                    <span className={`chip ${priority.color} text-[10px]`}>{priority.label}</span>
                   </div>
-                  <p className="text-sm font-bold text-slate-800">
+                  <p className="text-sm font-bold text-slate-800 dark:text-slate-200">
                     {client.budget ? `$${Number(client.budget).toLocaleString()}` : "—"}
                   </p>
                 </div>
@@ -351,7 +351,7 @@ export default function Clients() {
           <DialogHeader>
             <DialogTitle>Delete Client</DialogTitle>
           </DialogHeader>
-          <p className="text-sm text-slate-500 mt-2">Are you sure? This cannot be undone.</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">Are you sure? This cannot be undone.</p>
           <DialogFooter className="mt-4 gap-2">
             <Button variant="outline" onClick={() => setDeleteId(null)} className="rounded-xl">Cancel</Button>
             <Button variant="destructive" onClick={handleDelete} className="rounded-xl">Delete</Button>
@@ -407,9 +407,9 @@ function CreateClientForm({ onSuccess }: { onSuccess: () => void }) {
     );
   };
 
-  const inputCls = "h-9 rounded-xl text-sm border-slate-100 focus:ring-indigo-500/20";
-  const selectCls = "w-full h-9 border border-slate-100 rounded-xl px-3 text-sm bg-background text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20";
-  const labelCls = "text-xs font-semibold text-slate-600 mb-1 block";
+  const inputCls = "h-9 rounded-xl text-sm";
+  const selectCls = "w-full h-9 border border-slate-200 dark:border-slate-700 rounded-xl px-3 text-sm bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20";
+  const labelCls = "text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 block";
 
   return (
     <div className="space-y-4 pt-2">
@@ -437,7 +437,7 @@ function CreateClientForm({ onSuccess }: { onSuccess: () => void }) {
         </div>
       </div>
 
-      <div className="flex items-center gap-2 p-3 bg-indigo-50 rounded-xl">
+      <div className="flex items-center gap-2 p-3 bg-indigo-50 dark:bg-indigo-950/30 rounded-xl border border-indigo-100 dark:border-indigo-900/40">
         <input
           type="checkbox"
           id="template"
@@ -445,7 +445,7 @@ function CreateClientForm({ onSuccess }: { onSuccess: () => void }) {
           onChange={(e) => setApplyTemplate(e.target.checked)}
           className="accent-indigo-600 w-4 h-4"
         />
-        <label htmlFor="template" className="text-xs text-indigo-700 font-medium cursor-pointer">
+        <label htmlFor="template" className="text-xs text-indigo-700 dark:text-indigo-300 font-medium cursor-pointer">
           Auto-create default services from event template
         </label>
       </div>

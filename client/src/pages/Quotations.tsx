@@ -30,7 +30,7 @@ import { useLocation } from "wouter";
 // ─── constants ────────────────────────────────────────────────────────────────
 
 const STATUS_STYLES: Record<string, { chip: string; dot: string; bar: string }> = {
-  Draft:    { chip: "bg-slate-100 text-slate-600",     dot: "bg-slate-400",    bar: "bg-slate-300" },
+  Draft:    { chip: "bg-slate-100 dark:bg-slate-700/60 text-slate-600 dark:text-slate-300",     dot: "bg-slate-400",    bar: "bg-slate-300" },
   Sent:     { chip: "bg-blue-100 text-blue-700",       dot: "bg-blue-500",     bar: "bg-blue-400" },
   Accepted: { chip: "bg-emerald-100 text-emerald-700", dot: "bg-emerald-500",  bar: "bg-emerald-500" },
   Rejected: { chip: "bg-red-100 text-red-600",         dot: "bg-red-400",      bar: "bg-red-400" },
@@ -39,7 +39,7 @@ const STATUS_STYLES: Record<string, { chip: string; dot: string; bar: string }> 
 const CLIENT_STATUS_STYLES: Record<string, string> = {
   Lead:      "bg-amber-100 text-amber-700",
   Confirmed: "bg-emerald-100 text-emerald-700",
-  Completed: "bg-slate-100 text-slate-600",
+  Completed: "bg-slate-100 dark:bg-slate-700/60 text-slate-600 dark:text-slate-300",
   Cancelled: "bg-red-100 text-red-600",
 };
 
@@ -131,8 +131,8 @@ function ClientCard({ client, budget, finalPrice }: { client: any; budget: numbe
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="font-bold text-slate-800 text-sm truncate">{client.name}</span>
-            <Badge className={`text-[9px] px-1.5 py-0 ${CLIENT_STATUS_STYLES[client.status] || "bg-slate-100 text-slate-600"}`}>
+            <span className="font-bold text-slate-800 dark:text-slate-200 text-sm truncate">{client.name}</span>
+            <Badge className={`text-[9px] px-1.5 py-0 ${CLIENT_STATUS_STYLES[client.status] || "bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400"}`}>
               {client.status}
             </Badge>
           </div>
@@ -147,17 +147,17 @@ function ClientCard({ client, budget, finalPrice }: { client: any; budget: numbe
         </div>
       </div>
       <div className="grid grid-cols-3 gap-2 text-center mb-3">
-        <div className="bg-white rounded-lg p-2">
+        <div className="bg-white dark:bg-slate-700/50 rounded-lg p-2">
           <p className="text-[10px] text-slate-400 font-medium">Budget</p>
-          <p className="text-xs font-bold text-slate-700">{fmt(Number(client.budget) || 0)}</p>
+          <p className="text-xs font-bold text-slate-700 dark:text-slate-300">{fmt(Number(client.budget) || 0)}</p>
         </div>
-        <div className="bg-white rounded-lg p-2">
+        <div className="bg-white dark:bg-slate-700/50 rounded-lg p-2">
           <p className="text-[10px] text-slate-400 font-medium">Event</p>
-          <p className="text-xs font-bold text-slate-700 truncate">{client.eventType?.split(" ")[0] || "—"}</p>
+          <p className="text-xs font-bold text-slate-700 dark:text-slate-300 truncate">{client.eventType?.split(" ")[0] || "—"}</p>
         </div>
-        <div className="bg-white rounded-lg p-2">
+        <div className="bg-white dark:bg-slate-700/50 rounded-lg p-2">
           <p className="text-[10px] text-slate-400 font-medium">Guests</p>
-          <p className="text-xs font-bold text-slate-700">{client.guestCount || "—"}</p>
+          <p className="text-xs font-bold text-slate-700 dark:text-slate-300">{client.guestCount || "—"}</p>
         </div>
       </div>
       {budget > 0 && (
@@ -183,7 +183,7 @@ function ClientCard({ client, budget, finalPrice }: { client: any; budget: numbe
 
 function TemplateBanner({ eventType, onApply, onDismiss }: { eventType: string; onApply: () => void; onDismiss: () => void }) {
   return (
-    <div className="flex items-center gap-3 px-3 py-2.5 bg-indigo-50 border border-indigo-100 rounded-xl">
+    <div className="flex items-center gap-3 px-3 py-2.5 bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/50 rounded-xl">
       <Sparkles className="w-4 h-4 text-indigo-500 shrink-0" />
       <div className="flex-1">
         <p className="text-xs font-semibold text-indigo-800">
@@ -514,12 +514,12 @@ export default function Quotations() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400 mb-0.5">Sales</p>
-            <h2 className="text-xl font-bold text-slate-900">Quotation Builder</h2>
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white">Quotation Builder</h2>
             <p className="text-xs text-slate-400 mt-0.5">Build, price and send professional event quotes</p>
           </div>
           <div className="flex items-center gap-2">
             {selectedQuoteId && (
-              <span className="text-xs text-slate-400 font-mono bg-slate-100 px-2 py-1 rounded-lg">
+              <span className="text-xs text-slate-400 font-mono bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded-lg">
                 Quote #{String(selectedQuoteId).padStart(4, "0")}
               </span>
             )}
@@ -563,7 +563,7 @@ export default function Quotations() {
                 sub: "in progress",
                 icon: Clock,
                 cls: "text-slate-600",
-                bg: "bg-slate-100",
+                bg: "bg-slate-100 dark:bg-slate-700/50",
               },
             ].map(({ label, value, sub, icon: Icon, cls, bg }) => (
               <div key={label} className="stat-card">
@@ -581,12 +581,12 @@ export default function Quotations() {
         )}
 
         {/* ── Completeness progress bar ── */}
-        <div className="flex items-center gap-3 bg-white border border-slate-100 rounded-xl px-4 py-2.5 shadow-sm">
+        <div className="flex items-center gap-3 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl px-4 py-2.5 shadow-sm">
           <div className="flex items-center gap-2 shrink-0">
             <Target className="w-3.5 h-3.5 text-slate-400" />
             <span className="text-xs font-semibold text-slate-500">Quote completeness</span>
           </div>
-          <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+          <div className="flex-1 h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
             <div
               className={`h-full rounded-full transition-all duration-500 ${
                 completeness.score === 100 ? "bg-emerald-500" : "bg-gradient-to-r from-indigo-500 to-indigo-400"
@@ -607,15 +607,15 @@ export default function Quotations() {
           <div className="xl:col-span-2 flex flex-col gap-5">
 
             {/* ── CARD 1: Client & Event ── */}
-            <Card className="border border-slate-100 shadow-sm">
-              <CardHeader className="border-b border-slate-100 pb-3">
+            <Card className="border border-slate-100 dark:border-slate-700 shadow-sm dark:bg-slate-800/80">
+              <CardHeader className="border-b border-slate-100 dark:border-slate-700 pb-3">
                 <div className="flex items-center gap-2">
                   <div className="w-7 h-7 rounded-lg bg-indigo-100 flex items-center justify-center">
                     <Users className="w-3.5 h-3.5 text-indigo-600" />
                   </div>
                   <CardTitle className="text-base">Client & Event Details</CardTitle>
                   {selectedQuoteId && (
-                    <div className="ml-auto flex items-center gap-1.5 bg-slate-50 rounded-lg px-2 py-1">
+                    <div className="ml-auto flex items-center gap-1.5 bg-slate-50 dark:bg-slate-700/50 rounded-lg px-2 py-1">
                       <div className={`w-1.5 h-1.5 rounded-full ${STATUS_STYLES[status]?.dot}`} />
                       <span className="text-xs font-semibold text-slate-600">{status}</span>
                     </div>
@@ -709,8 +709,8 @@ export default function Quotations() {
             </Card>
 
             {/* ── CARD 2: Services ── */}
-            <Card className="border border-slate-100 shadow-sm">
-              <CardHeader className="border-b border-slate-100 pb-3">
+            <Card className="border border-slate-100 dark:border-slate-700 shadow-sm dark:bg-slate-800/80">
+              <CardHeader className="border-b border-slate-100 dark:border-slate-700 pb-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="w-7 h-7 rounded-lg bg-indigo-100 flex items-center justify-center">
@@ -756,7 +756,7 @@ export default function Quotations() {
                 </div>
 
                 {/* Column headers */}
-                <div className="grid grid-cols-12 text-[10px] font-semibold uppercase tracking-wider text-slate-400 px-1 pb-1 border-b border-slate-100">
+                <div className="grid grid-cols-12 text-[10px] font-semibold uppercase tracking-wider text-slate-400 px-1 pb-1 border-b border-slate-100 dark:border-slate-700">
                   <div className="col-span-1" />
                   <div className="col-span-7">Service / Description</div>
                   <div className="col-span-3 text-right pr-2">Cost ($)</div>
@@ -776,7 +776,7 @@ export default function Quotations() {
                           item.tag === "venue"  ? "bg-blue-50/70 border border-blue-100" :
                           item.tag === "vendor" ? "bg-purple-50/50 border border-purple-100" :
                           warnRow               ? "bg-amber-50/60 border border-amber-100" :
-                          "hover:bg-slate-50/80"
+                          "hover:bg-slate-50/80 dark:hover:bg-slate-700/30"
                         }`}
                       >
                         <div className="shrink-0 w-5 flex justify-center">
@@ -816,7 +816,7 @@ export default function Quotations() {
                 </div>
 
                 {/* Vendor Quick-Add */}
-                <div className="border border-slate-100 rounded-xl p-3 bg-slate-50/70 space-y-3">
+                <div className="border border-slate-100 dark:border-slate-700 rounded-xl p-3 bg-slate-50/70 dark:bg-slate-800/50 space-y-3">
                   <div className="flex items-center gap-2">
                     <ShoppingBag className="w-3.5 h-3.5 text-slate-400" />
                     <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
@@ -825,7 +825,7 @@ export default function Quotations() {
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <Select value={quickVendorId} onValueChange={(v) => { setQuickVendorId(v); setQuickProductId(""); }}>
-                      <SelectTrigger className="h-8 rounded-lg text-xs bg-white" data-testid="select-quick-vendor">
+                      <SelectTrigger className="h-8 rounded-lg text-xs bg-white dark:bg-slate-800" data-testid="select-quick-vendor">
                         <SelectValue placeholder="Select vendor…" />
                       </SelectTrigger>
                       <SelectContent>
@@ -842,7 +842,7 @@ export default function Quotations() {
                       onValueChange={setQuickProductId}
                       disabled={!quickVendorId || quickProducts.length === 0}
                     >
-                      <SelectTrigger className="h-8 rounded-lg text-xs bg-white" data-testid="select-quick-product">
+                      <SelectTrigger className="h-8 rounded-lg text-xs bg-white dark:bg-slate-800" data-testid="select-quick-product">
                         <SelectValue placeholder={
                           !quickVendorId ? "Pick vendor first" :
                           quickProducts.length === 0 ? "No services listed" : "Select service…"
@@ -878,7 +878,7 @@ export default function Quotations() {
                 </div>
 
                 {/* Pricing adjustments */}
-                <div className="border-t border-slate-100 pt-4">
+                <div className="border-t border-slate-100 dark:border-slate-700 pt-4">
                   <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-3">Pricing Adjustments</p>
                   <div className="grid grid-cols-3 gap-3">
                     <div>
@@ -919,13 +919,13 @@ export default function Quotations() {
 
             {/* ── CARD 3: Print Preview ── */}
             <Card className="border border-slate-100 shadow-sm" id="quote-preview" ref={printRef}>
-              <CardHeader className="border-b border-slate-100 pb-3">
+              <CardHeader className="border-b border-slate-100 dark:border-slate-700 pb-3">
                 <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center">
+                  <div className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
                     <FileText className="w-3.5 h-3.5 text-slate-500" />
                   </div>
                   <CardTitle className="text-base">Quote Preview</CardTitle>
-                  <span className="text-[10px] text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full ml-auto">Print-ready</span>
+                  <span className="text-[10px] text-slate-400 bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded-full ml-auto">Print-ready</span>
                 </div>
               </CardHeader>
               <CardContent className="pt-6 space-y-6">
@@ -937,7 +937,7 @@ export default function Quotations() {
                       <span className="text-white font-bold text-sm">EE</span>
                     </div>
                     <div>
-                      <p className="font-bold text-slate-900 text-base leading-tight">EventElite</p>
+                      <p className="font-bold text-slate-900 dark:text-white text-base leading-tight">EventElite</p>
                       <p className="text-[11px] text-slate-400">Professional Event Management</p>
                     </div>
                   </div>
@@ -1082,8 +1082,8 @@ export default function Quotations() {
           <div className="flex flex-col gap-4">
 
             {/* ── Financial Summary ── */}
-            <Card className="border border-slate-100 shadow-sm">
-              <CardHeader className="border-b border-slate-100 pb-3">
+            <Card className="border border-slate-100 dark:border-slate-700 shadow-sm dark:bg-slate-800/80">
+              <CardHeader className="border-b border-slate-100 dark:border-slate-700 pb-3">
                 <div className="flex items-center gap-2">
                   <div className="w-7 h-7 rounded-lg bg-indigo-100 flex items-center justify-center">
                     <DollarSign className="w-3.5 h-3.5 text-indigo-600" />
@@ -1145,10 +1145,10 @@ export default function Quotations() {
             </Card>
 
             {/* ── Quote Checklist ── */}
-            <Card className="border border-slate-100 shadow-sm">
-              <CardHeader className="border-b border-slate-100 pb-3">
+            <Card className="border border-slate-100 dark:border-slate-700 shadow-sm dark:bg-slate-800/80">
+              <CardHeader className="border-b border-slate-100 dark:border-slate-700 pb-3">
                 <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center">
+                  <div className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
                     <Target className="w-3.5 h-3.5 text-slate-500" />
                   </div>
                   <CardTitle className="text-sm">Readiness Checklist</CardTitle>
@@ -1174,10 +1174,10 @@ export default function Quotations() {
             </Card>
 
             {/* ── Actions ── */}
-            <Card className="border border-slate-100 shadow-sm">
-              <CardHeader className="border-b border-slate-100 pb-3">
+            <Card className="border border-slate-100 dark:border-slate-700 shadow-sm dark:bg-slate-800/80">
+              <CardHeader className="border-b border-slate-100 dark:border-slate-700 pb-3">
                 <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center">
+                  <div className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
                     <Zap className="w-3.5 h-3.5 text-slate-500" />
                   </div>
                   <CardTitle className="text-sm">Actions</CardTitle>
@@ -1215,8 +1215,8 @@ export default function Quotations() {
             </Card>
 
             {/* ── Status picker ── */}
-            <Card className="border border-slate-100 shadow-sm">
-              <CardHeader className="border-b border-slate-100 pb-3">
+            <Card className="border border-slate-100 dark:border-slate-700 shadow-sm dark:bg-slate-800/80">
+              <CardHeader className="border-b border-slate-100 dark:border-slate-700 pb-3">
                 <CardTitle className="text-sm">Update Status</CardTitle>
                 {!selectedQuoteId && (
                   <p className="text-[10px] text-slate-400 mt-0.5">Save the quote first to change status</p>
@@ -1245,7 +1245,7 @@ export default function Quotations() {
             </Card>
 
             {/* ── Saved quotes ── */}
-            <Card className="border border-slate-100 shadow-sm">
+            <Card className="border border-slate-100 dark:border-slate-700 shadow-sm dark:bg-slate-800/80">
               <CardHeader className="border-b border-slate-100 pb-3 space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -1321,7 +1321,7 @@ export default function Quotations() {
 
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-1.5">
-                              <p className="text-xs font-bold text-slate-700 truncate">
+                              <p className="text-xs font-bold text-slate-700 dark:text-slate-300 truncate">
                                 {c ? c.name : q.eventType}
                               </p>
                               <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full shrink-0 ${STATUS_STYLES[q.status]?.chip}`}>

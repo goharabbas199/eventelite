@@ -49,20 +49,20 @@ export default function Venues() {
       <div className="flex items-center justify-between">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400 mb-0.5">Management</p>
-          <h2 className="text-xl font-bold text-slate-900">Venues</h2>
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white">Venues</h2>
         </div>
         <div className="flex items-center gap-2">
           {/* View toggle */}
-          <div className="hidden sm:flex bg-slate-100 rounded-xl p-1 gap-0.5">
+          <div className="hidden sm:flex bg-slate-100 dark:bg-slate-800 border border-transparent dark:border-slate-700 rounded-xl p-1 gap-0.5">
             <button
               onClick={() => setViewMode("grid")}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${viewMode === "grid" ? "bg-white text-indigo-600 shadow-sm" : "text-slate-500"}`}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${viewMode === "grid" ? "bg-white dark:bg-slate-700 text-indigo-600 shadow-sm" : "text-slate-500 dark:text-slate-400"}`}
             >
               <LayoutGrid className="w-3.5 h-3.5" /> Grid
             </button>
             <button
               onClick={() => setViewMode("table")}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${viewMode === "table" ? "bg-white text-indigo-600 shadow-sm" : "text-slate-500"}`}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${viewMode === "table" ? "bg-white dark:bg-slate-700 text-indigo-600 shadow-sm" : "text-slate-500 dark:text-slate-400"}`}
             >
               <List className="w-3.5 h-3.5" /> Table
             </button>
@@ -79,9 +79,9 @@ export default function Venues() {
       {/* KPI row */}
       <div className="grid grid-cols-3 gap-3">
         {[
-          { label: "Total Venues", value: totalVenues, icon: Building2, cls: "text-indigo-600", bg: "bg-indigo-50" },
-          { label: "Avg Capacity", value: avgCapacity, icon: Users, cls: "text-emerald-600", bg: "bg-emerald-50" },
-          { label: "Avg Base Price", value: `$${avgPrice.toLocaleString()}`, icon: DollarSign, cls: "text-purple-600", bg: "bg-purple-50" },
+          { label: "Total Venues", value: totalVenues, icon: Building2, cls: "text-indigo-600 dark:text-indigo-400", bg: "bg-indigo-50 dark:bg-indigo-950/40" },
+          { label: "Avg Capacity", value: avgCapacity, icon: Users, cls: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-50 dark:bg-emerald-950/40" },
+          { label: "Avg Base Price", value: `$${avgPrice.toLocaleString()}`, icon: DollarSign, cls: "text-purple-600 dark:text-purple-400", bg: "bg-purple-50 dark:bg-purple-950/40" },
         ].map(({ label, value, icon: Icon, cls, bg }) => (
           <div key={label} className="stat-card">
             <div className="flex items-center gap-3">
