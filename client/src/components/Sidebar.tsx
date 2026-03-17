@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import {
   LayoutDashboard,
@@ -13,20 +14,22 @@ import {
   Calendar,
   FileText,
   Sparkles,
+  MoreHorizontal,
+  X,
 } from "lucide-react";
 import { useSettings } from "@/context/SettingsContext";
 
 const links = [
-  { href: "/",           label: "Dashboard",  icon: LayoutDashboard },
-  { href: "/clients",    label: "Clients",    icon: Users },
-  { href: "/events",     label: "Events",     icon: CalendarDays },
-  { href: "/calendar",   label: "Calendar",   icon: Calendar },
-  { href: "/vendors",    label: "Vendors",    icon: Store },
-  { href: "/venues",     label: "Venues",     icon: MapPin },
-  { href: "/quotations", label: "Quotes",     icon: ReceiptText },
-  { href: "/invoices",   label: "Invoices",   icon: FileText },
-  { href: "/budget",     label: "Budget",     icon: PieChart },
-  { href: "/analytics",  label: "Analytics",  icon: BarChart2 },
+  { href: "/",           label: "Dashboard",    icon: LayoutDashboard },
+  { href: "/clients",    label: "Clients",      icon: Users },
+  { href: "/events",     label: "Events",       icon: CalendarDays },
+  { href: "/calendar",   label: "Calendar",     icon: Calendar },
+  { href: "/vendors",    label: "Vendors",      icon: Store },
+  { href: "/venues",     label: "Venues",       icon: MapPin },
+  { href: "/quotations", label: "Quotes",       icon: ReceiptText },
+  { href: "/invoices",   label: "Invoices",     icon: FileText },
+  { href: "/budget",     label: "Budget",       icon: PieChart },
+  { href: "/analytics",  label: "Analytics",    icon: BarChart2 },
   { href: "/ai",         label: "AI Assistant", icon: Sparkles },
 ];
 
@@ -118,35 +121,105 @@ export function Sidebar({ collapsed }: { collapsed: boolean }) {
 /* ─── Mobile Bottom Navigation ─── */
 export function MobileNav() {
   const [location] = useLocation();
+  const [moreOpen, setMoreOpen] = useState(false);
 
-  const mobileLinks = [
-    { href: "/",          label: "Home",      icon: LayoutDashboard },
-    { href: "/clients",   label: "Clients",   icon: Users },
-    { href: "/vendors",   label: "Vendors",   icon: Store },
-    { href: "/budget",    label: "Budget",    icon: PieChart },
-    { href: "/analytics", label: "Analytics", icon: BarChart2 },
-    { href: "/settings",  label: "Settings",  icon: Settings },
+  const primaryLinks = [
+    { href: "/",          label: "Home",     icon: LayoutDashboard },
+    { href: "/events",    label: "Events",   icon: CalendarDays },
+    { href: "/calendar",  label: "Calendar", icon: Calendar },
+    { href: "/invoices",  label: "Invoices", icon: FileText },
   ];
 
-  return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-100 dark:border-slate-800 shadow-[0_-1px_20px_rgba(0,0,0,0.06)]">
-      <div className="flex items-stretch h-[58px]">
-        {mobileLinks.map((link) => {
-          const Icon = link.icon;
-          const isActive = location === link.href || (link.href !== "/" && location.startsWith(link.href));
+  const moreLinks = [
+    { href: "/clients",    label: "Clients",      icon: Users },
+    { href: "/vendors",    label: "Vendors",      icon: Store },
+    { href: "/venues",     label: "Venues",       icon: MapPin },
+    { href: "/quotations", label: "Quotes",       icon: ReceiptText },
+    { href: "/budget",     label: "Budget",       icon: PieChart },
+    { href: "/analytics",  label: "Analytics",    icon: BarChart2 },
+    { href: "/ai",         label: "AI Assistant", icon: Sparkles },
+    { href: "/settings",   label: "Settings",     icon: Settings },
+  ];
 
-          return (
-            <Link key={link.href} href={link.href} className="flex-1">
-              <div className={`flex flex-col items-center justify-center gap-1 h-full transition-all duration-150 ${isActive ? "text-primary" : "text-slate-400 dark:text-slate-500"}`}>
-                <div className={`p-1 rounded-lg transition-all ${isActive ? "bg-primary/10" : ""}`}>
-                  <Icon className="w-[18px] h-[18px]" strokeWidth={isActive ? 2.2 : 1.8} />
+  const isMoreActive = moreLinks.some(
+    (l) => location === l.href || (l.href !== "/" && location.startsWith(l.href))
+  );
+
+  return (
+    <>
+      {/* Bottom Tab Bar */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-100 dark:border-slate-800 shadow-[0_-1px_20px_rgba(0,0,0,0.06)]">
+        <div className="flex items-stretch h-[58px]">
+          {primaryLinks.map((link) => {
+            const Icon = link.icon;
+            const isActive = !moreOpen && (location === link.href || (link.href !== "/" && location.startsWith(link.href)));
+            return (
+              <Link key={link.href} href={link.href} className="flex-1" onClick={() => setMoreOpen(false)}>
+                <div className={`flex flex-col items-center justify-center gap-1 h-full transition-all duration-150 ${isActive ? "text-primary" : "text-slate-400 dark:text-slate-500"}`}>
+                  <div className={`p-1 rounded-lg transition-all ${isActive ? "bg-primary/10" : ""}`}>
+                    <Icon className="w-[18px] h-[18px]" strokeWidth={isActive ? 2.2 : 1.8} />
+                  </div>
+                  <span className="text-[9px] font-semibold leading-none tracking-wide">{link.label}</span>
                 </div>
-                <span className="text-[9px] font-semibold leading-none tracking-wide">{link.label}</span>
-              </div>
-            </Link>
-          );
-        })}
-      </div>
-    </nav>
+              </Link>
+            );
+          })}
+
+          {/* More button */}
+          <button
+            className="flex-1 flex flex-col items-center justify-center gap-1 h-full transition-all duration-150"
+            onClick={() => setMoreOpen((o) => !o)}
+            data-testid="button-mobile-more"
+          >
+            <div className={`p-1 rounded-lg transition-all ${moreOpen || isMoreActive ? "bg-primary/10" : ""}`}>
+              {moreOpen
+                ? <X className="w-[18px] h-[18px]" strokeWidth={2.2} style={{ color: "hsl(var(--primary))" }} />
+                : <MoreHorizontal className={`w-[18px] h-[18px]`} strokeWidth={moreOpen || isMoreActive ? 2.2 : 1.8} style={{ color: moreOpen || isMoreActive ? "hsl(var(--primary))" : undefined }} />
+              }
+            </div>
+            <span className={`text-[9px] font-semibold leading-none tracking-wide ${moreOpen || isMoreActive ? "text-primary" : "text-slate-400 dark:text-slate-500"}`}>More</span>
+          </button>
+        </div>
+      </nav>
+
+      {/* More Menu — slide-up overlay */}
+      {moreOpen && (
+        <>
+          {/* Backdrop */}
+          <div
+            className="md:hidden fixed inset-0 z-40 bg-black/30 backdrop-blur-sm"
+            onClick={() => setMoreOpen(false)}
+          />
+          {/* Sheet */}
+          <div className="md:hidden fixed bottom-[58px] left-0 right-0 z-50 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 rounded-t-2xl shadow-2xl px-4 pt-3 pb-4 animate-in slide-in-from-bottom-4 duration-200">
+            <div className="w-10 h-1 rounded-full bg-slate-200 dark:bg-slate-700 mx-auto mb-4" />
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3 px-1">More pages</p>
+            <div className="grid grid-cols-4 gap-2">
+              {moreLinks.map((link) => {
+                const Icon = link.icon;
+                const isActive = location === link.href || (link.href !== "/" && location.startsWith(link.href));
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setMoreOpen(false)}
+                    data-testid={`mobile-more-link-${link.label.toLowerCase().replace(/\s+/g, "-")}`}
+                  >
+                    <div className={`flex flex-col items-center gap-1.5 py-3 px-1 rounded-xl transition-all ${
+                      isActive
+                        ? "bg-primary/10 text-primary"
+                        : "text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
+                    }`}>
+                      <Icon className="w-5 h-5" strokeWidth={isActive ? 2.2 : 1.8} />
+                      <span className="text-[10px] font-semibold text-center leading-tight">{link.label}</span>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </>
+      )}
+    </>
   );
 }

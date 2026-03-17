@@ -241,13 +241,13 @@ export default function Events() {
             const Icon = s.icon;
             return (
               <Card key={s.label} className="border border-slate-100 dark:border-slate-700 shadow-sm">
-                <CardContent className="p-4 flex items-center gap-3">
-                  <div className="rounded-lg p-2 bg-slate-50 dark:bg-slate-800">
+                <CardContent className="p-3 md:p-4 flex items-center gap-2.5">
+                  <div className="rounded-lg p-1.5 md:p-2 bg-slate-50 dark:bg-slate-800 shrink-0">
                     <Icon className={`w-4 h-4 ${s.color}`} />
                   </div>
-                  <div>
-                    <p className="text-xs text-slate-400 font-medium">{s.label}</p>
-                    <p className={`text-2xl font-bold leading-none mt-0.5 ${s.color}`}>{s.value}</p>
+                  <div className="min-w-0">
+                    <p className="text-[10px] md:text-xs text-slate-400 font-medium truncate">{s.label}</p>
+                    <p className={`text-xl md:text-2xl font-bold leading-none mt-0.5 ${s.color}`}>{s.value}</p>
                   </div>
                 </CardContent>
               </Card>

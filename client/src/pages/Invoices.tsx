@@ -294,7 +294,7 @@ export default function Invoices() {
               data-testid="input-search-invoices"
             />
           </div>
-          <div className="flex gap-1.5">
+          <div className="flex gap-1.5 flex-wrap">
             {statusPills.map((p) => (
               <button
                 key={p.key}
@@ -317,11 +317,11 @@ export default function Invoices() {
           </div>
         </div>
 
-        {/* Invoice Table */}
+        {/* Invoice List */}
         {isLoading ? (
           <div className="space-y-2">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-14 rounded-xl bg-slate-100 dark:bg-slate-800 animate-pulse" />
+              <div key={i} className="h-20 rounded-xl bg-slate-100 dark:bg-slate-800 animate-pulse" />
             ))}
           </div>
         ) : filtered.length === 0 ? (
@@ -340,56 +340,45 @@ export default function Invoices() {
             )}
           </div>
         ) : (
-          <Card className="border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-slate-50/50 dark:bg-slate-800/30">
-                  <TableHead className="pl-6 text-xs font-semibold text-slate-500">Invoice #</TableHead>
-                  <TableHead className="text-xs font-semibold text-slate-500">Client</TableHead>
-                  <TableHead className="text-xs font-semibold text-slate-500">Amount</TableHead>
-                  <TableHead className="text-xs font-semibold text-slate-500">Status</TableHead>
-                  <TableHead className="text-xs font-semibold text-slate-500">Due Date</TableHead>
-                  <TableHead className="text-right pr-6 text-xs font-semibold text-slate-500">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filtered.map((invoice) => {
-                  const client = getClient(invoice.clientId);
-                  const sc = STATUS_CONFIG[invoice.status] || STATUS_CONFIG.unpaid;
-                  const StatusIcon = sc.icon;
-                  return (
-                    <TableRow key={invoice.id} data-testid={`row-invoice-${invoice.id}`} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
-                      <TableCell className="pl-6 font-mono text-sm font-semibold text-slate-700 dark:text-slate-300">
-                        {invoice.invoiceNumber}
-                      </TableCell>
-                      <TableCell className="text-slate-600 dark:text-slate-400 text-sm">{client?.name || "—"}</TableCell>
-                      <TableCell className="font-bold text-slate-800 dark:text-slate-200">
-                        ${Number(invoice.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex flex-col gap-0.5">
-                          <Badge className={`text-[10px] w-fit flex items-center gap-1 ${sc.color}`}>
+          <>
+            {/* Mobile card list */}
+            <div className="sm:hidden space-y-3">
+              {filtered.map((invoice) => {
+                const client = getClient(invoice.clientId);
+                const sc = STATUS_CONFIG[invoice.status] || STATUS_CONFIG.unpaid;
+                const StatusIcon = sc.icon;
+                return (
+                  <Card key={invoice.id} data-testid={`card-invoice-${invoice.id}`} className="border border-slate-100 dark:border-slate-700 shadow-sm">
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between gap-3 mb-3">
+                        <div className="min-w-0">
+                          <p className="font-mono text-sm font-bold text-slate-700 dark:text-slate-200">{invoice.invoiceNumber}</p>
+                          <p className="text-xs text-slate-400 mt-0.5 truncate">{client?.name || "No client"}</p>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <p className="text-lg font-bold text-slate-800 dark:text-slate-100">
+                            ${Number(invoice.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </p>
+                          {invoice.dueDate && (
+                            <p className={`text-[11px] mt-0.5 ${
+                              invoice.status === "overdue" ? "text-red-500 font-medium" :
+                              differenceInDays(new Date(invoice.dueDate), new Date()) <= 7 ? "text-amber-500 font-medium" :
+                              "text-slate-400"
+                            }`}>
+                              Due {format(new Date(invoice.dueDate), "MMM d")}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Badge className={`text-[10px] flex items-center gap-1 ${sc.color}`}>
                             <StatusIcon className="w-2.5 h-2.5" />
                             {sc.label}
                           </Badge>
                           <OverdueBadge dueDate={invoice.dueDate} status={invoice.status} />
                         </div>
-                      </TableCell>
-                      <TableCell className="text-slate-500 text-sm">
-                        {invoice.dueDate ? (
-                          <span className={
-                            invoice.status === "overdue"
-                              ? "text-red-500 font-medium"
-                              : differenceInDays(new Date(invoice.dueDate), new Date()) <= 7
-                              ? "text-amber-500 font-medium"
-                              : ""
-                          }>
-                            {format(new Date(invoice.dueDate), "MMM dd, yyyy")}
-                          </span>
-                        ) : "—"}
-                      </TableCell>
-                      <TableCell className="text-right pr-6">
-                        <div className="flex items-center justify-end gap-2">
+                        <div className="flex items-center gap-3">
                           {invoice.status !== "paid" && (
                             <button
                               onClick={() => handleMarkPaid(invoice)}
@@ -397,16 +386,16 @@ export default function Invoices() {
                               title="Mark as Paid"
                               data-testid={`button-mark-paid-${invoice.id}`}
                             >
-                              <CheckCircle className="w-4 h-4" />
+                              <CheckCircle className="w-5 h-5" />
                             </button>
                           )}
                           <button
                             onClick={() => setPortalDialogId(invoice.id)}
-                            className="text-indigo-500 hover:text-indigo-700 transition"
-                            title="Client Portal Link"
+                            className="text-indigo-400 hover:text-indigo-600 transition"
+                            title="Client Portal"
                             data-testid={`button-portal-link-${invoice.id}`}
                           >
-                            <ExternalLink className="w-4 h-4" />
+                            <ExternalLink className="w-5 h-5" />
                           </button>
                           <button
                             onClick={() => openEdit(invoice)}
@@ -414,7 +403,7 @@ export default function Invoices() {
                             title="Edit"
                             data-testid={`button-edit-invoice-${invoice.id}`}
                           >
-                            <Eye className="w-4 h-4" />
+                            <Eye className="w-5 h-5" />
                           </button>
                           <button
                             onClick={() => setConfirmDeleteId(invoice.id)}
@@ -422,16 +411,110 @@ export default function Invoices() {
                             title="Delete"
                             data-testid={`button-delete-invoice-${invoice.id}`}
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="w-5 h-5" />
                           </button>
                         </div>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </Card>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+
+            {/* Desktop table */}
+            <Card className="hidden sm:block border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-slate-50/50 dark:bg-slate-800/30">
+                    <TableHead className="pl-6 text-xs font-semibold text-slate-500">Invoice #</TableHead>
+                    <TableHead className="text-xs font-semibold text-slate-500">Client</TableHead>
+                    <TableHead className="text-xs font-semibold text-slate-500">Amount</TableHead>
+                    <TableHead className="text-xs font-semibold text-slate-500">Status</TableHead>
+                    <TableHead className="text-xs font-semibold text-slate-500">Due Date</TableHead>
+                    <TableHead className="text-right pr-6 text-xs font-semibold text-slate-500">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filtered.map((invoice) => {
+                    const client = getClient(invoice.clientId);
+                    const sc = STATUS_CONFIG[invoice.status] || STATUS_CONFIG.unpaid;
+                    const StatusIcon = sc.icon;
+                    return (
+                      <TableRow key={invoice.id} data-testid={`row-invoice-${invoice.id}`} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
+                        <TableCell className="pl-6 font-mono text-sm font-semibold text-slate-700 dark:text-slate-300">
+                          {invoice.invoiceNumber}
+                        </TableCell>
+                        <TableCell className="text-slate-600 dark:text-slate-400 text-sm">{client?.name || "—"}</TableCell>
+                        <TableCell className="font-bold text-slate-800 dark:text-slate-200">
+                          ${Number(invoice.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-col gap-0.5">
+                            <Badge className={`text-[10px] w-fit flex items-center gap-1 ${sc.color}`}>
+                              <StatusIcon className="w-2.5 h-2.5" />
+                              {sc.label}
+                            </Badge>
+                            <OverdueBadge dueDate={invoice.dueDate} status={invoice.status} />
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-slate-500 text-sm">
+                          {invoice.dueDate ? (
+                            <span className={
+                              invoice.status === "overdue"
+                                ? "text-red-500 font-medium"
+                                : differenceInDays(new Date(invoice.dueDate), new Date()) <= 7
+                                ? "text-amber-500 font-medium"
+                                : ""
+                            }>
+                              {format(new Date(invoice.dueDate), "MMM dd, yyyy")}
+                            </span>
+                          ) : "—"}
+                        </TableCell>
+                        <TableCell className="text-right pr-6">
+                          <div className="flex items-center justify-end gap-2">
+                            {invoice.status !== "paid" && (
+                              <button
+                                onClick={() => handleMarkPaid(invoice)}
+                                className="text-emerald-500 hover:text-emerald-700 transition"
+                                title="Mark as Paid"
+                                data-testid={`button-mark-paid-${invoice.id}`}
+                              >
+                                <CheckCircle className="w-4 h-4" />
+                              </button>
+                            )}
+                            <button
+                              onClick={() => setPortalDialogId(invoice.id)}
+                              className="text-indigo-500 hover:text-indigo-700 transition"
+                              title="Client Portal Link"
+                              data-testid={`button-portal-link-${invoice.id}`}
+                            >
+                              <ExternalLink className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => openEdit(invoice)}
+                              className="text-slate-400 hover:text-slate-600 transition"
+                              title="Edit"
+                              data-testid={`button-edit-invoice-${invoice.id}`}
+                            >
+                              <Eye className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => setConfirmDeleteId(invoice.id)}
+                              className="text-red-400 hover:text-red-600 transition"
+                              title="Delete"
+                              data-testid={`button-delete-invoice-${invoice.id}`}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </Card>
+          </>
         )}
 
       {/* Create / Edit Dialog */}

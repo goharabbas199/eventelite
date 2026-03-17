@@ -74,7 +74,7 @@ export default function Calendar() {
   return (
     <Layout title="Calendar">
         {/* Header */}
-        <div className="flex items-center justify-between flex-wrap gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400 mb-0.5">Schedule</p>
             <h2 className="text-xl font-bold text-slate-900 dark:text-white">Event Calendar</h2>
@@ -88,8 +88,8 @@ export default function Calendar() {
             <Button variant="outline" size="sm" onClick={() => setCurrentMonth(subMonths(currentMonth, 1))} data-testid="button-prev-month">
               <ChevronLeft className="w-4 h-4" />
             </Button>
-            <span className="text-sm font-bold text-slate-700 dark:text-slate-200 min-w-[140px] text-center px-2">
-              {format(currentMonth, "MMMM yyyy")}
+            <span className="text-sm font-bold text-slate-700 dark:text-slate-200 min-w-[110px] sm:min-w-[140px] text-center px-1">
+              {format(currentMonth, "MMM yyyy")}
             </span>
             <Button variant="outline" size="sm" onClick={() => setCurrentMonth(addMonths(currentMonth, 1))} data-testid="button-next-month">
               <ChevronRight className="w-4 h-4" />
