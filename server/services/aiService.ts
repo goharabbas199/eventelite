@@ -1,9 +1,20 @@
 import OpenAI from "openai";
 
-const openai = new OpenAI({
-  apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
-  baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
-});
+let openaiClient: OpenAI | null = null;
+
+function getOpenAIClient(): OpenAI {
+  if (!openaiClient) {
+    const apiKey = process.env.AI_INTEGRATIONS_OPENAI_API_KEY || process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+      throw new Error("Missing OpenAI API key. Please set OPENAI_API_KEY to enable AI features.");
+    }
+    openaiClient = new OpenAI({
+      apiKey,
+      baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
+    });
+  }
+  return openaiClient;
+}
 
 export type AIFeature =
   | "event_planner"
@@ -112,13 +123,15 @@ export async function runAI(request: AIRequest): Promise<any> {
 
   const userMessage = `${prompt}${contextStr}`;
 
+  const openai = getOpenAIClient();
+
   const response = await openai.chat.completions.create({
-    model: "gpt-5.1",
+    model: "gpt-4o",
     messages: [
       { role: "system", content: SYSTEM_PROMPTS[feature] },
       { role: "user", content: userMessage },
     ],
-    max_completion_tokens: 8192,
+    max_tokens: 8192,
   });
 
   const content = response.choices[0]?.message?.content || "";
