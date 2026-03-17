@@ -618,7 +618,7 @@ export async function registerRoutes(
       marketingTips: false,
     },
     appearance: {
-      theme: "light",
+      theme: "dark",
       density: "comfortable",
       accentColor: "indigo",
       sidebarCollapsed: false,

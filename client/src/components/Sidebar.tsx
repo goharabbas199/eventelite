@@ -115,8 +115,9 @@ export function MobileNav() {
     { href: "/",          label: "Home",      icon: LayoutDashboard },
     { href: "/clients",   label: "Clients",   icon: Users },
     { href: "/vendors",   label: "Vendors",   icon: Store },
-    { href: "/venues",    label: "Venues",    icon: MapPin },
+    { href: "/budget",    label: "Budget",    icon: PieChart },
     { href: "/analytics", label: "Analytics", icon: BarChart2 },
+    { href: "/settings",  label: "Settings",  icon: Settings },
   ];
 
   return (

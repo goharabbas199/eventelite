@@ -59,7 +59,7 @@ const PROFILE_DEFAULTS: ProfileSettings = {
 };
 
 const APPEARANCE_DEFAULTS: AppearanceSettings = {
-  theme: "light",
+  theme: "dark",
   density: "comfortable",
   accentColor: "indigo",
   sidebarCollapsed: false,
@@ -93,6 +93,7 @@ const ACCENT_COLORS: Record<string, string> = {
 
 export function applyTheme(theme: "light" | "system" | "dark") {
   const root = document.documentElement;
+  try { localStorage.setItem("ee_theme", theme); } catch (e) {}
   if (theme === "dark") {
     root.classList.add("dark");
   } else if (theme === "light") {
