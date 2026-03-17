@@ -486,6 +486,7 @@ export default function ClientDetails() {
                     ))}
                   </TableBody>
                 </Table>
+                </div>
               )}
             </CardContent>
           </Card>
