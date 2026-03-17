@@ -1,0 +1,170 @@
+You are working on an existing SaaS project called EventElite.
+
+Tech Stack:
+Frontend: React + Vite + TypeScript + TanStack Query + Wouter + ShadCN + Tailwind
+Backend: Node.js + Express
+Database: PostgreSQL with Drizzle ORM
+Validation: Zod
+
+Existing modules:
+
+Dashboard
+Clients
+Vendors
+Venues
+Quotes
+Budget Planner
+Analytics
+Settings
+
+Your task is to add a full AI automation system that helps users plan events automatically.
+
+Do NOT rebuild the project. Extend the existing architecture.
+
+---
+
+Create AI Service Layer
+
+Create a new backend service:
+
+server/services/aiService.ts
+
+This service will connect to the OpenAI API.
+
+---
+
+Create API endpoint
+
+POST /api/ai
+
+Input:
+
+{
+"prompt": "...",
+"context": {
+clients: [...],
+vendors: [...],
+venues: [...]
+}
+}
+
+Return structured JSON responses.
+
+---
+
+Feature 1 — AI Event Planner
+
+Allow users to type natural language instructions like:
+
+"Plan a wedding for 200 guests with $50k budget in Dubai."
+
+AI should generate:
+
+event details
+venue suggestions
+vendor services
+estimated costs
+recommended markup
+
+---
+
+Feature 2 — AI Quote Generator
+
+Add button in Quote Builder:
+
+Generate AI Quote
+
+AI should read:
+
+vendor catalog
+venue packages
+guest count
+budget
+
+And generate a full quotation automatically.
+
+---
+
+Feature 3 — AI Vendor Recommendation
+
+When selecting a venue or event type, AI should recommend best vendors based on:
+
+price
+category
+guest count
+venue compatibility
+
+---
+
+Feature 4 — AI Budget Planner
+
+Add AI button in Budget Planner:
+
+AI Budget Allocation
+
+AI distributes event budget across:
+
+venue
+catering
+decoration
+lighting
+entertainment
+misc
+
+---
+
+Feature 5 — AI Profit Optimization
+
+AI analyzes quote costs and suggests:
+
+better vendor
+optimal markup
+alternative package
+
+---
+
+Feature 6 — AI Assistant Chat
+
+Add AI assistant panel in dashboard.
+
+User can ask:
+
+"Generate wedding quote"
+"Optimize event budget"
+"Suggest vendors"
+"Create event checklist"
+
+AI should respond with structured suggestions.
+
+---
+
+Technical rules:
+
+AI responses must be structured JSON.
+
+Example:
+
+{
+"venue": "...",
+"vendors": [...],
+"estimatedCost": 35000,
+"suggestedMarkup": 20
+}
+
+---
+
+Frontend
+
+Create hook:
+
+useAI()
+
+Use TanStack Query for AI requests.
+
+Add AI buttons in:
+
+Quote Builder
+Budget Planner
+Dashboard
+
+Use existing UI components (ShadCN).

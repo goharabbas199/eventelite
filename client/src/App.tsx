@@ -26,6 +26,7 @@ import Quotations from "@/pages/Quotations";
 import Events from "@/pages/Events";
 import Calendar from "@/pages/Calendar";
 import Invoices from "@/pages/Invoices";
+import AIAssistant from "@/pages/AIAssistant";
 import ClientPortal from "@/pages/ClientPortal";
 
 function isAuthenticated() {
@@ -97,6 +98,9 @@ function Router() {
       </Route>
       <Route path="/invoices">
         <AuthGuard><Invoices /></AuthGuard>
+      </Route>
+      <Route path="/ai">
+        <AuthGuard><AIAssistant /></AuthGuard>
       </Route>
       <Route path="/portal/:id" component={ClientPortal} />
       <Route component={NotFound} />

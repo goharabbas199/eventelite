@@ -7,6 +7,8 @@ import {
   useDeleteExpense,
 } from "@/hooks/use-clients";
 import { useState, useMemo } from "react";
+import { useAI } from "@/hooks/use-ai";
+import { useToast } from "@/hooks/use-toast";
 import {
   Select,
   SelectContent,
@@ -45,6 +47,7 @@ import {
   Layers,
   Wrench,
   Receipt,
+  Sparkles,
 } from "lucide-react";
 import {
   Dialog,
@@ -96,12 +99,40 @@ type Tab = "overview" | "services" | "expenses";
 export default function BudgetPlanner() {
   const { data: clients = [], isLoading } = useClients();
   const [selectedClientId, setSelectedClientId] = useState<string | undefined>();
+  const [aiBudget, setAiBudget] = useState<any>(null);
+  const [aiBudgetLoading, setAiBudgetLoading] = useState(false);
+  const ai = useAI();
+  const { toast } = useToast();
 
   if (clients.length > 0 && !selectedClientId) {
     setSelectedClientId(String(clients[0].id));
   }
 
   const selectedClient = clients.find((c) => String(c.id) === selectedClientId);
+
+  async function handleAIBudget() {
+    if (!selectedClient) {
+      toast({ title: "Select a client first", variant: "destructive" });
+      return;
+    }
+    setAiBudgetLoading(true);
+    try {
+      const result = await ai.mutateAsync({
+        feature: "budget_planner",
+        prompt: `Allocate the event budget intelligently across categories for a ${selectedClient.eventType} event with ${selectedClient.guestCount || "unknown"} guests. Total budget: $${Number(selectedClient.budget) || 0}.`,
+        context: {
+          budget: Number(selectedClient.budget) || 0,
+          guestCount: Number(selectedClient.guestCount) || 0,
+          eventType: selectedClient.eventType,
+        },
+      });
+      setAiBudget(result);
+    } catch (err: any) {
+      toast({ title: "AI Error", description: err.message, variant: "destructive" });
+    } finally {
+      setAiBudgetLoading(false);
+    }
+  }
 
   // All-clients health summary
   const healthSummary = useMemo(() => {
@@ -119,25 +150,81 @@ export default function BudgetPlanner() {
           <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400 mb-0.5">Finance</p>
           <h2 className="text-xl font-bold text-slate-900 dark:text-white">Budget Planner</h2>
         </div>
-        <div className="min-w-[240px]">
-          <Select value={selectedClientId} onValueChange={setSelectedClientId}>
-            <SelectTrigger className="h-9 rounded-xl text-sm border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800" data-testid="select-budget-client">
-              <SelectValue placeholder="Select a client…" />
-            </SelectTrigger>
-            <SelectContent>
-              {isLoading ? (
-                <SelectItem value="loading">Loading…</SelectItem>
-              ) : (
-                clients.map((c) => (
-                  <SelectItem key={c.id} value={String(c.id)}>
-                    {c.name} — {c.eventType}
-                  </SelectItem>
-                ))
-              )}
-            </SelectContent>
-          </Select>
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={handleAIBudget}
+            disabled={aiBudgetLoading || !selectedClientId}
+            className="h-9 rounded-xl text-xs bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white border-0"
+            data-testid="button-ai-budget"
+          >
+            <Sparkles className="w-3.5 h-3.5 mr-1.5" />
+            {aiBudgetLoading ? "Analyzing…" : "AI Budget Allocation"}
+          </Button>
+          <div className="min-w-[240px]">
+            <Select value={selectedClientId} onValueChange={(v) => { setSelectedClientId(v); setAiBudget(null); }}>
+              <SelectTrigger className="h-9 rounded-xl text-sm border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800" data-testid="select-budget-client">
+                <SelectValue placeholder="Select a client…" />
+              </SelectTrigger>
+              <SelectContent>
+                {isLoading ? (
+                  <SelectItem value="loading">Loading…</SelectItem>
+                ) : (
+                  clients.map((c) => (
+                    <SelectItem key={c.id} value={String(c.id)}>
+                      {c.name} — {c.eventType}
+                    </SelectItem>
+                  ))
+                )}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </div>
+
+      {/* AI Budget Result Panel */}
+      {aiBudget && aiBudget.allocations && (
+        <div className="bg-white dark:bg-slate-800/80 border border-violet-200 dark:border-violet-800/50 rounded-2xl p-4 shadow-sm">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center">
+                <Sparkles className="w-3 h-3 text-white" />
+              </div>
+              <span className="text-sm font-bold text-slate-800 dark:text-slate-200">AI Budget Allocation</span>
+              <span className="text-xs text-violet-600 bg-violet-50 dark:bg-violet-950/40 px-2 py-0.5 rounded-lg font-semibold">Total: {fmt(Number(aiBudget.totalBudget) || 0)}</span>
+            </div>
+            <button onClick={() => setAiBudget(null)} className="text-slate-400 hover:text-slate-600">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 mb-3">
+            {aiBudget.allocations.map((a: any, i: number) => (
+              <div key={i} className="flex items-center gap-2.5 p-2.5 bg-slate-50 dark:bg-slate-700/40 rounded-xl">
+                <div className="flex-1">
+                  <div className="flex justify-between mb-1">
+                    <span className="text-[12px] font-semibold text-slate-700 dark:text-slate-200">{a.category}</span>
+                    <span className="text-[12px] font-bold text-indigo-600">{fmt(a.amount)}</span>
+                  </div>
+                  <div className="w-full bg-slate-200 dark:bg-slate-600 rounded-full h-1.5">
+                    <div className="h-full bg-indigo-500 rounded-full" style={{ width: `${a.percentage}%` }} />
+                  </div>
+                  <p className="text-[10px] text-slate-400 mt-0.5">{a.percentage}% · {a.notes}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          {aiBudget.summary && <p className="text-[12px] text-slate-500 italic">{aiBudget.summary}</p>}
+          {aiBudget.savingsTips?.length > 0 && (
+            <div className="mt-2 pt-2 border-t border-slate-100 dark:border-slate-700">
+              <p className="text-[11px] font-semibold text-slate-400 mb-1">Savings Tips</p>
+              <div className="flex flex-wrap gap-2">
+                {aiBudget.savingsTips.map((tip: string, i: number) => (
+                  <span key={i} className="text-[11px] text-slate-600 dark:text-slate-300 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/30 px-2 py-1 rounded-lg">{tip}</span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* All-clients health bar */}
       {healthSummary.length > 1 && (

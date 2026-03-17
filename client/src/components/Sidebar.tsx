@@ -12,6 +12,7 @@ import {
   CalendarDays,
   Calendar,
   FileText,
+  Sparkles,
 } from "lucide-react";
 import { useSettings } from "@/context/SettingsContext";
 
@@ -26,6 +27,7 @@ const links = [
   { href: "/invoices",   label: "Invoices",   icon: FileText },
   { href: "/budget",     label: "Budget",     icon: PieChart },
   { href: "/analytics",  label: "Analytics",  icon: BarChart2 },
+  { href: "/ai",         label: "AI Assistant", icon: Sparkles },
 ];
 
 export function Sidebar({ collapsed }: { collapsed: boolean }) {

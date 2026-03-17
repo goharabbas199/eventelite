@@ -4,6 +4,7 @@ import { useClients, useCreatePlannedService } from "@/hooks/use-clients";
 import { useVenues } from "@/hooks/use-venues";
 import { useVendors, useVendor } from "@/hooks/use-vendors";
 import { useQuotations, useCreateQuotation, useUpdateQuotation, useDeleteQuotation } from "@/hooks/use-quotations";
+import { useAI } from "@/hooks/use-ai";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -491,6 +492,43 @@ export default function Quotations() {
     toast({ title: "Quote deleted" });
   }
 
+  const ai = useAI();
+
+  async function handleGenerateAIQuote() {
+    if (!clientId) {
+      toast({ title: "Select a client first", description: "AI needs a client to generate a quote", variant: "destructive" });
+      return;
+    }
+    try {
+      const result = await ai.mutateAsync({
+        feature: "quote_generator",
+        prompt: `Generate a professional event quotation for a ${eventType} event with ${guestCount || "unknown"} guests and a budget of $${Number(selectedClient?.budget) || 0}. Use realistic pricing for event services.`,
+        context: {
+          vendors: (vendors as any[]).slice(0, 15),
+          venues: (venues as any[]).slice(0, 5),
+          budget: Number(selectedClient?.budget) || 0,
+          guestCount: Number(guestCount) || 0,
+          eventType,
+        },
+      });
+      if (result.lineItems && Array.isArray(result.lineItems)) {
+        const venueItem = items.find((i) => i.tag === "venue");
+        const aiItems = result.lineItems.map((li: any) => ({
+          id: uid(),
+          serviceName: li.name || li.description || "Service",
+          cost: String(li.vendorCost || li.clientPrice || 0),
+        }));
+        setItems([...(venueItem ? [venueItem] : []), ...aiItems]);
+        if (result.suggestedMarkup) setMarkup(String(Math.round(result.suggestedMarkup)));
+        toast({ title: "AI Quote generated!", description: `${aiItems.length} services added. Review and adjust as needed.` });
+      } else {
+        toast({ title: "AI response received", description: "Could not parse quote items. Try again." });
+      }
+    } catch (err: any) {
+      toast({ title: "AI Error", description: err.message, variant: "destructive" });
+    }
+  }
+
   const isPending = createQuotation.isPending || updateQuotation.isPending;
   const missingCostCount = items.filter((i) => i.serviceName.trim() && !Number(i.cost)).length;
 
@@ -523,6 +561,15 @@ export default function Quotations() {
                 Quote #{String(selectedQuoteId).padStart(4, "0")}
               </span>
             )}
+            <Button
+              onClick={handleGenerateAIQuote}
+              disabled={ai.isPending}
+              className="h-9 rounded-xl text-xs bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white border-0"
+              data-testid="button-ai-quote"
+            >
+              <Sparkles className="w-3.5 h-3.5 mr-1.5" />
+              {ai.isPending ? "Generating…" : "Generate AI Quote"}
+            </Button>
             <Button onClick={resetForm} variant="outline" className="h-9 rounded-xl text-xs" data-testid="button-new-quote">
               <Plus className="w-3.5 h-3.5 mr-1.5" /> New Quote
             </Button>

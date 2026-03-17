@@ -5,6 +5,7 @@ import { api } from "@shared/routes";
 import { z } from "zod";
 import cloudinary, { cloudinaryConfigured } from "./cloudinary";
 import multer from "multer";
+import { runAI } from "./services/aiService";
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -679,6 +680,22 @@ export async function registerRoutes(
       res.json({ invoice, client, quotation });
     } catch (err) {
       res.status(500).json({ message: "Failed to load portal data" });
+    }
+  });
+
+  // ========================= AI ==============================
+
+  app.post("/api/ai", async (req, res) => {
+    try {
+      const { feature, prompt, context } = req.body;
+      if (!feature || !prompt) {
+        return res.status(400).json({ message: "feature and prompt are required" });
+      }
+      const result = await runAI({ feature, prompt, context });
+      res.json(result);
+    } catch (err: any) {
+      console.error("AI error:", err);
+      res.status(500).json({ message: err?.message || "AI request failed" });
     }
   });
 
