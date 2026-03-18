@@ -154,9 +154,9 @@ export default function Dashboard() {
           </p>
           <h2 className="text-base md:text-xl font-bold text-slate-900 dark:text-white">Welcome back, {profile.name.split(" ")[0]} 👋</h2>
         </div>
-        <div className="hidden sm:flex flex-col items-end">
+        <div className="flex flex-col items-end">
           <p className="eyebrow mb-1">Pipeline value</p>
-          <p className="text-xl font-bold text-slate-900 dark:text-white">${totalRevenue.toLocaleString()}</p>
+          <p className="text-lg md:text-xl font-bold text-slate-900 dark:text-white">${totalRevenue.toLocaleString()}</p>
         </div>
       </div>
 

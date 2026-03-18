@@ -125,17 +125,17 @@ export function MobileNav() {
 
   const primaryLinks = [
     { href: "/",          label: "Home",     icon: LayoutDashboard },
+    { href: "/clients",   label: "Clients",  icon: Users },
     { href: "/events",    label: "Events",   icon: CalendarDays },
-    { href: "/calendar",  label: "Calendar", icon: Calendar },
     { href: "/invoices",  label: "Invoices", icon: FileText },
   ];
 
   const moreLinks = [
-    { href: "/clients",    label: "Clients",      icon: Users },
     { href: "/vendors",    label: "Vendors",      icon: Store },
     { href: "/venues",     label: "Venues",       icon: MapPin },
     { href: "/quotations", label: "Quotes",       icon: ReceiptText },
     { href: "/budget",     label: "Budget",       icon: PieChart },
+    { href: "/calendar",   label: "Calendar",     icon: Calendar },
     { href: "/analytics",  label: "Analytics",    icon: BarChart2 },
     { href: "/ai",         label: "AI Assistant", icon: Sparkles },
     { href: "/settings",   label: "Settings",     icon: Settings },

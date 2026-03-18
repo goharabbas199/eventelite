@@ -466,9 +466,9 @@ export default function AIAssistant() {
 
   return (
     <Layout title="AI Assistant">
-      <div className="flex flex-col h-[calc(100vh-120px)] gap-0">
+      <div className="flex flex-col gap-0" style={{ height: "clamp(400px, calc(100dvh - 340px), calc(100vh - 120px))" }}>
         {/* Header */}
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-3">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400 mb-0.5">AI Automation</p>
             <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
@@ -479,7 +479,7 @@ export default function AIAssistant() {
             </h2>
           </div>
           <div className="flex items-center gap-2">
-            <Badge variant="outline" className="text-[11px] border-indigo-200 text-indigo-600 dark:border-indigo-800 dark:text-indigo-400">
+            <Badge variant="outline" className="hidden sm:flex text-[11px] border-indigo-200 text-indigo-600 dark:border-indigo-800 dark:text-indigo-400">
               {FEATURE_LABELS[activeFeature]}
             </Badge>
             <Button
@@ -494,8 +494,8 @@ export default function AIAssistant() {
           </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 mb-3">
+        {/* Quick Actions — horizontal scroll on mobile, grid on desktop */}
+        <div className="flex sm:grid sm:grid-cols-3 lg:grid-cols-6 gap-2 mb-2 overflow-x-auto pb-1 sm:overflow-x-visible sm:pb-0 -mx-1 px-1 sm:mx-0 sm:px-0 scrollbar-hide flex-shrink-0">
           {QUICK_ACTIONS.map((action) => {
             const Icon = action.icon;
             return (
@@ -507,17 +507,17 @@ export default function AIAssistant() {
                   sendMessage(action.prompt, action.feature);
                 }}
                 disabled={ai.isPending}
-                className={`flex flex-col items-center justify-center gap-1.5 px-2 py-3 rounded-xl border text-center transition-all hover:shadow-sm disabled:opacity-50 ${action.color}`}
+                className={`flex flex-col items-center justify-center gap-1.5 px-3 sm:px-2 py-2.5 rounded-xl border text-center transition-all hover:shadow-sm disabled:opacity-50 shrink-0 min-w-[80px] sm:min-w-0 ${action.color}`}
               >
                 <Icon className="w-4 h-4" />
-                <span className="text-[11px] font-semibold leading-tight">{action.label}</span>
+                <span className="text-[11px] font-semibold leading-tight whitespace-nowrap sm:whitespace-normal">{action.label}</span>
               </button>
             );
           })}
         </div>
 
-        {/* Mode selector */}
-        <div className="flex items-center gap-2 mb-3 flex-wrap">
+        {/* Mode selector — hidden on mobile, shown on desktop */}
+        <div className="hidden sm:flex items-center gap-2 mb-2 flex-wrap flex-shrink-0">
           <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Mode:</span>
           {(Object.keys(FEATURE_LABELS) as AIFeature[]).map((feat) => (
             <button
@@ -533,6 +533,19 @@ export default function AIAssistant() {
               {FEATURE_LABELS[feat]}
             </button>
           ))}
+        </div>
+        {/* Mobile mode selector — compact select */}
+        <div className="sm:hidden mb-2 flex-shrink-0">
+          <select
+            value={activeFeature}
+            onChange={(e) => setActiveFeature(e.target.value as AIFeature)}
+            className="w-full h-8 border border-slate-200 dark:border-slate-700 rounded-xl px-3 text-[12px] bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            data-testid="select-ai-mode-mobile"
+          >
+            {(Object.entries(FEATURE_LABELS) as [AIFeature, string][]).map(([feat, label]) => (
+              <option key={feat} value={feat}>{label}</option>
+            ))}
+          </select>
         </div>
 
         {/* Messages */}

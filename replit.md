@@ -74,6 +74,14 @@
 | Engagement | Venue, Catering, Decoration, Photography |
 | Conference | Venue, Catering, AV Equipment |
 
+## Mobile / Responsive Improvements (March 2026)
+- **Header**: Dark mode toggle (sun/moon), Cmd+K/Ctrl+K keyboard shortcut for search, avatar click → Settings
+- **Sidebar mobile nav**: Primary tabs = Home, Clients, Events, Invoices; Calendar moved to "More" drawer
+- **AI Assistant**: Mobile height fixed with `clamp()`; quick actions horizontally scrollable on mobile; mode selector is a compact `<select>` on mobile
+- **Dashboard**: Pipeline value visible on all screen sizes (not hidden on mobile)
+- **index.css**: `.scrollbar-hide` utility added for custom scroll containers
+- All pages already have mobile card lists / responsive grid breakpoints
+
 ## Important Notes
 - `budget` field stored as numeric string; always convert with `Number()` for calculations
 - Payment amounts stored as `numeric` strings; convert with `String()` before insert
