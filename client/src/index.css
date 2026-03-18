@@ -171,19 +171,86 @@
 
   /* Input base */
   .input-base {
-    @apply h-9 rounded-xl border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 transition-all;
+    @apply h-9 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 transition-all duration-200;
     --tw-ring-color: hsl(var(--primary) / 0.15);
-    border-color: inherit;
   }
   .input-base:focus {
-    border-color: hsl(var(--primary) / 0.6);
-    outline: none;
-    box-shadow: 0 0 0 2px hsl(var(--primary) / 0.15);
+    @apply border-indigo-400 dark:border-indigo-600 bg-white dark:bg-slate-800 shadow-sm;
+    box-shadow: 0 0 0 3px hsl(224 71% 60% / 0.12);
+  }
+
+  /* Better input styling for all input types */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="search"],
+  input[type="number"],
+  input[type="date"],
+  input[type="time"],
+  textarea,
+  select {
+    @apply transition-all duration-200;
+  }
+
+  input[type="text"]:focus,
+  input[type="email"]:focus,
+  input[type="password"]:focus,
+  input[type="search"]:focus,
+  input[type="number"]:focus,
+  input[type="date"]:focus,
+  input[type="time"]:focus,
+  textarea:focus,
+  select:focus {
+    @apply border-indigo-400 dark:border-indigo-600;
   }
 
   /* Card hover lift */
   .card-hover {
-    @apply transition-all duration-150 hover:shadow-md hover:-translate-y-0.5;
+    @apply transition-all duration-150 hover:shadow-md hover:-translate-y-0.5 cursor-pointer;
+  }
+
+  /* Enhanced card styling */
+  .stat-card {
+    @apply bg-white dark:bg-slate-800/80 rounded-2xl border border-slate-100 dark:border-slate-700 p-4 shadow-sm transition-all duration-200;
+  }
+
+  /* Subtle button enhancements */
+  button:active:not(:disabled) {
+    @apply transition-transform duration-75;
+  }
+
+  /* Improve select styling */
+  select {
+    @apply cursor-pointer transition-all duration-200;
+  }
+  select:focus {
+    @apply border-indigo-400 dark:border-indigo-600;
+  }
+
+  /* Badge and chip hover improvements */
+  .badge {
+    @apply transition-all duration-200;
+  }
+
+  /* Link hover effects */
+  a {
+    @apply transition-colors duration-200;
+  }
+
+  /* Table row hover */
+  tbody tr {
+    @apply transition-all duration-150;
+  }
+  tbody tr:hover {
+    @apply bg-slate-50 dark:bg-slate-700/30 shadow-sm;
+  }
+
+  /* Card interactive states */
+  .card-interactive {
+    @apply transition-all duration-200 hover:shadow-md hover:border-indigo-200 dark:hover:border-indigo-800;
+  }
+  .card-interactive:hover {
+    @apply bg-slate-50 dark:bg-slate-800/50;
   }
 
   /* Scrollable fade-x */

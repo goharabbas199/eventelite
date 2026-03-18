@@ -77,18 +77,18 @@ export function Sidebar({ collapsed }: { collapsed: boolean }) {
             <Link key={link.href} href={link.href}>
               <div
                 className={`
-                  nav-item group
+                  nav-item group transition-all duration-200
                   ${collapsed ? "justify-center px-0" : ""}
                   ${isActive
-                    ? "bg-primary text-white shadow-sm shadow-black/20"
-                    : "text-white/40 hover:text-white/80 hover:bg-white/[0.05]"}
+                    ? "bg-primary text-white shadow-lg shadow-black/40"
+                    : "text-white/50 hover:text-white/90 hover:bg-white/[0.08] hover:shadow-sm hover:shadow-black/10"}
                 `}
                 title={collapsed ? link.label : undefined}
               >
-                <Icon className="w-[17px] h-[17px] shrink-0" strokeWidth={isActive ? 2.2 : 1.8} />
-                {!collapsed && <span>{link.label}</span>}
+                <Icon className="w-[17px] h-[17px] shrink-0 transition-all duration-200" strokeWidth={isActive ? 2.2 : 1.8} />
+                {!collapsed && <span className="transition-all duration-200">{link.label}</span>}
                 {!collapsed && isActive && (
-                  <div className="ml-auto w-1.5 h-1.5 rounded-full bg-white/60" />
+                  <div className="ml-auto w-1.5 h-1.5 rounded-full bg-white/70 shadow-sm" />
                 )}
               </div>
             </Link>

@@ -24,15 +24,15 @@ export function StatsCard({ title, value, icon: Icon, color = "blue", subtitle, 
   return (
     <div
       onClick={onClick}
-      className={`stat-card flex items-center justify-between gap-3 ${onClick ? "cursor-pointer active:scale-[0.98]" : ""}`}
+      className={`stat-card flex items-center justify-between gap-3 transition-all duration-200 ${onClick ? "cursor-pointer hover:shadow-md hover:border-indigo-200 dark:hover:border-indigo-800 hover:-translate-y-0.5 active:scale-[0.98] active:translate-y-0" : ""}`}
     >
       <div className="min-w-0 flex-1">
         <p className="eyebrow mb-1.5">{title}</p>
-        <p className="text-lg md:text-[22px] font-bold tracking-tight text-slate-900 dark:text-white leading-none">{value}</p>
-        {subtitle && <p className="text-[11px] text-slate-400 font-medium mt-1.5 leading-none">{subtitle}</p>}
+        <p className="text-lg md:text-[22px] font-bold tracking-tight text-slate-900 dark:text-white leading-none transition-all duration-200">{value}</p>
+        {subtitle && <p className="text-[11px] text-slate-400 font-medium mt-1.5 leading-none transition-all duration-200">{subtitle}</p>}
       </div>
-      <div className={`p-2.5 rounded-xl ${cfg.icon} shrink-0`}>
-        <Icon className="w-4.5 h-4.5 w-[18px] h-[18px]" strokeWidth={1.8} />
+      <div className={`p-2.5 rounded-xl ${cfg.icon} shrink-0 transition-all duration-200 ${onClick ? "group-hover:scale-110" : ""}`}>
+        <Icon className="w-4.5 h-4.5 w-[18px] h-[18px] transition-transform duration-200" strokeWidth={1.8} />
       </div>
     </div>
   );

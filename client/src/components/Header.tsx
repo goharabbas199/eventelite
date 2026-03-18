@@ -80,7 +80,7 @@ export function Header({
         <div className="flex items-center gap-3">
           <button
             onClick={() => setCollapsed(!collapsed)}
-            className="hidden md:flex items-center justify-center w-8 h-8 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
+            className="hidden md:flex items-center justify-center w-8 h-8 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200"
             data-testid="button-toggle-sidebar"
             title="Toggle sidebar"
           >
@@ -114,7 +114,7 @@ export function Header({
           {/* Mobile search toggle */}
           <button
             onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
-            className="md:hidden flex items-center justify-center w-8 h-8 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
+            className="md:hidden flex items-center justify-center w-8 h-8 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200"
             data-testid="button-mobile-search"
           >
             {mobileSearchOpen ? <X className="w-4 h-4" /> : <Search className="w-4 h-4" />}
@@ -123,18 +123,18 @@ export function Header({
           {/* Dark mode toggle */}
           <button
             onClick={toggleTheme}
-            className="flex items-center justify-center w-8 h-8 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
+            className="flex items-center justify-center w-8 h-8 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 hover:rotate-12"
             data-testid="button-toggle-theme"
             title={isDark ? "Switch to light mode" : "Switch to dark mode"}
           >
             {isDark
-              ? <Sun className="h-4 w-4" />
-              : <Moon className="h-4 w-4" />}
+              ? <Sun className="h-4 w-4 transition-transform duration-200" />
+              : <Moon className="h-4 w-4 transition-transform duration-200" />}
           </button>
 
           {/* Notification bell */}
           <button
-            className="relative flex items-center justify-center w-8 h-8 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
+            className="relative flex items-center justify-center w-8 h-8 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200"
             data-testid="button-notifications"
             title="Notifications"
           >

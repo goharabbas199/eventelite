@@ -163,19 +163,19 @@ export default function Dashboard() {
       {/* ── Quick Actions row ── */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: "New Client",  icon: Users,       href: "/clients",    color: "from-indigo-600 to-indigo-500" },
-          { label: "New Quote",   icon: ReceiptText,  href: "/quotations", color: "from-violet-600 to-violet-500" },
-          { label: "Invoices",    icon: Calendar,     href: "/invoices",   color: "from-blue-600 to-blue-500" },
-          { label: "Budget View", icon: PieChart,     href: "/budget",     color: "from-emerald-600 to-emerald-500" },
+          { label: "New Client",  icon: Users,       href: "/clients",    color: "from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600" },
+          { label: "New Quote",   icon: ReceiptText,  href: "/quotations", color: "from-violet-600 to-violet-500 hover:from-violet-700 hover:to-violet-600" },
+          { label: "Invoices",    icon: Calendar,     href: "/invoices",   color: "from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600" },
+          { label: "Budget View", icon: PieChart,     href: "/budget",     color: "from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600" },
         ].map(({ label, icon: Icon, href, color }) => (
           <button
             key={label}
             onClick={() => navigate(href)}
-            className={`flex items-center gap-1.5 md:gap-2.5 px-3 md:px-4 py-2.5 md:py-3 rounded-2xl bg-gradient-to-r ${color} text-white text-xs md:text-sm font-semibold shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 transition-all duration-150`}
+            className={`flex items-center gap-1.5 md:gap-2.5 px-3 md:px-4 py-2.5 md:py-3 rounded-2xl bg-gradient-to-r ${color} text-white text-xs md:text-sm font-semibold shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 active:shadow-md transition-all duration-150 group`}
           >
-            <Icon className="w-3.5 h-3.5 md:w-4 md:h-4 shrink-0" />
+            <Icon className="w-3.5 h-3.5 md:w-4 md:h-4 shrink-0 group-hover:scale-110 transition-transform duration-150" />
             <span className="truncate">{label}</span>
-            <ArrowRight className="w-3 h-3 md:w-3.5 md:h-3.5 ml-auto shrink-0 opacity-70 hidden sm:block" />
+            <ArrowRight className="w-3 h-3 md:w-3.5 md:h-3.5 ml-auto shrink-0 opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 hidden sm:block transition-all duration-150" />
           </button>
         ))}
       </div>

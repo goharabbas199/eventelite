@@ -339,7 +339,7 @@ export default function Clients() {
               <div
                 key={client.id}
                 onClick={() => setLocation(`/clients/${client.id}`)}
-                className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 p-4 shadow-sm active:scale-[0.98] transition-all cursor-pointer"
+                className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 p-4 shadow-sm hover:shadow-md hover:border-indigo-200 dark:hover:border-indigo-800 active:scale-[0.98] transition-all duration-200 cursor-pointer"
               >
                 <div className="flex items-start justify-between mb-2">
                   <div>

@@ -82,6 +82,20 @@
 - **index.css**: `.scrollbar-hide` utility added for custom scroll containers
 - All pages already have mobile card lists / responsive grid breakpoints
 
+## UI/UX Polish & Enhancements (March 2026)
+- **Input Fields**: Enhanced focus states with indigo border color; smoother transitions; consistent rounded corners (rounded-xl)
+- **Textarea**: Better focus styling with indigo border; vertical resizing allowed; smooth transitions
+- **Buttons & Icons**: Improved hover states with color shifts and animations; dark mode toggle has subtle rotation on hover
+- **Sidebar Navigation**: Better hover states with improved contrast and subtle shadows; smooth transitions (200ms); active state now has deeper shadow
+- **Dashboard Quick Actions**: Enhanced gradient colors on hover; icon scale (110%) and arrow opacity changes; improved shadow depth
+- **Cards**: Added hover effects (shadow lift, border color change); smooth transitions; cursor-pointer on interactive cards
+- **StatsCard**: Better hover feedback (lift, shadow, border color); only on clickable stats
+- **Tables**: Row hover states with light background and subtle shadow; cursor pointer for clickable rows
+- **Select Fields**: Smoother focus transitions; border color changes on focus; cursor-pointer
+- **Badges & Chips**: Smooth color transitions
+- **Links**: Better color transition timing across the app
+- **General**: All transitions use consistent 200ms duration for fluid feel; active states have faster 75ms feedback
+
 ## Important Notes
 - `budget` field stored as numeric string; always convert with `Number()` for calculations
 - Payment amounts stored as `numeric` strings; convert with `String()` before insert
