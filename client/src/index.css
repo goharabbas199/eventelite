@@ -159,9 +159,18 @@
   .gradient-green  { background: linear-gradient(135deg, #059669 0%, #10b981 100%); }
   .gradient-purple { background: linear-gradient(135deg, #7c3aed 0%, #9333ea 100%); }
 
-  /* Glass card */
+  /* Glass morphism effects */
   .glass {
     @apply bg-white/80 dark:bg-slate-800/80 backdrop-blur-md;
+  }
+  .glass-sm {
+    @apply bg-white/70 dark:bg-slate-800/60 backdrop-blur-sm;
+  }
+  .glass-lg {
+    @apply bg-white/60 dark:bg-slate-800/40 backdrop-blur-xl border border-white/20 dark:border-slate-700/50;
+  }
+  .glass-card {
+    @apply bg-white/40 dark:bg-slate-800/30 backdrop-blur-xl border border-white/30 dark:border-slate-700/40 shadow-xl;
   }
 
   /* Focus ring */
@@ -209,14 +218,81 @@
     @apply transition-all duration-150 hover:shadow-md hover:-translate-y-0.5 cursor-pointer;
   }
 
-  /* Enhanced card styling */
+  /* Enhanced card styling with depth */
   .stat-card {
-    @apply bg-white dark:bg-slate-800/80 rounded-2xl border border-slate-100 dark:border-slate-700 p-4 shadow-sm transition-all duration-200;
+    @apply bg-white dark:bg-slate-800/80 rounded-2xl border border-slate-100 dark:border-slate-700 p-4 shadow-sm transition-all duration-300 relative overflow-hidden;
+  }
+  .stat-card::before {
+    content: '';
+    @apply absolute inset-0 opacity-0 transition-opacity duration-300 pointer-events-none;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
+  }
+  .stat-card:hover::before {
+    @apply opacity-100;
   }
 
-  /* Subtle button enhancements */
+  /* 3D Card effect on hover */
+  .card-3d {
+    @apply transition-all duration-300;
+    transform-style: preserve-3d;
+    perspective: 1000px;
+  }
+  .card-3d:hover {
+    @apply shadow-2xl;
+    transform: translateY(-8px) rotateX(5deg) rotateY(-2deg);
+  }
+
+  /* Depth layering with multiple shadows */
+  .depth-1 {
+    @apply shadow-sm;
+  }
+  .depth-2 {
+    @apply shadow-md;
+  }
+  .depth-3 {
+    @apply shadow-lg;
+  }
+  .depth-4 {
+    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1), inset 0 1px 1px 0 rgba(255, 255, 255, 0.06);
+  }
+
+  /* Floating animation for cards */
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-8px); }
+  }
+  .float-effect {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  /* Glow effect for interactive elements */
+  .glow-on-hover {
+    @apply transition-all duration-300 relative;
+  }
+  .glow-on-hover:hover {
+    @apply shadow-lg;
+    box-shadow: 0 0 20px rgba(79, 70, 229, 0.3), 0 0 40px rgba(79, 70, 229, 0.15);
+  }
+  .glow-on-hover.dark:hover {
+    box-shadow: 0 0 20px rgba(129, 140, 248, 0.25), 0 0 40px rgba(129, 140, 248, 0.1);
+  }
+
+  /* Subtle button enhancements with 3D effect */
   button:active:not(:disabled) {
     @apply transition-transform duration-75;
+    transform: translateY(2px);
+  }
+
+  /* Button 3D depth effect */
+  .button-3d {
+    @apply transition-all duration-200 relative;
+    transform-style: preserve-3d;
+  }
+  .button-3d:hover:not(:disabled) {
+    transform: translateY(-2px) scale(1.02);
+  }
+  .button-3d:active:not(:disabled) {
+    transform: translateY(1px) scale(0.98);
   }
 
   /* Improve select styling */
@@ -256,6 +332,51 @@
   /* Scrollable fade-x */
   .fade-x {
     mask-image: linear-gradient(to right, transparent, black 1rem, black calc(100% - 1rem), transparent);
+  }
+
+  /* Backdrop blur for modals and overlays */
+  .backdrop-glass {
+    @apply backdrop-blur-sm bg-black/30;
+  }
+
+  /* Gradient overlay for cards */
+  .gradient-overlay {
+    @apply relative;
+  }
+  .gradient-overlay::before {
+    content: '';
+    @apply absolute inset-0 opacity-0 transition-opacity duration-300 pointer-events-none rounded-2xl;
+    background: linear-gradient(135deg, rgba(79, 70, 229, 0.1) 0%, rgba(139, 92, 246, 0.05) 100%);
+  }
+  .gradient-overlay:hover::before {
+    @apply opacity-100;
+  }
+
+  /* Shimmer effect for loading states */
+  @keyframes shimmer {
+    0% { background-position: -1000px 0; }
+    100% { background-position: 1000px 0; }
+  }
+  .shimmer {
+    animation: shimmer 2s infinite;
+    background: linear-gradient(to right, #f0f0f0 8%, #f8f8f8 18%, #f0f0f0 33%);
+    background-size: 800px 104px;
+  }
+  .dark .shimmer {
+    background: linear-gradient(to right, #1e293b 8%, #334155 18%, #1e293b 33%);
+  }
+
+  /* Enhanced hover with scale and glow */
+  .hover-lift {
+    @apply transition-all duration-300 cursor-pointer;
+  }
+  .hover-lift:hover {
+    @apply -translate-y-1 shadow-xl;
+  }
+
+  /* Smooth backdrop transitions */
+  .modal-backdrop {
+    @apply transition-all duration-300;
   }
 
   /* Hide scrollbar but allow scrolling */

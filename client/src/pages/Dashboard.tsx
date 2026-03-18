@@ -171,7 +171,7 @@ export default function Dashboard() {
           <button
             key={label}
             onClick={() => navigate(href)}
-            className={`flex items-center gap-1.5 md:gap-2.5 px-3 md:px-4 py-2.5 md:py-3 rounded-2xl bg-gradient-to-r ${color} text-white text-xs md:text-sm font-semibold shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 active:shadow-md transition-all duration-150 group`}
+            className={`button-3d flex items-center gap-1.5 md:gap-2.5 px-3 md:px-4 py-2.5 md:py-3 rounded-2xl bg-gradient-to-r ${color} text-white text-xs md:text-sm font-semibold shadow-lg hover:shadow-2xl active:shadow-md transition-all duration-150 group glow-on-hover`}
           >
             <Icon className="w-3.5 h-3.5 md:w-4 md:h-4 shrink-0 group-hover:scale-110 transition-transform duration-150" />
             <span className="truncate">{label}</span>
@@ -267,7 +267,7 @@ export default function Dashboard() {
       {/* ── Chart + Upcoming Events ── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Revenue Chart */}
-        <Card className="lg:col-span-2 border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm bg-white dark:bg-slate-800/80">
+        <Card className="lg:col-span-2 border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm bg-white dark:bg-slate-800/80 transition-all duration-300 hover:shadow-xl hover:border-indigo-200 dark:hover:border-indigo-800 hover:-translate-y-1 gradient-overlay card-3d">
           <CardHeader className="flex flex-row items-start justify-between pb-0 pt-4 px-5">
             <div>
               <CardTitle className="text-[14px] font-bold text-slate-900 dark:text-slate-100">Revenue Overview</CardTitle>
@@ -322,7 +322,7 @@ export default function Dashboard() {
         </Card>
 
         {/* Upcoming Events */}
-        <Card className="border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm bg-white dark:bg-slate-800/80">
+        <Card className="border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm bg-white dark:bg-slate-800/80 transition-all duration-300 hover:shadow-xl hover:border-indigo-200 dark:hover:border-indigo-800 hover:-translate-y-1 gradient-overlay card-3d">
           <CardHeader className="pb-0 pt-4 px-5">
             <div className="flex items-center justify-between">
               <div>
@@ -385,7 +385,7 @@ export default function Dashboard() {
       {/* ── Recent Clients + Pipeline Status ── */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
         {/* Recent clients */}
-        <Card className="lg:col-span-3 border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm bg-white dark:bg-slate-800/80">
+        <Card className="lg:col-span-3 border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm bg-white dark:bg-slate-800/80 transition-all duration-300 hover:shadow-xl hover:border-indigo-200 dark:hover:border-indigo-800 hover:-translate-y-1 gradient-overlay card-3d">
           <CardHeader className="pb-0 pt-4 px-5">
             <div className="flex items-center justify-between">
               <div>
@@ -439,7 +439,7 @@ export default function Dashboard() {
         </Card>
 
         {/* Pipeline by status */}
-        <Card className="lg:col-span-2 border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm bg-white dark:bg-slate-800/80">
+        <Card className="lg:col-span-2 border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm bg-white dark:bg-slate-800/80 transition-all duration-300 hover:shadow-xl hover:border-indigo-200 dark:hover:border-indigo-800 hover:-translate-y-1 gradient-overlay card-3d">
           <CardHeader className="pb-0 pt-4 px-5">
             <div className="flex items-center justify-between">
               <CardTitle className="text-[14px] font-bold text-slate-900 dark:text-slate-100">Pipeline Status</CardTitle>

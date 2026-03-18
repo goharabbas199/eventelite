@@ -329,7 +329,7 @@ export default function Events() {
                   <Card
                     key={event.id}
                     data-testid={`card-event-${event.id}`}
-                    className={`border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-lg hover:border-indigo-200 dark:hover:border-indigo-800 transition-all duration-200 border-l-4 cursor-pointer ${sc.borderColor}`}
+                    className={`border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-xl hover:border-indigo-200 dark:hover:border-indigo-800 transition-all duration-300 border-l-4 cursor-pointer card-3d gradient-overlay hover:-translate-y-1 ${sc.borderColor}`}
                   >
                     <CardHeader className="pb-2 pt-4">
                       <div className="flex items-start justify-between gap-2">

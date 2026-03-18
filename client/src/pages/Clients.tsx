@@ -172,7 +172,7 @@ export default function Clients() {
       </div>
 
       {/* Filter bar */}
-      <Card className="border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm bg-white dark:bg-slate-800/80">
+      <Card className="border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm bg-white dark:bg-slate-800/80 transition-all duration-300 hover:shadow-lg hover:border-indigo-200 dark:hover:border-indigo-800 gradient-overlay">
         <div className="p-4 md:p-5">
           <div className="flex flex-col gap-2 md:flex-row md:gap-3">
             <Input

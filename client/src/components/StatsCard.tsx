@@ -24,7 +24,7 @@ export function StatsCard({ title, value, icon: Icon, color = "blue", subtitle, 
   return (
     <div
       onClick={onClick}
-      className={`stat-card flex items-center justify-between gap-3 transition-all duration-200 ${onClick ? "cursor-pointer hover:shadow-md hover:border-indigo-200 dark:hover:border-indigo-800 hover:-translate-y-0.5 active:scale-[0.98] active:translate-y-0" : ""}`}
+      className={`stat-card gradient-overlay flex items-center justify-between gap-3 transition-all duration-300 ${onClick ? "cursor-pointer glow-on-hover card-3d hover:shadow-2xl hover:border-indigo-200 dark:hover:border-indigo-800 active:scale-[0.98] active:translate-y-1" : ""}`}
     >
       <div className="min-w-0 flex-1">
         <p className="eyebrow mb-1.5">{title}</p>

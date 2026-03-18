@@ -206,7 +206,7 @@ export default function Invoices() {
           ].map((s) => {
             const Icon = s.icon;
             return (
-              <Card key={s.label} className="border border-slate-100 dark:border-slate-700 shadow-sm">
+              <Card key={s.label} className="border border-slate-100 dark:border-slate-700 shadow-sm transition-all duration-300 hover:shadow-lg hover:border-indigo-200 dark:hover:border-indigo-800 hover:-translate-y-1 gradient-overlay card-3d">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-2 mb-2">
                     <Icon className={`w-3.5 h-3.5 ${s.color}`} />
@@ -222,7 +222,7 @@ export default function Invoices() {
 
         {/* Collection progress bar */}
         {stats.total > 0 && (
-          <Card className="border border-slate-100 dark:border-slate-700 shadow-sm">
+          <Card className="border border-slate-100 dark:border-slate-700 shadow-sm transition-all duration-300 hover:shadow-lg hover:border-indigo-200 dark:hover:border-indigo-800 hover:-translate-y-1 gradient-overlay card-3d">
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-xs font-semibold text-slate-500">Collection Progress</p>
@@ -248,7 +248,7 @@ export default function Invoices() {
 
         {/* Generate from Quote CTA */}
         {(quotations as any[]).filter((q) => q.status === "Accepted").length > 0 && (
-          <Card className="border border-indigo-100 dark:border-indigo-900/50 bg-gradient-to-r from-indigo-50 to-slate-50 dark:from-indigo-950/20 dark:to-slate-900 shadow-sm">
+          <Card className="border border-indigo-100 dark:border-indigo-900/50 bg-gradient-to-r from-indigo-50 to-slate-50 dark:from-indigo-950/20 dark:to-slate-900 shadow-sm transition-all duration-300 hover:shadow-lg hover:border-indigo-400 dark:hover:border-indigo-600 hover:-translate-y-1 gradient-overlay card-3d">
             <CardContent className="p-4 flex items-center gap-4">
               <FileText className="w-8 h-8 text-indigo-500 shrink-0" />
               <div className="flex-1">

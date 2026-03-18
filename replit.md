@@ -96,6 +96,29 @@
 - **Links**: Better color transition timing across the app
 - **General**: All transitions use consistent 200ms duration for fluid feel; active states have faster 75ms feedback
 
+## Advanced Visual Effects (March 2026)
+- **Glass Morphism**: Added `.glass`, `.glass-sm`, `.glass-lg`, `.glass-card` utilities with backdrop blur and transparency for modern frosted glass effects
+- **3D Transforms**: 
+  - `.card-3d` class applies `transform-style: preserve-3d` with 1000px perspective
+  - Hover transforms: Cards rotate (rotateX/rotateY) and translate up with shadow expansion
+  - Buttons use `.button-3d` for scale (1.02) and lift (-2px) on hover
+  - Active state: buttons scale down (0.98) with subtle press feedback
+- **Gradient Overlays**: `.gradient-overlay` and `.gradient-overlay::before` provide animated indigo-to-purple gradient on card hover
+- **Depth Layering**: `.depth-1` through `.depth-4` utilities for multi-layer shadow effects creating visual hierarchy
+- **Glow Effects**: `.glow-on-hover` creates indigo glow (0-40px blur radius) on interactive elements; adapts to dark mode
+- **Floating Animation**: `.float-effect` keyframe animates subtle Y-axis floating (0 to -8px) over 3s loop
+- **Shimmer Loading**: `.shimmer` class for loading states with animated gradient sweep
+- **Hover Lift**: `.hover-lift` class for 1px upward translation with shadow-xl on interactive elements
+- **Dynamic Button Feedback**: `.button-3d` active state: `translateY(2px)` press effect for tactile feel
+- **Applied to**:
+  - Dashboard stat cards (StatsCard component): 3D rotations + gradient overlay + glow
+  - Dashboard quick action buttons: 3D button transforms + glow shadow
+  - Chart and upcoming events cards: 3D transforms + gradient overlays + shadow expansion
+  - Recent clients and pipeline cards: 3D depth effects
+  - Event cards on Events page: 3D transforms + gradient overlays + hover lift
+  - Invoice stat cards: 3D transforms + gradient overlays
+  - All card components maintain responsive 3D effects on mobile (subtle, not jarring)
+
 ## Important Notes
 - `budget` field stored as numeric string; always convert with `Number()` for calculations
 - Payment amounts stored as `numeric` strings; convert with `String()` before insert
