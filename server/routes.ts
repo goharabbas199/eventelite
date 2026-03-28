@@ -685,6 +685,19 @@ export async function registerRoutes(
 
   // ========================= AI ==============================
 
+  app.get("/api/ai/status", (_req, res) => {
+    const hasOpenAI = !!(
+      process.env.AI_INTEGRATIONS_OPENAI_API_KEY ||
+      process.env.OPENAI_API_KEY
+    );
+    res.json({
+      engine: hasOpenAI ? "openai" : "built-in",
+      model: hasOpenAI ? "GPT-4o" : "EventElite Built-in AI",
+      available: true,
+      features: ["event_planner", "quote_generator", "vendor_recommendation", "budget_planner", "profit_optimizer", "assistant"],
+    });
+  });
+
   app.post("/api/ai", async (req, res) => {
     try {
       const { feature, prompt, context } = req.body;

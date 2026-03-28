@@ -4,6 +4,7 @@ import { useAI, type AIFeature } from "@/hooks/use-ai";
 import { useClients } from "@/hooks/use-clients";
 import { useVendors } from "@/hooks/use-vendors";
 import { useVenues } from "@/hooks/use-venues";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   Sparkles, Send, Bot, User, Wand2, DollarSign,
   Store, Calendar, TrendingUp, RotateCcw, Copy, Check,
-  Lightbulb, Zap,
+  Lightbulb, Zap, Cpu, ExternalLink,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -148,34 +149,119 @@ function MessageBubble({ msg }: { msg: Message }) {
   );
 }
 
+function TipsList({ tips, label = "Tips" }: { tips: string[]; label?: string }) {
+  if (!tips?.length) return null;
+  return (
+    <div className="space-y-1">
+      <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">{label}</p>
+      {tips.map((tip: string, i: number) => (
+        <div key={i} className="flex items-start gap-1.5 text-[12px] text-slate-600 dark:text-slate-300">
+          <Lightbulb className="w-3 h-3 text-amber-500 mt-0.5 shrink-0" />
+          {tip}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function AIResponseRenderer({ data }: { data: any }) {
   if (!data || typeof data !== "object") return <p className="text-sm text-slate-600 dark:text-slate-300">{String(data)}</p>;
 
-  if (data.message) {
-    return <p className="text-[13px] text-slate-700 dark:text-slate-200 leading-relaxed">{data.message}</p>;
+  // ── General message with optional extras ──────────────────────────────────
+  if (data.message && !data.allocations && !data.lineItems && !data.vendorServices && !data.recommendations && !data.suggestions) {
+    return (
+      <div className="space-y-3">
+        <p className="text-[13px] text-slate-700 dark:text-slate-200 leading-relaxed whitespace-pre-wrap">{data.message}</p>
+
+        {/* Capabilities list (help response) */}
+        {data.capabilities?.length > 0 && (
+          <div className="space-y-1.5 mt-2">
+            {data.capabilities.map((cap: string, i: number) => (
+              <div key={i} className="flex items-start gap-2 p-2 bg-indigo-50 dark:bg-indigo-950/30 rounded-xl text-[12px] text-slate-700 dark:text-slate-300">
+                {cap}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Checklist */}
+        {data.checklist?.length > 0 && (
+          <div className="space-y-1 mt-1">
+            <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Planning Checklist</p>
+            <div className="space-y-1 max-h-60 overflow-y-auto">
+              {data.checklist.map((item: string, i: number) => (
+                <div key={i} className="flex items-start gap-2 text-[12px] text-slate-600 dark:text-slate-300 py-1 border-b border-slate-100 dark:border-slate-700/50 last:border-0">
+                  <span className="w-4 h-4 rounded bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center shrink-0 mt-0.5">
+                    <span className="text-[8px] font-bold text-indigo-600">{i + 1}</span>
+                  </span>
+                  {item}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Upcoming events from context */}
+        {data.upcomingEvents?.length > 0 && (
+          <div className="space-y-1.5">
+            <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Your Upcoming Events</p>
+            {data.upcomingEvents.map((ev: any, i: number) => (
+              <div key={i} className="flex items-start justify-between p-2.5 bg-slate-50 dark:bg-slate-700/40 rounded-xl">
+                <div>
+                  <p className="text-[12px] font-bold text-slate-800 dark:text-slate-200">{ev.client}</p>
+                  <p className="text-[11px] text-slate-500">{ev.type} · {ev.date ? new Date(ev.date).toLocaleDateString() : "TBD"}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-[11px] font-semibold text-indigo-600">{ev.status}</p>
+                  {ev.guests && <p className="text-[10px] text-slate-400">{ev.guests} guests</p>}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <TipsList tips={data.tips} />
+
+        {data.tip && (
+          <div className="flex items-start gap-2 p-2.5 bg-amber-50 dark:bg-amber-950/30 rounded-xl border border-amber-100 dark:border-amber-900/40">
+            <Lightbulb className="w-3.5 h-3.5 text-amber-500 mt-0.5 shrink-0" />
+            <p className="text-[12px] text-amber-800 dark:text-amber-200">{data.tip}</p>
+          </div>
+        )}
+      </div>
+    );
   }
 
+  // ── Budget Allocation ─────────────────────────────────────────────────────
   if (data.allocations) {
     return (
       <div className="space-y-3">
         <div className="flex items-center gap-2 mb-2">
           <DollarSign className="w-4 h-4 text-emerald-500" />
-          <span className="text-sm font-bold text-slate-800 dark:text-slate-200">Budget Allocation</span>
+          <span className="text-sm font-bold text-slate-800 dark:text-slate-200">Budget Allocation — {data.eventType}</span>
           <span className="ml-auto text-sm font-bold text-emerald-600">${data.totalBudget?.toLocaleString()}</span>
         </div>
+        {data.perHeadTotal && (
+          <div className="bg-indigo-50 dark:bg-indigo-950/30 rounded-xl p-2 text-center mb-2">
+            <p className="text-[10px] text-indigo-600 font-medium">Per Head Cost</p>
+            <p className="text-[16px] font-bold text-indigo-700 dark:text-indigo-300">${data.perHeadTotal?.toLocaleString()}</p>
+            <p className="text-[10px] text-indigo-500">{data.guestCount} guests</p>
+          </div>
+        )}
         <div className="space-y-2">
           {data.allocations?.map((a: any, i: number) => (
-            <div key={i} className="flex items-center justify-between">
-              <div className="flex-1">
-                <div className="flex justify-between mb-0.5">
-                  <span className="text-[12px] font-semibold text-slate-700 dark:text-slate-300">{a.category}</span>
-                  <span className="text-[12px] font-bold text-indigo-600">${a.amount?.toLocaleString()}</span>
+            <div key={i} className="flex-1">
+              <div className="flex justify-between mb-0.5">
+                <span className="text-[12px] font-semibold text-slate-700 dark:text-slate-300">{a.category}</span>
+                <div className="flex items-center gap-2">
+                  {a.perHead > 0 && <span className="text-[10px] text-slate-400">${a.perHead}/head</span>}
+                  <span className="text-[12px] font-bold text-indigo-600">${a.amount?.toLocaleString()} <span className="text-slate-400 font-normal">({a.percentage}%)</span></span>
                 </div>
-                <div className="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-1.5">
-                  <div className="h-full bg-indigo-500 rounded-full" style={{ width: `${a.percentage}%` }} />
-                </div>
-                {a.notes && <p className="text-[10px] text-slate-400 mt-0.5">{a.notes}</p>}
               </div>
+              <div className="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-1.5">
+                <div className="h-full bg-gradient-to-r from-indigo-500 to-violet-500 rounded-full transition-all" style={{ width: `${a.percentage}%` }} />
+              </div>
+              {a.notes && <p className="text-[10px] text-slate-400 mt-0.5">{a.notes}</p>}
             </div>
           ))}
         </div>
@@ -195,6 +281,7 @@ function AIResponseRenderer({ data }: { data: any }) {
     );
   }
 
+  // ── Quote / Line Items ────────────────────────────────────────────────────
   if (data.lineItems) {
     return (
       <div className="space-y-3">
@@ -208,6 +295,7 @@ function AIResponseRenderer({ data }: { data: any }) {
               <div className="flex-1">
                 <p className="text-[12px] font-semibold text-slate-800 dark:text-slate-200">{item.name}</p>
                 {item.description && <p className="text-[11px] text-slate-400">{item.description}</p>}
+                {item.markup && <p className="text-[10px] text-indigo-500">{item.markup}% markup</p>}
               </div>
               <div className="text-right ml-3 shrink-0">
                 <p className="text-[12px] font-bold text-slate-800 dark:text-slate-200">${item.clientPrice?.toLocaleString()}</p>
@@ -226,15 +314,16 @@ function AIResponseRenderer({ data }: { data: any }) {
             <p className="text-[13px] font-bold text-emerald-600">${data.totalClientPrice?.toLocaleString()}</p>
           </div>
           <div className="bg-indigo-50 dark:bg-indigo-950/40 rounded-xl p-2 text-center">
-            <p className="text-[10px] text-indigo-600">Profit</p>
+            <p className="text-[10px] text-indigo-600">Profit ({data.profitMargin}%)</p>
             <p className="text-[13px] font-bold text-indigo-600">${data.estimatedProfit?.toLocaleString()}</p>
           </div>
         </div>
-        {data.notes && <p className="text-[11px] text-slate-400 italic">{data.notes}</p>}
+        {data.notes && <p className="text-[11px] text-slate-400 italic border-t border-slate-100 dark:border-slate-700 pt-2 mt-1">{data.notes}</p>}
       </div>
     );
   }
 
+  // ── Event Plan ────────────────────────────────────────────────────────────
   if (data.vendorServices || data.suggestedVenue) {
     return (
       <div className="space-y-3">
@@ -243,20 +332,36 @@ function AIResponseRenderer({ data }: { data: any }) {
           <span className="text-sm font-bold text-slate-800 dark:text-slate-200">{data.eventName || "Event Plan"}</span>
           <Badge variant="outline" className="text-[10px] ml-auto">{data.eventType}</Badge>
         </div>
+        <div className="grid grid-cols-3 gap-2">
+          <div className="bg-slate-50 dark:bg-slate-700/40 rounded-xl p-2 text-center">
+            <p className="text-[10px] text-slate-400">Guests</p>
+            <p className="text-[14px] font-bold text-slate-700 dark:text-slate-200">{data.estimatedGuestCount}</p>
+          </div>
+          <div className="bg-slate-50 dark:bg-slate-700/40 rounded-xl p-2 text-center">
+            <p className="text-[10px] text-slate-400">Location</p>
+            <p className="text-[11px] font-bold text-slate-700 dark:text-slate-200 truncate">{data.location}</p>
+          </div>
+          {data.preferredMonth && (
+            <div className="bg-slate-50 dark:bg-slate-700/40 rounded-xl p-2 text-center">
+              <p className="text-[10px] text-slate-400">Month</p>
+              <p className="text-[11px] font-bold text-slate-700 dark:text-slate-200">{data.preferredMonth}</p>
+            </div>
+          )}
+        </div>
         {data.suggestedVenue && (
-          <div className="bg-slate-50 dark:bg-slate-700/40 rounded-xl p-3">
-            <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">Suggested Venue</p>
+          <div className="bg-violet-50 dark:bg-violet-950/30 rounded-xl p-3 border border-violet-100 dark:border-violet-900/40">
+            <p className="text-[11px] font-semibold text-violet-600 uppercase tracking-wider mb-1">Suggested Venue</p>
             <p className="text-[13px] font-bold text-slate-800 dark:text-slate-200">{data.suggestedVenue.name}</p>
-            <p className="text-[11px] text-slate-500">{data.suggestedVenue.reason}</p>
+            <p className="text-[11px] text-slate-500 mt-0.5">{data.suggestedVenue.reason}</p>
             <p className="text-[12px] font-semibold text-indigo-600 mt-1">${data.suggestedVenue.estimatedCost?.toLocaleString()}</p>
           </div>
         )}
         {data.vendorServices?.length > 0 && (
           <div className="space-y-1.5">
-            <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Services</p>
+            <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Vendor Services</p>
             {data.vendorServices.map((s: any, i: number) => (
-              <div key={i} className="flex justify-between items-start py-1 border-b border-slate-100 dark:border-slate-700/50 last:border-0">
-                <div>
+              <div key={i} className="flex justify-between items-start py-1.5 border-b border-slate-100 dark:border-slate-700/50 last:border-0">
+                <div className="flex-1">
                   <p className="text-[12px] font-semibold text-slate-700 dark:text-slate-300">{s.service}</p>
                   {s.description && <p className="text-[10px] text-slate-400">{s.description}</p>}
                 </div>
@@ -275,21 +380,25 @@ function AIResponseRenderer({ data }: { data: any }) {
             <p className="text-[13px] font-bold text-emerald-600">${data.suggestedClientPrice?.toLocaleString()}</p>
           </div>
         </div>
-        {data.tips?.length > 0 && (
-          <div className="space-y-1">
-            <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Tips</p>
-            {data.tips.map((tip: string, i: number) => (
-              <div key={i} className="flex items-start gap-1.5 text-[12px] text-slate-600 dark:text-slate-300">
-                <Lightbulb className="w-3 h-3 text-amber-500 mt-0.5 shrink-0" />
-                {tip}
-              </div>
-            ))}
+        {data.timeline?.length > 0 && (
+          <div>
+            <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Key Timeline Milestones</p>
+            <div className="space-y-1 max-h-48 overflow-y-auto">
+              {data.timeline.slice(0, 8).map((t: any, i: number) => (
+                <div key={i} className="flex items-start gap-2 text-[11px] py-1 border-b border-slate-100 dark:border-slate-700/50 last:border-0">
+                  <span className="text-[10px] text-indigo-500 font-semibold shrink-0 w-14">{t.daysBeforeEvent === 0 ? "Event day" : `${t.daysBeforeEvent}d`}</span>
+                  <span className="text-slate-600 dark:text-slate-400">{t.task}</span>
+                </div>
+              ))}
+            </div>
           </div>
         )}
+        <TipsList tips={data.tips} />
       </div>
     );
   }
 
+  // ── Vendor Recommendations ────────────────────────────────────────────────
   if (data.recommendations) {
     return (
       <div className="space-y-3">
@@ -303,10 +412,15 @@ function AIResponseRenderer({ data }: { data: any }) {
               <div className="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center shrink-0">
                 <Store className="w-4 h-4 text-amber-600" />
               </div>
-              <div className="flex-1">
-                <div className="flex items-center justify-between">
-                  <p className="text-[12px] font-bold text-slate-800 dark:text-slate-200">{r.vendorName}</p>
-                  <span className="text-[10px] text-indigo-600 font-semibold">{r.compatibilityScore}% match</span>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-[12px] font-bold text-slate-800 dark:text-slate-200 truncate">{r.vendorName}</p>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <div className="h-1.5 w-10 bg-slate-200 dark:bg-slate-600 rounded-full overflow-hidden">
+                      <div className="h-full bg-indigo-500 rounded-full" style={{ width: `${r.compatibilityScore}%` }} />
+                    </div>
+                    <span className="text-[10px] text-indigo-600 font-semibold">{r.compatibilityScore}%</span>
+                  </div>
                 </div>
                 <p className="text-[10px] text-slate-400">{r.category}</p>
                 <p className="text-[11px] text-slate-500 mt-0.5">{r.reason}</p>
@@ -320,6 +434,7 @@ function AIResponseRenderer({ data }: { data: any }) {
     );
   }
 
+  // ── Profit Optimizer ──────────────────────────────────────────────────────
   if (data.suggestions || data.alternativePackages) {
     return (
       <div className="space-y-3">
@@ -327,7 +442,11 @@ function AIResponseRenderer({ data }: { data: any }) {
           <TrendingUp className="w-4 h-4 text-rose-500" />
           <span className="text-sm font-bold text-slate-800 dark:text-slate-200">Profit Optimization</span>
         </div>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <div className="bg-slate-50 dark:bg-slate-700/40 rounded-xl p-2 text-center">
+            <p className="text-[10px] text-slate-400">Current Cost</p>
+            <p className="text-[13px] font-bold text-slate-700 dark:text-slate-200">${data.currentCost?.toLocaleString()}</p>
+          </div>
           <div className="bg-slate-50 dark:bg-slate-700/40 rounded-xl p-2 text-center">
             <p className="text-[10px] text-slate-400">Current Markup</p>
             <p className="text-[13px] font-bold text-slate-700 dark:text-slate-200">{data.currentMarkup}%</p>
@@ -343,7 +462,7 @@ function AIResponseRenderer({ data }: { data: any }) {
         </div>
         {data.suggestions?.length > 0 && (
           <div className="space-y-1.5">
-            <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Suggestions</p>
+            <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Optimization Suggestions</p>
             {data.suggestions.map((s: any, i: number) => (
               <div key={i} className="flex items-start gap-2 p-2 bg-slate-50 dark:bg-slate-700/40 rounded-xl">
                 <Zap className="w-3.5 h-3.5 text-amber-500 mt-0.5 shrink-0" />
@@ -356,6 +475,20 @@ function AIResponseRenderer({ data }: { data: any }) {
             ))}
           </div>
         )}
+        {data.alternativePackages?.length > 0 && (
+          <div>
+            <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Package Options</p>
+            <div className="grid grid-cols-3 gap-2">
+              {data.alternativePackages.map((pkg: any, i: number) => (
+                <div key={i} className={`rounded-xl p-2 text-center border ${i === 1 ? "bg-indigo-50 dark:bg-indigo-950/30 border-indigo-200 dark:border-indigo-800" : "bg-slate-50 dark:bg-slate-700/40 border-slate-100 dark:border-slate-700"}`}>
+                  <p className="text-[10px] font-semibold text-slate-500">{pkg.name}</p>
+                  <p className="text-[12px] font-bold text-slate-800 dark:text-slate-200 mt-0.5">${pkg.clientPrice?.toLocaleString()}</p>
+                  <p className="text-[10px] text-emerald-600">+${pkg.profit?.toLocaleString()}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -366,11 +499,19 @@ function AIResponseRenderer({ data }: { data: any }) {
 }
 
 export default function AIAssistant() {
+  const { data: aiStatus } = useQuery<{ engine: string; model: string; available: boolean }>({
+    queryKey: ["/api/ai/status"],
+  });
+
+  const isBuiltIn = !aiStatus || aiStatus.engine === "built-in";
+
   const [messages, setMessages] = useState<Message[]>([
     {
       id: uid(),
       role: "assistant",
-      content: "Hello! I'm your EventElite AI assistant. I can help you plan events, generate quotes, recommend vendors, allocate budgets, and optimize your profits. Try a quick action below or type your own request.",
+      content: isBuiltIn
+        ? "Hello! I'm EventElite's built-in AI assistant — no external API required. I'm powered by event planning expertise built right into your platform. Try a quick action below or type a request like 'Plan a wedding for 150 guests with a $40,000 budget'."
+        : "Hello! I'm your EventElite AI assistant. I can help you plan events, generate quotes, recommend vendors, allocate budgets, and optimize your profits. Try a quick action below or type your own request.",
       timestamp: new Date(),
     },
   ]);
@@ -479,6 +620,18 @@ export default function AIAssistant() {
             </h2>
           </div>
           <div className="flex items-center gap-2">
+            {/* Engine status badge */}
+            {isBuiltIn ? (
+              <Badge className="hidden sm:flex items-center gap-1.5 text-[11px] bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 px-2 py-1">
+                <Cpu className="w-3 h-3" />
+                Built-in AI · Free
+              </Badge>
+            ) : (
+              <Badge className="hidden sm:flex items-center gap-1.5 text-[11px] bg-violet-50 dark:bg-violet-950/40 text-violet-700 dark:text-violet-400 border border-violet-200 dark:border-violet-800 px-2 py-1">
+                <Sparkles className="w-3 h-3" />
+                {aiStatus?.model || "GPT-4o"}
+              </Badge>
+            )}
             <Badge variant="outline" className="hidden sm:flex text-[11px] border-indigo-200 text-indigo-600 dark:border-indigo-800 dark:text-indigo-400">
               {FEATURE_LABELS[activeFeature]}
             </Badge>

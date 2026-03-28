@@ -1,20 +1,4 @@
-import OpenAI from "openai";
-
-let openaiClient: OpenAI | null = null;
-
-function getOpenAIClient(): OpenAI {
-  if (!openaiClient) {
-    const apiKey = process.env.AI_INTEGRATIONS_OPENAI_API_KEY || process.env.OPENAI_API_KEY;
-    if (!apiKey) {
-      throw new Error("Missing OpenAI API key. Please set OPENAI_API_KEY to enable AI features.");
-    }
-    openaiClient = new OpenAI({
-      apiKey,
-      baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
-    });
-  }
-  return openaiClient;
-}
+import { runCustomAI } from "./customAI";
 
 export type AIFeature =
   | "event_planner"
@@ -39,6 +23,14 @@ interface AIRequest {
     guestCount?: number;
     eventType?: string;
   };
+}
+
+// Check if OpenAI API key is available for optional upgrade
+function hasOpenAIKey(): boolean {
+  return !!(
+    process.env.AI_INTEGRATIONS_OPENAI_API_KEY ||
+    process.env.OPENAI_API_KEY
+  );
 }
 
 const SYSTEM_PROMPTS: Record<AIFeature, string> = {
@@ -114,22 +106,25 @@ const SYSTEM_PROMPTS: Record<AIFeature, string> = {
 If the user asks you to generate structured data, use JSON format. For open-ended questions, respond in plain text.`,
 };
 
-export async function runAI(request: AIRequest): Promise<any> {
-  const { feature, prompt, context } = request;
+async function runWithOpenAI(request: AIRequest): Promise<any> {
+  const { OpenAI } = await import("openai");
+  const apiKey =
+    process.env.AI_INTEGRATIONS_OPENAI_API_KEY || process.env.OPENAI_API_KEY;
+  const client = new OpenAI({
+    apiKey,
+    baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
+  });
 
+  const { feature, prompt, context } = request;
   const contextStr = context
     ? `\n\nAvailable data context:\n${JSON.stringify(context, null, 2)}`
     : "";
 
-  const userMessage = `${prompt}${contextStr}`;
-
-  const openai = getOpenAIClient();
-
-  const response = await openai.chat.completions.create({
+  const response = await client.chat.completions.create({
     model: "gpt-4o",
     messages: [
       { role: "system", content: SYSTEM_PROMPTS[feature] },
-      { role: "user", content: userMessage },
+      { role: "user", content: `${prompt}${contextStr}` },
     ],
     max_tokens: 8192,
   });
@@ -145,9 +140,23 @@ export async function runAI(request: AIRequest): Promise<any> {
       const jsonMatch = content.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
       if (jsonMatch) return JSON.parse(jsonMatch[0]);
     } catch {
-      // fall through to return raw
+      // fall through
     }
   }
 
   return { message: content };
+}
+
+export async function runAI(request: AIRequest): Promise<any> {
+  // Use OpenAI if key is present, otherwise fall back to built-in AI engine
+  if (hasOpenAIKey()) {
+    try {
+      return await runWithOpenAI(request);
+    } catch (err: any) {
+      console.warn("[AI] OpenAI request failed, falling back to built-in engine:", err?.message);
+    }
+  }
+
+  // Always-available built-in AI engine (no API key required)
+  return runCustomAI(request);
 }
