@@ -1,9 +1,10 @@
-import { Switch, Route, useLocation } from "wouter";
+import { Switch, Route, useLocation, Redirect } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SettingsProvider } from "@/context/SettingsContext";
+import { AuthProvider, useAuth } from "@/context/AuthContext";
 import NotFound from "@/pages/not-found";
 import Login from "@/pages/Login";
 
@@ -29,18 +30,21 @@ import Invoices from "@/pages/Invoices";
 import AIAssistant from "@/pages/AIAssistant";
 import ClientPortal from "@/pages/ClientPortal";
 
-function isAuthenticated() {
-  return localStorage.getItem("ee_auth") === "1";
-}
-
 function AuthGuard({ children }: { children: React.ReactNode }) {
-  const [location, navigate] = useLocation();
-  const authed = isAuthenticated();
+  const { user, isLoading } = useAuth();
 
-  if (!authed) {
-    if (location !== "/login") navigate("/login");
-    return null;
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#0d1117] flex items-center justify-center">
+        <div className="w-9 h-9 border-2 border-indigo-600/20 border-t-indigo-500 rounded-full animate-spin" />
+      </div>
+    );
   }
+
+  if (!user) {
+    return <Redirect to="/login" />;
+  }
+
   return <>{children}</>;
 }
 
@@ -112,10 +116,12 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <SettingsProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-        </TooltipProvider>
+        <AuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Router />
+          </TooltipProvider>
+        </AuthProvider>
       </SettingsProvider>
     </QueryClientProvider>
   );

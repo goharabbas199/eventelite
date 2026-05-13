@@ -1,5 +1,6 @@
 import { db } from "./db";
 import {
+  users,
   vendors,
   vendorProducts,
   venues,
@@ -16,6 +17,7 @@ import {
   events,
   invoices,
   appSettings,
+  type User,
   type InsertVendor,
   type InsertVendorProduct,
   type InsertVenue,
@@ -34,6 +36,11 @@ import {
 import { eq, desc } from "drizzle-orm";
 
 export interface IStorage {
+  // Users / Auth
+  getUserByEmail(email: string): Promise<User | undefined>;
+  getUserById(id: number): Promise<User | undefined>;
+  createUser(data: { fullName: string; email: string; passwordHash: string }): Promise<User>;
+
   getVendors(): Promise<any[]>;
   getVendor(id: number): Promise<any | undefined>;
   createVendor(vendor: InsertVendor): Promise<any>;
@@ -115,6 +122,25 @@ export interface IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
+  // ── Users / Auth ──────────────────────────────────────────────────────────
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email.toLowerCase().trim()));
+    return user;
+  }
+
+  async getUserById(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
+  }
+
+  async createUser(data: { fullName: string; email: string; passwordHash: string }): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values({ fullName: data.fullName, email: data.email.toLowerCase().trim(), passwordHash: data.passwordHash })
+      .returning();
+    return user;
+  }
+
   async getVendors() {
     return db.select().from(vendors).orderBy(desc(vendors.createdAt));
   }

@@ -1,7 +1,9 @@
 import express, { type Request, Response, NextFunction } from "express";
+import session from "express-session";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
+import { passport } from "./auth";
 
 const app = express();
 const httpServer = createServer(app);
@@ -9,6 +11,12 @@ const httpServer = createServer(app);
 declare module "http" {
   interface IncomingMessage {
     rawBody: unknown;
+  }
+}
+
+declare module "express-session" {
+  interface SessionData {
+    passport: { user: number };
   }
 }
 
@@ -22,6 +30,22 @@ app.use(
 );
 
 app.use(express.urlencoded({ extended: false, limit: "15mb" }));
+
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || "eventelite-dev-secret",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      secure: false,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    },
+  }),
+);
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 export function log(message: string, source = "express") {
   const formattedTime = new Date().toLocaleTimeString("en-US", {
@@ -64,7 +88,6 @@ app.use((req, res, next) => {
   try {
     await registerRoutes(httpServer, app);
 
-    // ✅ Only seed in development
     if (process.env.NODE_ENV !== "production") {
       try {
         const seedModule = await import("./seed");

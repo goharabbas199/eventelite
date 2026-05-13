@@ -6,6 +6,8 @@ import { z } from "zod";
 import cloudinary, { cloudinaryConfigured } from "./cloudinary";
 import multer from "multer";
 import { runAI } from "./services/aiService";
+import bcrypt from "bcrypt";
+import { passport } from "./auth";
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -13,6 +15,69 @@ export async function registerRoutes(
   httpServer: Server,
   app: Express,
 ): Promise<Server> {
+
+  // ===================== AUTH ===========================
+
+  app.post("/api/auth/signup", async (req, res) => {
+    try {
+      const { fullName, email, password } = z.object({
+        fullName: z.string().min(2, "Full name must be at least 2 characters"),
+        email: z.string().email("Invalid email address"),
+        password: z.string().min(8, "Password must be at least 8 characters"),
+      }).parse(req.body);
+
+      const existing = await storage.getUserByEmail(email);
+      if (existing) {
+        return res.status(409).json({ message: "An account with this email already exists" });
+      }
+
+      const passwordHash = await bcrypt.hash(password, 12);
+      const user = await storage.createUser({ fullName, email, passwordHash });
+
+      req.login(user, (err) => {
+        if (err) return res.status(500).json({ message: "Login after signup failed" });
+        const { passwordHash: _ph, ...safeUser } = user;
+        res.status(201).json(safeUser);
+      });
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ message: err.errors[0].message });
+      }
+      console.error("Signup error:", err);
+      res.status(500).json({ message: "Signup failed. Please try again." });
+    }
+  });
+
+  app.post("/api/auth/login", (req, res, next) => {
+    passport.authenticate("local", (err: any, user: any, info: any) => {
+      if (err) return next(err);
+      if (!user) return res.status(401).json({ message: info?.message || "Invalid email or password" });
+      req.login(user, (loginErr) => {
+        if (loginErr) return next(loginErr);
+        const { passwordHash: _ph, ...safeUser } = user;
+        res.json(safeUser);
+      });
+    })(req, res, next);
+  });
+
+  app.post("/api/auth/logout", (req, res) => {
+    req.logout(() => {
+      req.session.destroy(() => {
+        res.clearCookie("connect.sid");
+        res.json({ success: true });
+      });
+    });
+  });
+
+  app.get("/api/auth/me", (req, res) => {
+    if (!req.isAuthenticated() || !req.user) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+    const user = req.user as any;
+    const { passwordHash: _ph, ...safeUser } = user;
+    res.json(safeUser);
+  });
+
   // ===================== VENDORS ========================
 
   app.get(api.vendors.list.path, async (_req, res) => {

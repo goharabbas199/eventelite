@@ -1,0 +1,79 @@
+I want to replace the current demo login system with a fully functional real authentication system for EventElite SaaS.
+
+Current situation:
+
+* The login page only uses demo credentials.
+* I want users to be able to create real accounts and log in with their own email and password.
+* Remove the “Demo Credentials” section completely.
+
+Requirements:
+
+1. Create a complete authentication system with:
+
+   * Sign Up
+   * Sign In
+   * Logout
+   * Session handling
+   * Protected routes
+
+2. Sign Up should include:
+
+   * Full Name
+   * Email
+   * Password
+   * Confirm Password
+
+3. Store users securely in PostgreSQL database using Drizzle ORM.
+
+4. Passwords must be hashed securely using bcrypt.
+
+5. Add backend API routes for:
+
+   * POST /api/auth/signup
+   * POST /api/auth/login
+   * POST /api/auth/logout
+   * GET /api/auth/me
+
+6. Use proper validation with Zod:
+
+   * Valid email format
+   * Strong password minimum 8 characters
+   * Prevent duplicate accounts
+
+7. After successful login:
+
+   * Save session/auth state properly
+   * Redirect user to dashboard
+   * Keep user logged in after refresh
+
+8. Protect all dashboard/private pages:
+
+   * If user is not logged in, redirect to login page.
+
+9. Update frontend UI:
+
+   * Add toggle between Sign In and Sign Up
+   * Add loading states
+   * Add proper success/error toast messages
+   * Remove demo credential card entirely
+
+10. Keep current dark modern UI design exactly the same.
+
+11. Follow existing project stack and architecture:
+
+* React + TypeScript + Vite frontend
+* Express backend
+* PostgreSQL
+* Drizzle ORM
+* TanStack Query
+* ShadCN UI
+* Wouter routing
+
+12. Important:
+
+* Do not break existing SaaS structure.
+* Work carefully file by file.
+* Create production-ready authentication.
+* Use clean scalable architecture for future multi-tenant SaaS support.
+
+Before editing, first analyze the current auth flow and project structure, then implement the complete real authentication system step by step.
