@@ -133,12 +133,12 @@ export default function Clients() {
           <h2 className="text-xl font-bold text-slate-900 dark:text-white">Client Events</h2>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={handleExportCSV} className="h-9 text-xs rounded-xl hidden sm:flex">
+          <Button variant="outline" onClick={handleExportCSV} className="h-9 text-xs rounded-xl hidden sm:flex" data-testid="button-export-clients-csv">
             Export CSV
           </Button>
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-              <Button className="h-9 rounded-xl bg-indigo-600 hover:bg-indigo-700 shadow-sm shadow-indigo-900/20 text-sm">
+              <Button className="h-9 rounded-xl bg-indigo-600 hover:bg-indigo-700 shadow-sm shadow-indigo-900/20 text-sm" data-testid="button-new-client">
                 <Plus className="w-4 h-4 mr-1.5" />
                 New Client
               </Button>
@@ -161,7 +161,7 @@ export default function Clients() {
           { label: "Upcoming (30d)",   value: upcomingCount,                              icon: Calendar,     cls: "text-amber-600 dark:text-amber-400" },
           { label: "Pipeline Budget",  value: `$${totalPipelineBudget.toLocaleString()}`, icon: DollarSign,   cls: "text-indigo-600 dark:text-indigo-400" },
         ].map(({ label, value, icon: Icon, cls }) => (
-          <div key={label} className="stat-card">
+          <div key={label} className="stat-card" data-testid={`card-client-kpi-${label.toLowerCase().replace(/\s+/g, "-")}`}>
             <div className="flex items-center justify-between mb-2">
               <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">{label}</p>
               <Icon className={`w-4 h-4 ${cls} opacity-60`} />
@@ -192,6 +192,7 @@ export default function Clients() {
                   className={selectCls}
                   value={value}
                   onChange={(e) => onChange(e.target.value)}
+                  data-testid={`select-client-filter-${i}`}
                 >
                   {options.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
                 </select>
@@ -201,9 +202,10 @@ export default function Clients() {
           <div className="flex items-center justify-between mt-3">
             <p className="text-xs text-slate-400 font-medium">Showing {filteredCount} of {totalClients} clients</p>
             {(filter !== "All" || statusFilter !== "All" || typeFilter !== "All" || search) && (
-              <button
+                <button
                 onClick={() => { setFilter("All"); setStatusFilter("All"); setTypeFilter("All"); setSearch(""); }}
                 className="text-xs text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 font-semibold"
+                  data-testid="button-clear-client-filters"
               >
                 Clear filters
               </button>

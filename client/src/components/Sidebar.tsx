@@ -74,7 +74,7 @@ export function Sidebar({ collapsed }: { collapsed: boolean }) {
           const isActive = location === link.href || (link.href !== "/" && location.startsWith(link.href));
 
           return (
-            <Link key={link.href} href={link.href}>
+            <Link key={link.href} href={link.href} data-testid={`link-sidebar-${link.label.toLowerCase().replace(/\s+/g, "-")}`}>
               <div
                 className={`
                   nav-item group transition-all duration-200
@@ -98,7 +98,7 @@ export function Sidebar({ collapsed }: { collapsed: boolean }) {
 
       {/* Settings */}
       <div className="p-2" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
-        <Link href="/settings">
+        <Link href="/settings" data-testid="link-sidebar-settings">
           <div
             className={`
               nav-item
@@ -154,7 +154,7 @@ export function MobileNav() {
             const Icon = link.icon;
             const isActive = !moreOpen && (location === link.href || (link.href !== "/" && location.startsWith(link.href)));
             return (
-              <Link key={link.href} href={link.href} className="flex-1" onClick={() => setMoreOpen(false)}>
+              <Link key={link.href} href={link.href} className="flex-1" onClick={() => setMoreOpen(false)} data-testid={`link-mobile-nav-${link.label.toLowerCase().replace(/\s+/g, "-")}`}>
                 <div className={`flex flex-col items-center justify-center gap-1 h-full transition-all duration-150 ${isActive ? "text-primary" : "text-slate-400 dark:text-slate-500"}`}>
                   <div className={`p-1 rounded-lg transition-all ${isActive ? "bg-primary/10" : ""}`}>
                     <Icon className="w-[18px] h-[18px]" strokeWidth={isActive ? 2.2 : 1.8} />

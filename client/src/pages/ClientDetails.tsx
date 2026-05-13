@@ -540,12 +540,14 @@ export default function ClientDetails() {
                     }
                   }}
                   className="flex-1"
+                  data-testid="input-task-title"
                 />
                 <Input
                   type="date"
                   value={newTaskDueDate}
                   onChange={(e) => setNewTaskDueDate(e.target.value)}
                   className="w-36"
+                  data-testid="input-task-due-date"
                 />
                 <Button
                   size="sm"
@@ -582,6 +584,7 @@ export default function ClientDetails() {
                           })
                         }
                         className="shrink-0 text-slate-400 hover:text-emerald-500 transition-colors"
+                        data-testid={`button-toggle-task-${task.id}`}
                       >
                         {task.status === "Completed" ? (
                           <SquareCheck className="w-5 h-5 text-emerald-500" />
@@ -605,6 +608,7 @@ export default function ClientDetails() {
                       <button
                         onClick={() => deleteTask.mutate({ id: task.id, clientId: id })}
                         className="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 transition-all"
+                        data-testid={`button-delete-task-${task.id}`}
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>

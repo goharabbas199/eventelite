@@ -146,6 +146,7 @@ export default function Analytics() {
           variant="outline"
           className="h-9 rounded-xl text-xs font-semibold flex items-center gap-2"
           disabled={allClients.length === 0}
+          data-testid="button-export-analytics-csv"
         >
           <Download className="w-3.5 h-3.5" />
           Export CSV
@@ -155,7 +156,7 @@ export default function Analytics() {
       {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {kpis.map(({ label, value, icon: Icon, color, bg }) => (
-          <div key={label} className="stat-card">
+          <div key={label} className="stat-card" data-testid={`card-kpi-${label.toLowerCase().replace(/\s+/g, "-")}`}>
             <div className="flex items-center justify-between mb-2">
               <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">{label}</p>
               <div className={`p-2 rounded-xl ${bg}`}>
@@ -169,7 +170,7 @@ export default function Analytics() {
 
       {/* Secondary KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div className="bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700 rounded-2xl px-4 py-3 shadow-sm flex items-center justify-between gap-2">
+          <div className="bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700 rounded-2xl px-4 py-3 shadow-sm flex items-center justify-between gap-2" data-testid="card-avg-profit">
           <div className="min-w-0">
             <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">Avg Profit / Event</p>
             <p className="text-xs text-slate-400 mt-0.5 hidden sm:block">Across all {totalEvents} events</p>
@@ -179,7 +180,7 @@ export default function Analytics() {
           </span>
         </div>
 
-        <div className="bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700 rounded-2xl px-4 py-3 shadow-sm flex items-center justify-between gap-2">
+          <div className="bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700 rounded-2xl px-4 py-3 shadow-sm flex items-center justify-between gap-2" data-testid="card-profit-margin">
           <div className="min-w-0">
             <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">Profit Margin</p>
             <p className="text-xs text-slate-400 mt-0.5 hidden sm:block">Revenue vs. total expenses</p>
@@ -192,7 +193,7 @@ export default function Analytics() {
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700 rounded-2xl px-4 py-3 shadow-sm flex items-center justify-between gap-2">
+          <div className="bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700 rounded-2xl px-4 py-3 shadow-sm flex items-center justify-between gap-2" data-testid="card-completion-rate">
           <div className="min-w-0">
             <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">Completion Rate</p>
             <p className="text-xs text-slate-400 mt-0.5 hidden sm:block">{completedCount} events completed</p>
@@ -209,7 +210,7 @@ export default function Analytics() {
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* Revenue by Month */}
-        <Card className="border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm bg-white dark:bg-slate-800/80">
+        <Card className="border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm bg-white dark:bg-slate-800/80" data-testid="card-revenue-by-month">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-bold text-slate-900 dark:text-slate-100">Revenue by Event Month</CardTitle>
           </CardHeader>
@@ -230,7 +231,7 @@ export default function Analytics() {
         </Card>
 
         {/* Events by Type */}
-        <Card className="border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm bg-white dark:bg-slate-800/80">
+        <Card className="border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm bg-white dark:bg-slate-800/80" data-testid="card-events-by-type">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-bold text-slate-900 dark:text-slate-100">Events by Type</CardTitle>
           </CardHeader>
@@ -261,7 +262,7 @@ export default function Analytics() {
 
         {/* Revenue vs Expenses per Client */}
         {revExpData.length > 0 && (
-          <Card className="border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm bg-white dark:bg-slate-800/80 lg:col-span-2">
+          <Card className="border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm bg-white dark:bg-slate-800/80 lg:col-span-2" data-testid="card-revenue-vs-expenses">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-bold text-slate-900 dark:text-slate-100">Revenue vs Expenses per Client</CardTitle>
             </CardHeader>
@@ -283,7 +284,7 @@ export default function Analytics() {
 
         {/* Status Breakdown */}
         {Object.keys(byStatus).length > 0 && (
-          <Card className="border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm bg-white dark:bg-slate-800/80">
+          <Card className="border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm bg-white dark:bg-slate-800/80" data-testid="card-pipeline-status">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-bold text-slate-900 dark:text-slate-100">Pipeline by Status</CardTitle>
             </CardHeader>
@@ -309,7 +310,7 @@ export default function Analytics() {
 
         {/* Top Clients by Revenue */}
         {topClients.length > 0 && (
-          <Card className="border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm bg-white dark:bg-slate-800/80">
+          <Card className="border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm bg-white dark:bg-slate-800/80" data-testid="card-top-clients">
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-sm font-bold text-slate-900 dark:text-slate-100">Top Clients by Revenue</CardTitle>
