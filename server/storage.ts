@@ -40,6 +40,7 @@ export interface IStorage {
   getUserByEmail(email: string): Promise<User | undefined>;
   getUserById(id: number): Promise<User | undefined>;
   createUser(data: { fullName: string; email: string; passwordHash: string }): Promise<User>;
+  updateUserProfile(id: number, data: { fullName?: string; email?: string; phone?: string | null; bio?: string | null; avatarUrl?: string | null; role?: string }): Promise<User>;
 
   getVendors(): Promise<any[]>;
   getVendor(id: number): Promise<any | undefined>;
@@ -138,6 +139,25 @@ export class DatabaseStorage implements IStorage {
       .insert(users)
       .values({ fullName: data.fullName, email: data.email.toLowerCase().trim(), passwordHash: data.passwordHash })
       .returning();
+    return user;
+  }
+
+  async updateUserProfile(id: number, data: {
+    fullName?: string;
+    email?: string;
+    phone?: string | null;
+    bio?: string | null;
+    avatarUrl?: string | null;
+    role?: string;
+  }): Promise<User> {
+    const updates: Partial<typeof users.$inferInsert> = {};
+    if (data.fullName !== undefined) updates.fullName = data.fullName;
+    if (data.email    !== undefined) updates.email    = data.email.toLowerCase().trim();
+    if (data.phone    !== undefined) updates.phone    = data.phone;
+    if (data.bio      !== undefined) updates.bio      = data.bio;
+    if (data.avatarUrl !== undefined) updates.avatarUrl = data.avatarUrl;
+    if (data.role     !== undefined) updates.role     = data.role;
+    const [user] = await db.update(users).set(updates).where(eq(users.id, id)).returning();
     return user;
   }
 

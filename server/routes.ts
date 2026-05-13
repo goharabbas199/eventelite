@@ -777,26 +777,82 @@ export async function registerRoutes(
     }
   });
 
+  // ===================== USER PROFILE ========================
+
+  app.get("/api/user/profile", (req, res) => {
+    if (!req.isAuthenticated() || !req.user) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+    const u = req.user as any;
+    res.json({
+      id:        u.id,
+      fullName:  u.fullName,
+      email:     u.email,
+      role:      u.role,
+      phone:     u.phone     ?? "",
+      bio:       u.bio       ?? "",
+      avatarUrl: u.avatarUrl ?? "",
+    });
+  });
+
+  app.patch("/api/user/profile", async (req, res) => {
+    if (!req.isAuthenticated() || !req.user) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+    try {
+      const userId = (req.user as any).id as number;
+      const schema = z.object({
+        fullName:  z.string().min(2).optional(),
+        email:     z.string().email().optional(),
+        phone:     z.string().nullable().optional(),
+        bio:       z.string().nullable().optional(),
+        avatarUrl: z.string().nullable().optional(),
+        role:      z.string().optional(),
+      });
+      const data = schema.parse(req.body);
+
+      // If email is changing, check it's not already taken
+      if (data.email) {
+        const existing = await storage.getUserByEmail(data.email);
+        if (existing && existing.id !== userId) {
+          return res.status(409).json({ message: "Email already in use by another account" });
+        }
+      }
+
+      const updated = await storage.updateUserProfile(userId, data);
+      // Refresh passport session so req.user reflects new data
+      req.login(updated, (err) => {
+        if (err) return res.status(500).json({ message: "Profile update failed" });
+        const { passwordHash: _ph, ...safe } = updated;
+        res.json({
+          ...safe,
+          phone:     safe.phone     ?? "",
+          bio:       safe.bio       ?? "",
+          avatarUrl: safe.avatarUrl ?? "",
+        });
+      });
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ message: err.errors[0].message });
+      }
+      console.error("Profile update error:", err);
+      res.status(500).json({ message: "Failed to update profile" });
+    }
+  });
+
   // ===================== APP SETTINGS ========================
 
+  // Non-profile sections defaults (appearance, notifications, etc.)
   const DEFAULT_SETTINGS: Record<string, any> = {
-    profile: {
-      name: "Alex Morgan",
-      email: "alex@eventelite.com",
-      phone: "+1 555 0100",
-      role: "Administrator",
-      avatarUrl: "https://github.com/shadcn.png",
-      bio: "",
-    },
     business: {
-      companyName: "EventElite Agency",
-      email: "hello@eventelite.com",
-      phone: "+1 555 0200",
-      website: "https://eventelite.com",
-      address: "123 Event Blvd, Suite 400",
-      city: "New York",
-      state: "NY",
-      country: "United States",
+      companyName: "",
+      email: "",
+      phone: "",
+      website: "",
+      address: "",
+      city: "",
+      state: "",
+      country: "",
       timezone: "America/New_York",
       currency: "USD",
       taxId: "",
@@ -826,13 +882,25 @@ export async function registerRoutes(
     },
   };
 
-  app.get("/api/settings", async (_req, res) => {
+  app.get("/api/settings", async (req, res) => {
     try {
       const stored = await storage.getAllSettings();
       const merged: Record<string, any> = {};
       for (const key of Object.keys(DEFAULT_SETTINGS)) {
         merged[key] = stored[key] ?? DEFAULT_SETTINGS[key];
       }
+
+      // Profile always comes from the authenticated user, not from appSettings
+      const u = req.isAuthenticated() ? (req.user as any) : null;
+      merged.profile = {
+        name:      u?.fullName  ?? "",
+        email:     u?.email     ?? "",
+        phone:     u?.phone     ?? "",
+        role:      u?.role      ?? "owner",
+        avatarUrl: u?.avatarUrl ?? "",
+        bio:       u?.bio       ?? "",
+      };
+
       res.json(merged);
     } catch (err) {
       res.status(500).json({ message: "Failed to load settings" });
@@ -842,6 +910,37 @@ export async function registerRoutes(
   app.put("/api/settings/:section", async (req, res) => {
     try {
       const { section } = req.params;
+
+      // Profile changes are saved to the users table, not appSettings
+      if (section === "profile") {
+        if (!req.isAuthenticated() || !req.user) {
+          return res.status(401).json({ message: "Not authenticated" });
+        }
+        const userId = (req.user as any).id as number;
+        const { name, email, phone, role, avatarUrl, bio } = req.body;
+        const updated = await storage.updateUserProfile(userId, {
+          fullName:  name,
+          email:     email,
+          phone:     phone     ?? null,
+          bio:       bio       ?? null,
+          avatarUrl: avatarUrl ?? null,
+          role:      role,
+        });
+        // Refresh session
+        req.login(updated, (err) => {
+          if (err) return res.status(500).json({ message: "Session refresh failed" });
+          res.json({
+            name:      updated.fullName,
+            email:     updated.email,
+            phone:     updated.phone     ?? "",
+            role:      updated.role,
+            avatarUrl: updated.avatarUrl ?? "",
+            bio:       updated.bio       ?? "",
+          });
+        });
+        return;
+      }
+
       const allowed = Object.keys(DEFAULT_SETTINGS);
       if (!allowed.includes(section)) {
         return res.status(400).json({ message: "Unknown settings section" });

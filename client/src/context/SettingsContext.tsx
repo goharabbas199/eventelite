@@ -49,12 +49,13 @@ export interface SecuritySettings {
   sessionAlerts: boolean;
 }
 
+// Truly blank defaults — no demo data
 const PROFILE_DEFAULTS: ProfileSettings = {
-  name: "Alex Morgan",
-  email: "alex@eventelite.com",
-  phone: "+1 555 0100",
-  role: "Administrator",
-  avatarUrl: "https://github.com/shadcn.png",
+  name: "",
+  email: "",
+  phone: "",
+  role: "owner",
+  avatarUrl: "",
   bio: "",
 };
 
@@ -118,14 +119,14 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [profile, setProfile] = useState<ProfileSettings>(PROFILE_DEFAULTS);
   const [business, setBusiness] = useState<BusinessSettings>({
-    companyName: "EventElite Agency",
-    email: "hello@eventelite.com",
-    phone: "+1 555 0200",
-    website: "https://eventelite.com",
-    address: "123 Event Blvd, Suite 400",
-    city: "New York",
-    state: "NY",
-    country: "United States",
+    companyName: "",
+    email: "",
+    phone: "",
+    website: "",
+    address: "",
+    city: "",
+    state: "",
+    country: "",
     timezone: "America/New_York",
     currency: "USD",
     taxId: "",
@@ -149,6 +150,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     fetch("/api/settings")
       .then((r) => r.json())
       .then((data) => {
+        // Profile comes from the authenticated user via the server
         if (data.profile) setProfile(data.profile);
         if (data.business) setBusiness(data.business);
         if (data.notifications) setNotifications(data.notifications);
@@ -185,6 +187,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 
   const updateProfile = useCallback(async (data: ProfileSettings) => {
     setProfile(data);
+    // Profile is saved to the users table via the settings/profile route
     await save("profile", data);
   }, [save]);
 

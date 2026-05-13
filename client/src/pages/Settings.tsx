@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/context/AuthContext";
 import { useSettings, applyTheme, applyAccentColor } from "@/context/SettingsContext";
 import type {
   ProfileSettings,
@@ -63,11 +64,12 @@ type TabId = "profile" | "business" | "security" | "notifications" | "appearance
 export default function Settings() {
   const { toast } = useToast();
   const { profile } = useSettings();
+  const { logout } = useAuth();
   const [tab, setTab] = useState<TabId | null>(null);
   const [, navigate] = useLocation();
 
-  const handleLogout = () => {
-    localStorage.removeItem("ee_auth");
+  const handleLogout = async () => {
+    await logout();
     navigate("/login");
   };
 
