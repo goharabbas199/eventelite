@@ -1,9 +1,10 @@
-import { Search, Bell, PanelLeft, X, Sun, Moon, Settings } from "lucide-react";
+import { Search, Bell, PanelLeft, X, Sun, Moon } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { useSettings, applyTheme } from "@/context/SettingsContext";
+import { useAuth } from "@/context/AuthContext";
 
 export function Header({
   title,
@@ -17,7 +18,8 @@ export function Header({
   const [search, setSearch] = useState("");
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [, navigate] = useLocation();
-  const { profile, appearance, updateAppearance } = useSettings();
+  const { appearance, updateAppearance } = useSettings();
+  const { user } = useAuth();
   const searchRef = useRef<HTMLInputElement>(null);
 
   const isDark =
@@ -25,7 +27,10 @@ export function Header({
     (appearance.theme === "system" &&
       window.matchMedia("(prefers-color-scheme: dark)").matches);
 
-  const initials = profile.name
+  const displayName = user?.fullName || "User";
+  const displayRole = user?.role || "owner";
+
+  const initials = displayName
     .split(" ")
     .map((n) => n[0])
     .join("")
@@ -43,6 +48,7 @@ export function Header({
   const toggleTheme = () => {
     const next = isDark ? "light" : "dark";
     updateAppearance({ ...appearance, theme: next });
+    applyTheme(next);
   };
 
   useEffect(() => {
@@ -145,8 +151,8 @@ export function Header({
           {/* Profile */}
           <div className="flex items-center gap-2 pl-2 ml-1.5 border-l border-slate-100 dark:border-slate-800">
             <div className="hidden md:block text-right">
-              <p className="text-[12px] font-semibold leading-none text-slate-800 dark:text-slate-200">{profile.name}</p>
-              <p className="text-[10px] text-slate-400 mt-0.5 font-medium">{profile.role}</p>
+              <p className="text-[12px] font-semibold leading-none text-slate-800 dark:text-slate-200">{displayName}</p>
+              <p className="text-[10px] text-slate-400 mt-0.5 font-medium capitalize">{displayRole}</p>
             </div>
             <button
               onClick={() => navigate("/settings")}
@@ -155,7 +161,7 @@ export function Header({
               className="rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition-all"
             >
               <Avatar className="h-7 w-7 ring-2 ring-indigo-100 hover:ring-indigo-300 transition-all">
-                <AvatarImage src={profile.avatarUrl} />
+                <AvatarImage src={user?.avatarUrl || ""} />
                 <AvatarFallback className="bg-indigo-600 text-white text-[10px] font-bold">{initials}</AvatarFallback>
               </Avatar>
             </button>

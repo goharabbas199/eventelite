@@ -64,7 +64,7 @@ type TabId = "profile" | "business" | "security" | "notifications" | "appearance
 export default function Settings() {
   const { toast } = useToast();
   const { profile } = useSettings();
-  const { logout } = useAuth();
+  const { logout, user: authUser } = useAuth();
   const [tab, setTab] = useState<TabId | null>(null);
   const [, navigate] = useLocation();
 
@@ -91,8 +91,8 @@ export default function Settings() {
             <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white dark:border-slate-900" />
           </div>
           <div className="min-w-0">
-            <p className="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">{profile.name}</p>
-            <p className="text-xs text-slate-400 truncate">{profile.role}</p>
+            <p className="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">{authUser?.fullName || profile.name || "User"}</p>
+            <p className="text-xs text-slate-400 truncate capitalize">{authUser?.role || profile.role || "owner"}</p>
           </div>
         </div>
       </div>
@@ -238,20 +238,54 @@ export default function Settings() {
 /* ─── Profile tab ─── */
 function ProfileTab({ toast }: { toast: any }) {
   const { profile, updateProfile, isLoaded } = useSettings();
+  const { user: authUser, refetchUser } = useAuth();
   const [form, setForm] = useState<ProfileSettings>({ ...profile });
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (isLoaded) setForm({ ...profile });
-  }, [isLoaded]);
+    if (authUser) {
+      setForm({
+        name: authUser.fullName || "",
+        email: authUser.email || "",
+        phone: authUser.phone || "",
+        role: authUser.role || "owner",
+        avatarUrl: authUser.avatarUrl || "",
+        bio: authUser.bio || "",
+      });
+    } else if (isLoaded) {
+      setForm({ ...profile });
+    }
+  }, [authUser, isLoaded]);
 
   const F = (k: keyof ProfileSettings) => (e: any) => setForm((p) => ({ ...p, [k]: e.target.value }));
 
   const save_ = async () => {
     setSaving(true);
-    await updateProfile(form);
-    setSaving(false);
-    toast({ title: "Profile saved", description: "Your profile has been updated." });
+    try {
+      const res = await fetch("/api/user/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fullName: form.name,
+          email: form.email,
+          phone: form.phone || null,
+          bio: form.bio || null,
+          avatarUrl: form.avatarUrl || null,
+          role: form.role,
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.message || "Save failed");
+      }
+      await updateProfile(form);
+      refetchUser();
+      toast({ title: "Profile saved", description: "Your profile has been updated." });
+    } catch (err: any) {
+      toast({ title: "Save failed", description: err.message, variant: "destructive" });
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (

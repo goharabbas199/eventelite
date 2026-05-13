@@ -8,6 +8,8 @@ import multer from "multer";
 import { runAI } from "./services/aiService";
 import bcrypt from "bcrypt";
 import { passport } from "./auth";
+import rateLimit from "express-rate-limit";
+import { sendOtpEmail, generateOtp } from "./services/emailService";
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -18,7 +20,21 @@ export async function registerRoutes(
 
   // ===================== AUTH ===========================
 
-  app.post("/api/auth/signup", async (req, res) => {
+  const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 30,
+    message: { message: "Too many requests. Please try again later." },
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+
+  function safeUser(user: any) {
+    const { passwordHash: _ph, ...rest } = user;
+    return rest;
+  }
+
+  // POST /api/auth/signup — create user + send email OTP
+  app.post("/api/auth/signup", authLimiter, async (req, res) => {
     try {
       const { fullName, email, password } = z.object({
         fullName: z.string().min(2, "Full name must be at least 2 characters"),
@@ -28,38 +44,153 @@ export async function registerRoutes(
 
       const existing = await storage.getUserByEmail(email);
       if (existing) {
+        if (!existing.emailVerified) {
+          // Resend OTP for unverified existing account
+          const code = generateOtp();
+          await storage.createOtp({ email: existing.email, code, type: "email_verify", expiresAt: new Date(Date.now() + 10 * 60 * 1000) });
+          const { devOtp } = await sendOtpEmail(existing.email, code, "email_verify");
+          return res.status(200).json({ pendingVerification: true, email: existing.email, ...(devOtp ? { devOtp } : {}) });
+        }
         return res.status(409).json({ message: "An account with this email already exists" });
       }
 
       const passwordHash = await bcrypt.hash(password, 12);
-      const user = await storage.createUser({ fullName, email, passwordHash });
+      const user = await storage.createUser({ fullName, email, passwordHash, emailVerified: false });
 
-      req.login(user, (err) => {
-        if (err) return res.status(500).json({ message: "Login after signup failed" });
-        const { passwordHash: _ph, ...safeUser } = user;
-        res.status(201).json(safeUser);
-      });
+      const code = generateOtp();
+      await storage.createOtp({ email: user.email, code, type: "email_verify", expiresAt: new Date(Date.now() + 10 * 60 * 1000) });
+      const { devOtp } = await sendOtpEmail(user.email, code, "email_verify");
+
+      res.status(201).json({ pendingVerification: true, email: user.email, ...(devOtp ? { devOtp } : {}) });
     } catch (err) {
-      if (err instanceof z.ZodError) {
-        return res.status(400).json({ message: err.errors[0].message });
-      }
+      if (err instanceof z.ZodError) return res.status(400).json({ message: err.errors[0].message });
       console.error("Signup error:", err);
       res.status(500).json({ message: "Signup failed. Please try again." });
     }
   });
 
-  app.post("/api/auth/login", (req, res, next) => {
+  // POST /api/auth/verify-email — confirm OTP, activate account, log in
+  app.post("/api/auth/verify-email", authLimiter, async (req, res) => {
+    try {
+      const { email, code } = z.object({
+        email: z.string().email(),
+        code: z.string().length(6),
+      }).parse(req.body);
+
+      const otp = await storage.getValidOtp(email, code, "email_verify");
+      if (!otp) return res.status(400).json({ message: "Invalid or expired code. Please try again." });
+
+      await storage.markOtpUsed(otp.id);
+
+      const user = await storage.getUserByEmail(email);
+      if (!user) return res.status(400).json({ message: "Account not found." });
+
+      const verifiedUser = await storage.updateUserEmailVerified(user.id);
+
+      req.login(verifiedUser, (err) => {
+        if (err) return res.status(500).json({ message: "Login failed after verification" });
+        res.json(safeUser(verifiedUser));
+      });
+    } catch (err) {
+      if (err instanceof z.ZodError) return res.status(400).json({ message: err.errors[0].message });
+      console.error("Verify email error:", err);
+      res.status(500).json({ message: "Verification failed. Please try again." });
+    }
+  });
+
+  // POST /api/auth/resend-otp — resend verification or reset OTP
+  app.post("/api/auth/resend-otp", authLimiter, async (req, res) => {
+    try {
+      const { email, type } = z.object({
+        email: z.string().email(),
+        type: z.enum(["email_verify", "password_reset"]),
+      }).parse(req.body);
+
+      const user = await storage.getUserByEmail(email);
+      if (!user) return res.status(200).json({ success: true }); // Don't reveal if user exists
+
+      const code = generateOtp();
+      await storage.createOtp({ email: user.email, code, type, expiresAt: new Date(Date.now() + 10 * 60 * 1000) });
+      const { devOtp } = await sendOtpEmail(user.email, code, type);
+
+      res.json({ success: true, ...(devOtp ? { devOtp } : {}) });
+    } catch (err) {
+      if (err instanceof z.ZodError) return res.status(400).json({ message: err.errors[0].message });
+      res.status(500).json({ message: "Failed to resend code." });
+    }
+  });
+
+  // POST /api/auth/login
+  app.post("/api/auth/login", authLimiter, (req, res, next) => {
     passport.authenticate("local", (err: any, user: any, info: any) => {
       if (err) return next(err);
       if (!user) return res.status(401).json({ message: info?.message || "Invalid email or password" });
+      if (!user.emailVerified) {
+        // Resend OTP so they can verify
+        const code = generateOtp();
+        storage.createOtp({ email: user.email, code, type: "email_verify", expiresAt: new Date(Date.now() + 10 * 60 * 1000) })
+          .then(() => sendOtpEmail(user.email, code, "email_verify"))
+          .then(({ devOtp }) => {
+            res.status(403).json({ message: "Please verify your email first.", pendingVerification: true, email: user.email, ...(devOtp ? { devOtp } : {}) });
+          })
+          .catch(next);
+        return;
+      }
       req.login(user, (loginErr) => {
         if (loginErr) return next(loginErr);
-        const { passwordHash: _ph, ...safeUser } = user;
-        res.json(safeUser);
+        res.json(safeUser(user));
       });
     })(req, res, next);
   });
 
+  // POST /api/auth/forgot-password
+  app.post("/api/auth/forgot-password", authLimiter, async (req, res) => {
+    try {
+      const { email } = z.object({ email: z.string().email() }).parse(req.body);
+
+      const user = await storage.getUserByEmail(email);
+      if (!user) return res.status(200).json({ success: true }); // Don't reveal if user exists
+
+      const code = generateOtp();
+      await storage.createOtp({ email: user.email, code, type: "password_reset", expiresAt: new Date(Date.now() + 10 * 60 * 1000) });
+      const { devOtp } = await sendOtpEmail(user.email, code, "password_reset");
+
+      res.json({ success: true, ...(devOtp ? { devOtp } : {}) });
+    } catch (err) {
+      if (err instanceof z.ZodError) return res.status(400).json({ message: err.errors[0].message });
+      console.error("Forgot password error:", err);
+      res.status(500).json({ message: "Failed to send reset code." });
+    }
+  });
+
+  // POST /api/auth/reset-password
+  app.post("/api/auth/reset-password", authLimiter, async (req, res) => {
+    try {
+      const { email, code, newPassword } = z.object({
+        email: z.string().email(),
+        code: z.string().length(6),
+        newPassword: z.string().min(8, "Password must be at least 8 characters"),
+      }).parse(req.body);
+
+      const otp = await storage.getValidOtp(email, code, "password_reset");
+      if (!otp) return res.status(400).json({ message: "Invalid or expired code. Please try again." });
+
+      const user = await storage.getUserByEmail(email);
+      if (!user) return res.status(400).json({ message: "Account not found." });
+
+      const passwordHash = await bcrypt.hash(newPassword, 12);
+      await storage.updateUserPassword(user.id, passwordHash);
+      await storage.markOtpUsed(otp.id);
+
+      res.json({ success: true });
+    } catch (err) {
+      if (err instanceof z.ZodError) return res.status(400).json({ message: err.errors[0].message });
+      console.error("Reset password error:", err);
+      res.status(500).json({ message: "Failed to reset password." });
+    }
+  });
+
+  // POST /api/auth/logout
   app.post("/api/auth/logout", (req, res) => {
     req.logout(() => {
       req.session.destroy(() => {
@@ -69,13 +200,30 @@ export async function registerRoutes(
     });
   });
 
+  // GET /api/auth/me
   app.get("/api/auth/me", (req, res) => {
     if (!req.isAuthenticated() || !req.user) {
       return res.status(401).json({ message: "Not authenticated" });
     }
-    const user = req.user as any;
-    const { passwordHash: _ph, ...safeUser } = user;
-    res.json(safeUser);
+    res.json(safeUser(req.user));
+  });
+
+  // GET /api/auth/google — Google OAuth (only if credentials configured)
+  app.get("/api/auth/google", (req, res, next) => {
+    if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+      return res.status(501).json({ message: "Google login is not configured. Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables." });
+    }
+    passport.authenticate("google", { scope: ["profile", "email"] })(req, res, next);
+  });
+
+  app.get("/api/auth/google/callback", (req, res, next) => {
+    passport.authenticate("google", (err: any, user: any) => {
+      if (err || !user) return res.redirect("/login?error=google_failed");
+      req.login(user, (loginErr) => {
+        if (loginErr) return res.redirect("/login?error=google_failed");
+        res.redirect("/");
+      });
+    })(req, res, next);
   });
 
   // ===================== VENDORS ========================

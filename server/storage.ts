@@ -1,6 +1,7 @@
 import { db } from "./db";
 import {
   users,
+  emailVerifications,
   vendors,
   vendorProducts,
   venues,
@@ -33,14 +34,22 @@ import {
   type InsertEvent,
   type InsertInvoice,
 } from "@shared/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and, gt, isNull } from "drizzle-orm";
 
 export interface IStorage {
   // Users / Auth
   getUserByEmail(email: string): Promise<User | undefined>;
   getUserById(id: number): Promise<User | undefined>;
-  createUser(data: { fullName: string; email: string; passwordHash: string }): Promise<User>;
+  getUserByGoogleId(googleId: string): Promise<User | undefined>;
+  createUser(data: { fullName: string; email: string; passwordHash?: string | null; googleId?: string; emailVerified?: boolean }): Promise<User>;
   updateUserProfile(id: number, data: { fullName?: string; email?: string; phone?: string | null; bio?: string | null; avatarUrl?: string | null; role?: string }): Promise<User>;
+  updateUserEmailVerified(id: number): Promise<User>;
+  updateUserPassword(id: number, passwordHash: string): Promise<User>;
+  linkGoogleId(userId: number, googleId: string): Promise<User>;
+  // OTP
+  createOtp(data: { email: string; code: string; type: string; expiresAt: Date }): Promise<any>;
+  getValidOtp(email: string, code: string, type: string): Promise<any>;
+  markOtpUsed(id: number): Promise<void>;
 
   getVendors(): Promise<any[]>;
   getVendor(id: number): Promise<any | undefined>;
@@ -134,12 +143,88 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async createUser(data: { fullName: string; email: string; passwordHash: string }): Promise<User> {
+  async createUser(data: { fullName: string; email: string; passwordHash?: string | null; googleId?: string; emailVerified?: boolean }): Promise<User> {
     const [user] = await db
       .insert(users)
-      .values({ fullName: data.fullName, email: data.email.toLowerCase().trim(), passwordHash: data.passwordHash })
+      .values({
+        fullName: data.fullName,
+        email: data.email.toLowerCase().trim(),
+        passwordHash: data.passwordHash ?? null,
+        googleId: data.googleId ?? null,
+        emailVerified: data.emailVerified ?? false,
+      })
       .returning();
     return user;
+  }
+
+  async getUserByGoogleId(googleId: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.googleId, googleId));
+    return user;
+  }
+
+  async updateUserEmailVerified(id: number): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ emailVerified: true })
+      .where(eq(users.id, id))
+      .returning();
+    return user;
+  }
+
+  async updateUserPassword(id: number, passwordHash: string): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ passwordHash })
+      .where(eq(users.id, id))
+      .returning();
+    return user;
+  }
+
+  async linkGoogleId(userId: number, googleId: string): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ googleId, emailVerified: true })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
+  }
+
+  async createOtp(data: { email: string; code: string; type: string; expiresAt: Date }): Promise<any> {
+    const [otp] = await db
+      .insert(emailVerifications)
+      .values({
+        email: data.email.toLowerCase().trim(),
+        code: data.code,
+        type: data.type,
+        expiresAt: data.expiresAt,
+      })
+      .returning();
+    return otp;
+  }
+
+  async getValidOtp(email: string, code: string, type: string): Promise<any> {
+    const [otp] = await db
+      .select()
+      .from(emailVerifications)
+      .where(
+        and(
+          eq(emailVerifications.email, email.toLowerCase().trim()),
+          eq(emailVerifications.code, code),
+          eq(emailVerifications.type, type),
+          gt(emailVerifications.expiresAt, new Date()),
+          isNull(emailVerifications.usedAt)
+        )
+      )
+      .orderBy(desc(emailVerifications.createdAt))
+      .limit(1);
+    return otp;
+  }
+
+  async markOtpUsed(id: number): Promise<void> {
+    await db
+      .update(emailVerifications)
+      .set({ usedAt: new Date() })
+      .where(eq(emailVerifications.id, id));
   }
 
   async updateUserProfile(id: number, data: {
