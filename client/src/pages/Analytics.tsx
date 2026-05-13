@@ -135,7 +135,7 @@ export default function Analytics() {
   return (
     <Layout title="Analytics">
       {/* Page header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between reveal">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400 mb-0.5">Insights</p>
           <h2 className="text-xl font-bold text-slate-900 dark:text-white">Analytics Overview</h2>
@@ -154,7 +154,7 @@ export default function Analytics() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 reveal reveal-d1">
         {kpis.map(({ label, value, icon: Icon, color, bg }) => (
           <div key={label} className="stat-card" data-testid={`card-kpi-${label.toLowerCase().replace(/\s+/g, "-")}`}>
             <div className="flex items-center justify-between mb-2">
@@ -169,7 +169,7 @@ export default function Analytics() {
       </div>
 
       {/* Secondary KPIs */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 reveal reveal-d2">
           <div className="bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700 rounded-2xl px-4 py-3 shadow-sm flex items-center justify-between gap-2" data-testid="card-avg-profit">
           <div className="min-w-0">
             <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">Avg Profit / Event</p>
@@ -208,7 +208,7 @@ export default function Analytics() {
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 reveal reveal-d3">
         {/* Revenue by Month */}
         <Card className="border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm bg-white dark:bg-slate-800/80" data-testid="card-revenue-by-month">
           <CardHeader className="pb-2">

@@ -147,7 +147,7 @@ export default function Dashboard() {
   return (
     <Layout title="Dashboard">
       {/* ── Greeting strip ── */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between reveal">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400 mb-0.5">
             {format(new Date(), "EEEE, MMMM do")}
@@ -161,7 +161,7 @@ export default function Dashboard() {
       </div>
 
       {/* ── Quick Actions row ── */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 reveal reveal-d1">
         {[
           { label: "New Client",  icon: Users,       href: "/clients",    color: "from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600" },
           { label: "New Quote",   icon: ReceiptText,  href: "/quotations", color: "from-violet-600 to-violet-500 hover:from-violet-700 hover:to-violet-600" },
@@ -200,7 +200,7 @@ export default function Dashboard() {
       )}
 
       {/* ── Stats grid — 3 + 3 ── */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 reveal reveal-d2">
         <StatsCard title="Active Clients"  value={activeClients}                           icon={Users}      color="blue"   subtitle="Leads & confirmed" onClick={() => navigate("/clients")} />
         <StatsCard title="Total Vendors"   value={vendors?.length ?? 0}                   icon={Store}      color="purple" subtitle="Service providers"  onClick={() => navigate("/vendors")} />
         <StatsCard title="Venues"          value={venues?.length ?? 0}                    icon={MapPin}     color="orange" subtitle="Event locations"    onClick={() => navigate("/venues")} />
@@ -210,7 +210,7 @@ export default function Dashboard() {
       </div>
 
       {/* ── Performance KPIs ── */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 reveal reveal-d3">
         {[
           {
             label: "Win Rate",
@@ -265,9 +265,9 @@ export default function Dashboard() {
       </div>
 
       {/* ── Chart + Upcoming Events ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 reveal reveal-d4">
         {/* Revenue Chart */}
-        <Card className="lg:col-span-2 border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm bg-white dark:bg-slate-800/80 transition-all duration-300 hover:shadow-xl hover:border-indigo-200 dark:hover:border-indigo-800 hover:-translate-y-1 gradient-overlay card-3d">
+        <Card data-tilt data-tilt-max="5" className="lg:col-span-2 border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm bg-white dark:bg-slate-800/80 transition-all duration-300 hover:shadow-xl hover:border-indigo-200 dark:hover:border-indigo-800 gradient-overlay">
           <CardHeader className="flex flex-row items-start justify-between pb-0 pt-4 px-5">
             <div>
               <CardTitle className="text-[14px] font-bold text-slate-900 dark:text-slate-100">Revenue Overview</CardTitle>
@@ -322,7 +322,7 @@ export default function Dashboard() {
         </Card>
 
         {/* Upcoming Events */}
-        <Card className="border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm bg-white dark:bg-slate-800/80 transition-all duration-300 hover:shadow-xl hover:border-indigo-200 dark:hover:border-indigo-800 hover:-translate-y-1 gradient-overlay card-3d">
+        <Card data-tilt data-tilt-max="5" className="border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm bg-white dark:bg-slate-800/80 transition-all duration-300 hover:shadow-xl hover:border-indigo-200 dark:hover:border-indigo-800 gradient-overlay">
           <CardHeader className="pb-0 pt-4 px-5">
             <div className="flex items-center justify-between">
               <div>
@@ -383,9 +383,9 @@ export default function Dashboard() {
       </div>
 
       {/* ── Recent Clients + Pipeline Status ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 reveal reveal-d5">
         {/* Recent clients */}
-        <Card className="lg:col-span-3 border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm bg-white dark:bg-slate-800/80 transition-all duration-300 hover:shadow-xl hover:border-indigo-200 dark:hover:border-indigo-800 hover:-translate-y-1 gradient-overlay card-3d">
+        <Card data-tilt data-tilt-max="4" className="lg:col-span-3 border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm bg-white dark:bg-slate-800/80 transition-all duration-300 hover:shadow-xl hover:border-indigo-200 dark:hover:border-indigo-800 gradient-overlay">
           <CardHeader className="pb-0 pt-4 px-5">
             <div className="flex items-center justify-between">
               <div>
@@ -439,7 +439,7 @@ export default function Dashboard() {
         </Card>
 
         {/* Pipeline by status */}
-        <Card className="lg:col-span-2 border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm bg-white dark:bg-slate-800/80 transition-all duration-300 hover:shadow-xl hover:border-indigo-200 dark:hover:border-indigo-800 hover:-translate-y-1 gradient-overlay card-3d">
+        <Card data-tilt data-tilt-max="4" className="lg:col-span-2 border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm bg-white dark:bg-slate-800/80 transition-all duration-300 hover:shadow-xl hover:border-indigo-200 dark:hover:border-indigo-800 gradient-overlay">
           <CardHeader className="pb-0 pt-4 px-5">
             <div className="flex items-center justify-between">
               <CardTitle className="text-[14px] font-bold text-slate-900 dark:text-slate-100">Pipeline Status</CardTitle>

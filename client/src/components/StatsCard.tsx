@@ -24,14 +24,16 @@ export function StatsCard({ title, value, icon: Icon, color = "blue", subtitle, 
   return (
     <div
       onClick={onClick}
-      className={`stat-card gradient-overlay flex items-center justify-between gap-3 transition-all duration-300 ${onClick ? "cursor-pointer glow-on-hover card-3d hover:shadow-2xl hover:border-indigo-200 dark:hover:border-indigo-800 active:scale-[0.98] active:translate-y-1" : ""}`}
+      data-tilt={onClick ? "" : undefined}
+      data-tilt-max={onClick ? "4" : undefined}
+      className={`stat-card gradient-overlay flex items-center justify-between gap-3 transition-all duration-300 ${onClick ? "cursor-pointer glow-on-hover hover:shadow-2xl hover:border-indigo-200 dark:hover:border-indigo-800 active:scale-[0.98]" : ""}`}
     >
       <div className="min-w-0 flex-1">
         <p className="eyebrow mb-1.5">{title}</p>
         <p className="text-lg md:text-[22px] font-bold tracking-tight text-slate-900 dark:text-white leading-none transition-all duration-200">{value}</p>
         {subtitle && <p className="text-[11px] text-slate-400 font-medium mt-1.5 leading-none transition-all duration-200">{subtitle}</p>}
       </div>
-      <div className={`p-2.5 rounded-xl ${cfg.icon} shrink-0 transition-all duration-200 ${onClick ? "group-hover:scale-110" : ""}`}>
+      <div className={`p-2.5 rounded-xl ${cfg.icon} shrink-0 transition-all duration-200`}>
         <Icon className="w-4.5 h-4.5 w-[18px] h-[18px] transition-transform duration-200" strokeWidth={1.8} />
       </div>
     </div>

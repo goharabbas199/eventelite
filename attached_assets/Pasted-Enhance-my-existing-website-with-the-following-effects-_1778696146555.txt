@@ -1,0 +1,60 @@
+Enhance my existing website with the following effects. Apply each effect ONLY where it makes contextual sense and adds value — skip it entirely if it feels forced or unnecessary for that element.
+
+---
+
+### 1. HOVER EFFECTS
+- Add smooth hover transitions on all interactive elements (buttons, cards, links, nav items, images).
+- Use CSS `transition` with `ease-in-out` (200ms–350ms).
+- Ideas: subtle lift (`translateY(-4px)` + `box-shadow`), color shifts, underline draw effects on links, scale on cards.
+- Do NOT add hover effects to static decorative elements.
+
+---
+
+### 2. SMOOTH PAGE LOADER
+- Add a full-screen page loader that shows on initial load and fades out once the DOM is ready.
+- Use a clean, minimal animated indicator (CSS spinner, pulsing dot, or progress bar — match the site's aesthetic).
+- Fade the loader out with `opacity: 0` then `display: none` after 1–2 seconds or on `window.onload`.
+- Ensure the main content is hidden (`opacity: 0`) until the loader dismisses, then fades in.
+
+---
+
+### 3. 3D MOTION / TILT EFFECT
+- Apply subtle 3D tilt on hero cards, feature cards, or prominent image sections using CSS `perspective` + `rotateX/rotateY` on `mousemove`.
+- Keep the tilt range small (max ±10–15 degrees) so it feels premium, not gimmicky.
+- Add a smooth `transition: transform 0.1s ease` for fluid response.
+- Only apply to large, visually prominent elements — skip for small UI components.
+
+---
+
+### 4. ENTRANCE REVEAL ANIMATIONS
+- Add scroll-triggered entrance animations using the Intersection Observer API (no external libraries unless already in the project).
+- Elements should start hidden (`opacity: 0`, slight `translateY(30px)`) and animate into view (`opacity: 1`, `translateY(0)`).
+- Stagger child elements (e.g., cards in a grid) with incremental `animation-delay` (e.g., 100ms apart).
+- Apply to: sections, headings, cards, feature lists, testimonials, footer content.
+- Do NOT apply to the navbar or elements always visible above the fold on load.
+
+---
+
+### 5. PARALLAX EFFECT
+- Add a subtle parallax scroll effect on hero background images or large decorative elements.
+- Use a `scroll` event listener to shift the background or element at a slower rate than scroll speed (e.g., `background-position-y: calc(50% + scrollY * 0.3px)`).
+- Keep the effect subtle (0.2–0.4 multiplier) to avoid dizziness.
+- Only apply where there is a layered visual (hero section, full-width banner, section with a background image).
+- Skip for plain solid-color backgrounds.
+
+---
+
+### 6. CUSTOM CURSOR EFFECT
+- Replace the default cursor with a custom one ONLY if the site has a strong visual identity or creative/portfolio aesthetic.
+- Use two elements: a small dot (8px) that follows the cursor exactly, and a larger circle (32px) that follows with a slight lag (`lerp` smoothing).
+- On hover over interactive elements, scale up the outer ring and change its color/opacity.
+- If the site is a standard business/utility site, SKIP the custom cursor entirely.
+
+---
+
+### GLOBAL RULES
+- Use vanilla JS unless the project already uses a library like GSAP, Framer Motion, or AOS — in that case, prefer those.
+- Never break existing functionality. Wrap all new JS in `DOMContentLoaded`.
+- All animations must respect `prefers-reduced-motion`: wrap motion-heavy effects in `@media (prefers-reduced-motion: no-preference)` or check via JS.
+- Keep performance in mind: use `will-change: transform` only where actively animating, and remove it after animation completes.
+- Test that no effect causes layout shift or scroll jank.

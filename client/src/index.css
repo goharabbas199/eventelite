@@ -105,13 +105,10 @@
 }
 
 @layer utilities {
-  /* Stat cards — white, soft shadow, rounded */
+  /* Stat cards — white, soft shadow, rounded (base) */
   .stat-card {
     @apply bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700/50 rounded-2xl p-4 shadow-sm;
-    transition: box-shadow 0.15s ease, transform 0.15s ease;
-  }
-  .stat-card:hover {
-    @apply shadow-md;
+    transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
   }
 
   /* Dark mode badge/chip color variants */
@@ -386,5 +383,60 @@
   }
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
+  }
+
+  /* ── Entrance reveal animations (Intersection Observer) ── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(26px);
+    transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: transform, opacity;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0px);
+    will-change: auto;
+  }
+
+  /* Stagger delay helpers — apply to the reveal element itself */
+  .reveal-d1 { transition-delay: 70ms; }
+  .reveal-d2 { transition-delay: 140ms; }
+  .reveal-d3 { transition-delay: 210ms; }
+  .reveal-d4 { transition-delay: 280ms; }
+  .reveal-d5 { transition-delay: 350ms; }
+  .reveal-d6 { transition-delay: 420ms; }
+
+  /* Enhanced stat-card hover lift */
+  .stat-card:hover {
+    @apply shadow-md -translate-y-0.5 border-indigo-100 dark:border-indigo-900/40;
+  }
+
+  /* Tilt-active elements: hardware acceleration hint during motion */
+  [data-tilt] {
+    transform-style: preserve-3d;
+    will-change: auto;
+  }
+  [data-tilt].tilting {
+    will-change: transform;
+  }
+}
+
+/* ── Reduced motion: disable all custom motion effects ── */
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .reveal.visible {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+    will-change: auto !important;
+  }
+  .reveal-d1, .reveal-d2, .reveal-d3,
+  .reveal-d4, .reveal-d5, .reveal-d6 {
+    transition-delay: 0ms !important;
+  }
+  [data-tilt] {
+    transform: none !important;
+    transition: none !important;
   }
 }
