@@ -1,26 +1,17 @@
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { useLocation } from "wouter";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Zap, Eye, EyeOff, Lock, Mail, AlertCircle,
-  User, CheckCircle, Phone, Loader2, ChevronLeft,
+  User, CheckCircle, Loader2,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import {
-  GoogleAuthProvider,
-  signInWithPopup,
-  RecaptchaVerifier,
-  signInWithPhoneNumber,
-  type ConfirmationResult,
-} from "firebase/auth";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { firebaseAuth, isFirebaseConfigured } from "@/lib/firebase";
 
-// ─── helpers ────────────────────────────────────────────────────────────────
-
 type Mode = "signin" | "signup";
-type PhoneStep = "phone" | "otp" | "complete";   // "complete" = new phone user, need name+email
 
 async function apiPost(url: string, body: object) {
   const res = await fetch(url, {
@@ -35,8 +26,6 @@ async function apiPost(url: string, body: object) {
 
 const FIREBASE_READY = isFirebaseConfigured();
 
-// ─── Google button ───────────────────────────────────────────────────────────
-
 function GoogleIcon() {
   return (
     <svg className="w-4 h-4" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -45,250 +34,6 @@ function GoogleIcon() {
       <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
       <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
     </svg>
-  );
-}
-
-// ─── Phone OTP sub-flow ──────────────────────────────────────────────────────
-
-function PhoneFlow({
-  onSuccess,
-  onBack,
-}: {
-  onSuccess: (user: any) => void;
-  onBack: () => void;
-}) {
-  const { toast } = useToast();
-  const recaptchaRef = useRef<HTMLDivElement>(null);
-  const verifierRef  = useRef<RecaptchaVerifier | null>(null);
-  const confirmRef   = useRef<ConfirmationResult | null>(null);
-
-  const [step, setStep]         = useState<PhoneStep>("phone");
-  const [phone, setPhone]       = useState("");
-  const [otp, setOtp]           = useState("");
-  const [name, setName]         = useState("");
-  const [email, setEmail]       = useState("");
-  const [loading, setLoading]   = useState(false);
-  const [error, setError]       = useState("");
-  const [uid, setUid]           = useState("");
-  const [idToken, setIdToken]   = useState("");
-  const [countdown, setCountdown] = useState(0);
-
-  // countdown timer
-  useEffect(() => {
-    if (countdown <= 0) return;
-    const t = setTimeout(() => setCountdown((c) => c - 1), 1000);
-    return () => clearTimeout(t);
-  }, [countdown]);
-
-  function setupRecaptcha() {
-    if (verifierRef.current) return verifierRef.current;
-    verifierRef.current = new RecaptchaVerifier(firebaseAuth!, recaptchaRef.current!, {
-      size: "invisible",
-      callback: () => {},
-    });
-    return verifierRef.current;
-  }
-
-  async function sendOtp() {
-    setError("");
-    const raw = phone.trim();
-    if (!raw.match(/^\+[1-9]\d{6,14}$/)) {
-      return setError("Enter a valid phone number with country code, e.g. +14155551234");
-    }
-    setLoading(true);
-    try {
-      const verifier = setupRecaptcha();
-      confirmRef.current = await signInWithPhoneNumber(firebaseAuth!, raw, verifier);
-      setStep("otp");
-      setCountdown(60);
-      toast({ title: "OTP sent!", description: `Code sent to ${raw}` });
-    } catch (err: any) {
-      setError(err.message || "Failed to send OTP");
-      // Reset reCAPTCHA so it can be used again
-      verifierRef.current?.clear();
-      verifierRef.current = null;
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function verifyOtp() {
-    setError("");
-    if (otp.length !== 6) return setError("Enter the 6-digit code");
-    if (!confirmRef.current) return setError("Session expired. Please go back and try again.");
-    setLoading(true);
-    try {
-      const result = await confirmRef.current.confirm(otp);
-      const token  = await result.user.getIdToken();
-
-      // POST to backend
-      const data = await apiPost("/api/auth/firebase", { idToken: token });
-
-      if (data.status === "profile_required") {
-        // New phone-only user — need name + email
-        setIdToken(token);
-        setUid(data.uid);
-        setStep("complete");
-      } else {
-        onSuccess(data);
-      }
-    } catch (err: any) {
-      setError(err.message || "Invalid code. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function completeProfile() {
-    setError("");
-    if (!name.trim()) return setError("Full name is required");
-    if (!email.trim() || !email.includes("@")) return setError("Valid email is required");
-    setLoading(true);
-    try {
-      const data = await apiPost("/api/auth/firebase", {
-        idToken,
-        fullName: name.trim(),
-        email: email.trim(),
-      });
-      onSuccess(data);
-    } catch (err: any) {
-      setError(err.message || "Failed to complete sign-up");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  return (
-    <div className="space-y-4">
-      {/* Invisible reCAPTCHA anchor */}
-      <div ref={recaptchaRef} />
-
-      {step === "phone" && (
-        <>
-          <div>
-            <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 block mb-1.5">
-              Phone number
-            </label>
-            <div className="relative">
-              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-              <Input
-                type="tel"
-                placeholder="+1 415 555 1234"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && sendOtp()}
-                className="pl-10 h-11 rounded-xl bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400"
-                data-testid="input-phone"
-              />
-            </div>
-            <p className="text-[11px] text-slate-400 mt-1">Include country code — e.g. +1 for US</p>
-          </div>
-          {error && <ErrorBox msg={error} />}
-          <Button
-            onClick={sendOtp}
-            disabled={loading}
-            className="w-full h-11 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold"
-            data-testid="button-send-otp"
-          >
-            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Send verification code"}
-          </Button>
-        </>
-      )}
-
-      {step === "otp" && (
-        <>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
-            Enter the 6-digit code sent to <span className="font-semibold text-slate-700 dark:text-slate-200">{phone}</span>
-          </p>
-          <div>
-            <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 block mb-1.5">
-              Verification code
-            </label>
-            <Input
-              type="text"
-              inputMode="numeric"
-              maxLength={6}
-              placeholder="000000"
-              value={otp}
-              onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
-              onKeyDown={(e) => e.key === "Enter" && verifyOtp()}
-              className="h-11 rounded-xl text-center tracking-[0.4em] text-lg font-mono bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100"
-              data-testid="input-otp"
-              autoFocus
-            />
-          </div>
-          {error && <ErrorBox msg={error} />}
-          <Button
-            onClick={verifyOtp}
-            disabled={loading || otp.length !== 6}
-            className="w-full h-11 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold"
-            data-testid="button-verify-otp"
-          >
-            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Verify code"}
-          </Button>
-          <div className="flex items-center justify-between">
-            <button
-              type="button"
-              onClick={() => { setStep("phone"); setOtp(""); setError(""); }}
-              className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 flex items-center gap-1"
-            >
-              <ChevronLeft className="w-3 h-3" /> Change number
-            </button>
-            {countdown > 0 ? (
-              <p className="text-xs text-slate-400">Resend in {countdown}s</p>
-            ) : (
-              <button
-                type="button"
-                onClick={sendOtp}
-                className="text-xs text-indigo-500 hover:text-indigo-700 font-semibold"
-              >
-                Resend code
-              </button>
-            )}
-          </div>
-        </>
-      )}
-
-      {step === "complete" && (
-        <>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
-            Phone verified! Complete your profile to continue.
-          </p>
-          <div className="space-y-3">
-            <div className="relative">
-              <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-              <Input
-                placeholder="Full name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="pl-10 h-11 rounded-xl bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700"
-                data-testid="input-complete-name"
-              />
-            </div>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-              <Input
-                type="email"
-                placeholder="Email address"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="pl-10 h-11 rounded-xl bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700"
-                data-testid="input-complete-email"
-              />
-            </div>
-          </div>
-          {error && <ErrorBox msg={error} />}
-          <Button
-            onClick={completeProfile}
-            disabled={loading}
-            className="w-full h-11 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold"
-            data-testid="button-complete-profile"
-          >
-            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Create account"}
-          </Button>
-        </>
-      )}
-    </div>
   );
 }
 
@@ -301,16 +46,12 @@ function ErrorBox({ msg }: { msg: string }) {
   );
 }
 
-// ─── Main Login page ─────────────────────────────────────────────────────────
-
 export default function Login() {
   const [, navigate]   = useLocation();
   const queryClient    = useQueryClient();
   const { toast }      = useToast();
 
-  // email/password state
   const [mode, setMode]               = useState<Mode>("signin");
-  const [tab, setTab]                 = useState<"email" | "phone">("email");
   const [fullName, setFullName]       = useState("");
   const [email, setEmail]             = useState("");
   const [password, setPassword]       = useState("");
@@ -325,7 +66,6 @@ export default function Login() {
     navigate("/");
   };
 
-  // ── email/password mutations ──────────────────────────────────────────────
   const signinMutation = useMutation({
     mutationFn: () => apiPost("/api/auth/login", { email: email.trim(), password }),
     onSuccess,
@@ -363,7 +103,6 @@ export default function Login() {
     setConfirm("");
   };
 
-  // ── Google Sign-In ────────────────────────────────────────────────────────
   const handleGoogle = async () => {
     if (!FIREBASE_READY) {
       setError("Google Sign-In is not configured. Please add Firebase credentials.");
@@ -464,8 +203,8 @@ export default function Login() {
             ))}
           </div>
 
-          {/* Social auth */}
-          <div className="space-y-2.5 mb-5">
+          {/* Google sign-in */}
+          <div className="mb-5">
             <button
               type="button"
               onClick={handleGoogle}
@@ -488,153 +227,105 @@ export default function Login() {
             <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700" />
           </div>
 
-          {/* Email / Phone tab switcher */}
-          <div className="flex gap-1 mb-4">
-            {(["email", "phone"] as const).map((t) => (
-              <button
-                key={t}
-                type="button"
-                onClick={() => { setTab(t); setError(""); }}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                  tab === t
-                    ? "bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800"
-                    : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
-                }`}
-                data-testid={`tab-${t}`}
-              >
-                {t === "email" ? <Mail className="w-3 h-3" /> : <Phone className="w-3 h-3" />}
-                {t === "email" ? "Email" : "Phone"}
-              </button>
-            ))}
-          </div>
-
-          {/* ── Email/password form ── */}
-          {tab === "email" && (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {mode === "signup" && (
-                <div>
-                  <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 block mb-1.5">Full Name</label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                    <Input
-                      type="text"
-                      placeholder="Jane Smith"
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      className="pl-10 h-11 rounded-xl bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400"
-                      autoComplete="name"
-                      data-testid="input-fullname"
-                    />
-                  </div>
-                </div>
-              )}
-
+          {/* Email / password form */}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {mode === "signup" && (
               <div>
-                <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 block mb-1.5">Email address</label>
+                <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 block mb-1.5">Full Name</label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                   <Input
-                    type="email"
-                    placeholder="you@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    type="text"
+                    placeholder="Jane Smith"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
                     className="pl-10 h-11 rounded-xl bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400"
-                    autoComplete="email"
-                    data-testid="input-email"
+                    autoComplete="name"
+                    data-testid="input-fullname"
                   />
                 </div>
               </div>
+            )}
 
+            <div>
+              <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 block mb-1.5">Email address</label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                <Input
+                  type="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="pl-10 h-11 rounded-xl bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400"
+                  autoComplete="email"
+                  data-testid="input-email"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 block mb-1.5">Password</label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                <Input
+                  type={showPw ? "text" : "password"}
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="pl-10 pr-10 h-11 rounded-xl bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100"
+                  autoComplete={mode === "signup" ? "new-password" : "current-password"}
+                  data-testid="input-password"
+                />
+                <button type="button" onClick={() => setShowPw(!showPw)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
+                  {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+              {mode === "signup" && <p className="text-[11px] text-slate-400 mt-1">Minimum 8 characters</p>}
+            </div>
+
+            {mode === "signup" && (
               <div>
-                <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 block mb-1.5">Password</label>
+                <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 block mb-1.5">Confirm Password</label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                   <Input
-                    type={showPw ? "text" : "password"}
+                    type={showCpw ? "text" : "password"}
                     placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirm(e.target.value)}
                     className="pl-10 pr-10 h-11 rounded-xl bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100"
-                    autoComplete={mode === "signup" ? "new-password" : "current-password"}
-                    data-testid="input-password"
+                    autoComplete="new-password"
+                    data-testid="input-confirm-password"
                   />
-                  <button type="button" onClick={() => setShowPw(!showPw)}
+                  <button type="button" onClick={() => setShowCpw(!showCpw)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
-                    {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {showCpw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
-                {mode === "signup" && <p className="text-[11px] text-slate-400 mt-1">Minimum 8 characters</p>}
+                {confirmPassword && password && (
+                  <div className="flex items-center gap-1 mt-1">
+                    {password === confirmPassword
+                      ? <><CheckCircle className="w-3 h-3 text-emerald-500" /><p className="text-[11px] text-emerald-500">Passwords match</p></>
+                      : <><AlertCircle className="w-3 h-3 text-amber-500" /><p className="text-[11px] text-amber-500">Passwords do not match</p></>}
+                  </div>
+                )}
               </div>
+            )}
 
-              {mode === "signup" && (
-                <div>
-                  <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 block mb-1.5">Confirm Password</label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                    <Input
-                      type={showCpw ? "text" : "password"}
-                      placeholder="••••••••"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirm(e.target.value)}
-                      className="pl-10 pr-10 h-11 rounded-xl bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100"
-                      autoComplete="new-password"
-                      data-testid="input-confirm-password"
-                    />
-                    <button type="button" onClick={() => setShowCpw(!showCpw)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
-                      {showCpw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                  {confirmPassword && password && (
-                    <div className="flex items-center gap-1 mt-1">
-                      {password === confirmPassword
-                        ? <><CheckCircle className="w-3 h-3 text-emerald-500" /><p className="text-[11px] text-emerald-500">Passwords match</p></>
-                        : <><AlertCircle className="w-3 h-3 text-amber-500" /><p className="text-[11px] text-amber-500">Passwords do not match</p></>}
-                    </div>
-                  )}
-                </div>
-              )}
+            {error && <ErrorBox msg={error} />}
 
-              {error && <ErrorBox msg={error} />}
-
-              <Button
-                type="submit"
-                disabled={isPending}
-                className="w-full h-11 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-sm shadow-indigo-900/20 mt-2 transition-all duration-200"
-                data-testid="button-submit"
-              >
-                {isPending
-                  ? (mode === "signin" ? "Signing in…" : "Creating account…")
-                  : (mode === "signin" ? "Sign in" : "Create account")}
-              </Button>
-            </form>
-          )}
-
-          {/* ── Phone OTP flow ── */}
-          {tab === "phone" && (
-            <div>
-              {!FIREBASE_READY && (
-                <div className="mb-4 p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800">
-                  <p className="text-xs text-amber-700 dark:text-amber-300 font-medium">
-                    Phone authentication requires Firebase credentials. Add <code className="font-mono bg-amber-100 dark:bg-amber-900/50 px-1 rounded">VITE_FIREBASE_*</code> secrets to enable it.
-                  </p>
-                </div>
-              )}
-              {FIREBASE_READY ? (
-                <PhoneFlow onSuccess={(user) => { onSuccess(user); }} onBack={() => setTab("email")} />
-              ) : (
-                <div className="space-y-3 opacity-50 pointer-events-none">
-                  <div className="relative">
-                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                    <Input placeholder="+1 415 555 1234" className="pl-10 h-11 rounded-xl" disabled />
-                  </div>
-                  <Button disabled className="w-full h-11 rounded-xl bg-indigo-600 text-white font-semibold">
-                    Send verification code
-                  </Button>
-                </div>
-              )}
-            </div>
-          )}
+            <Button
+              type="submit"
+              disabled={isPending}
+              className="w-full h-11 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-sm shadow-indigo-900/20 mt-2 transition-all duration-200"
+              data-testid="button-submit"
+            >
+              {isPending
+                ? (mode === "signin" ? "Signing in…" : "Creating account…")
+                : (mode === "signin" ? "Sign in" : "Create account")}
+            </Button>
+          </form>
 
           {/* Footer mode switch */}
           <p className="text-center text-xs text-slate-400 mt-6">
@@ -645,15 +336,6 @@ export default function Login() {
               {mode === "signin" ? "Sign up" : "Sign in"}
             </button>
           </p>
-
-          {/* Firebase config note */}
-          {!FIREBASE_READY && (
-            <div className="mt-5 p-3 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium text-center">
-                🔑 To enable Google & Phone auth, add Firebase secrets
-              </p>
-            </div>
-          )}
         </div>
       </div>
     </div>
