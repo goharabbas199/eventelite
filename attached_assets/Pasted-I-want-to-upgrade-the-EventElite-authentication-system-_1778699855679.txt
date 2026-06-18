@@ -1,0 +1,118 @@
+I want to upgrade the EventElite authentication system to work like a real production SaaS application.
+
+Current auth system is basic. I now want a secure real-world authentication flow with persistent accounts, email verification, OTP confirmation, and social login support.
+
+Requirements:
+
+1. Real Account-Based Authentication
+
+* Only users who actually signed up should be able to log in.
+* Remove all fake/demo authentication logic completely.
+* Users must have their own stored accounts in PostgreSQL database.
+
+2. Persistent User Accounts
+
+* When a user signs up, their account data must stay saved permanently in database.
+* If the user logs out and comes back later, they should still be able to log in with the same email/password.
+* Sessions should persist properly.
+* Keep users logged in after refresh using secure session/cookie handling.
+
+3. Secure Authentication
+
+* Use bcrypt for password hashing.
+* Never store plain text passwords.
+* Use secure HTTP-only cookies or proper session strategy.
+* Add rate limiting for login attempts.
+* Validate all auth inputs using Zod.
+
+4. Email OTP Verification System
+   During signup:
+
+* User enters:
+
+  * Full name
+  * Email
+  * Password
+
+Then:
+
+* Send a 6-digit OTP code to their email.
+* User must enter the OTP to verify email before account becomes active.
+* Prevent login until email is verified.
+* OTP should expire after a few minutes.
+* Add resend OTP option with cooldown timer.
+
+5. Forgot Password Flow
+   Add:
+
+* “Forgot Password?”
+* Send password reset OTP/email.
+* Allow secure password reset.
+
+6. Social Login
+   Add:
+
+* Continue with Google
+* Continue with Microsoft
+
+Requirements:
+
+* Real OAuth integration
+* Create/login account automatically after successful OAuth
+* Save OAuth user data into database
+* Handle returning users properly
+
+7. Database Requirements
+   Create proper scalable auth schema:
+
+* users table
+* email verification table
+* password reset tokens table
+* OAuth provider support
+* timestamps
+* verified email status
+
+8. Profile Integration
+   After login:
+
+* Profile/settings page should automatically show logged-in user data.
+* Any fields not provided during signup should remain blank until user fills them manually.
+
+9. Backend API Requirements
+   Create production-ready routes such as:
+
+* POST /api/auth/signup
+* POST /api/auth/verify-email
+* POST /api/auth/login
+* POST /api/auth/logout
+* POST /api/auth/forgot-password
+* POST /api/auth/reset-password
+* GET /api/auth/me
+
+10. Frontend Requirements
+
+* Beautiful loading states
+* Error/success toasts
+* OTP verification modal/page
+* Disable buttons during requests
+* Proper form validation
+* Keep existing dark UI design exactly the same
+
+11. Tech Stack Rules
+    Use existing stack only:
+
+* React + TypeScript
+* Express
+* PostgreSQL
+* Drizzle ORM
+* TanStack Query
+* ShadCN UI
+* Wouter
+
+12. Important
+
+* Do not break current SaaS architecture.
+* Keep implementation scalable for future multi-tenant SaaS.
+* Work carefully file by file.
+* Remove all remaining hardcoded demo auth/profile data.
+* Make this authentication system production-ready like modern real SaaS platforms.

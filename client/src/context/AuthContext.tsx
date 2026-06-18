@@ -7,6 +7,11 @@ export interface AuthUser {
   fullName: string;
   email: string;
   role: string;
+  phone?: string | null;
+  bio?: string | null;
+  avatarUrl?: string | null;
+  emailVerified: boolean;
+  googleId?: string | null;
   createdAt: string;
 }
 
@@ -14,19 +19,21 @@ interface AuthContextType {
   user: AuthUser | null;
   isLoading: boolean;
   logout: () => Promise<void>;
+  refetchUser: () => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
   isLoading: true,
   logout: async () => {},
+  refetchUser: () => {},
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const queryClient = useQueryClient();
   const [, navigate] = useLocation();
 
-  const { data: user, isLoading } = useQuery<AuthUser | null>({
+  const { data: user, isLoading, refetch } = useQuery<AuthUser | null>({
     queryKey: ["/api/auth/me"],
     queryFn: async () => {
       const res = await fetch("/api/auth/me");
@@ -54,7 +61,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user: user ?? null, isLoading, logout }}>
+    <AuthContext.Provider value={{ user: user ?? null, isLoading, logout, refetchUser: refetch }}>
       {children}
     </AuthContext.Provider>
   );
