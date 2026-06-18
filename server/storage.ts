@@ -41,6 +41,8 @@ export interface IStorage {
   getUserById(id: number): Promise<User | undefined>;
   createUser(data: { fullName: string; email: string; passwordHash: string }): Promise<User>;
   updateUserProfile(id: number, data: { fullName?: string; email?: string; phone?: string | null; bio?: string | null; avatarUrl?: string | null; role?: string }): Promise<User>;
+  findUserByFirebaseUid(firebaseUid: string): Promise<User | undefined>;
+  findOrCreateFirebaseUser(data: { firebaseUid: string; email: string; fullName: string; avatarUrl?: string; phone?: string }): Promise<User>;
 
   getVendors(): Promise<any[]>;
   getVendor(id: number): Promise<any | undefined>;
@@ -140,6 +142,53 @@ export class DatabaseStorage implements IStorage {
       .values({ fullName: data.fullName, email: data.email.toLowerCase().trim(), passwordHash: data.passwordHash })
       .returning();
     return user;
+  }
+
+  async findUserByFirebaseUid(firebaseUid: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.firebaseUid, firebaseUid));
+    return user;
+  }
+
+  async findOrCreateFirebaseUser(data: {
+    firebaseUid: string;
+    email: string;
+    fullName: string;
+    avatarUrl?: string;
+    phone?: string;
+  }): Promise<User> {
+    // 1. Try by Firebase UID first
+    const byUid = await this.findUserByFirebaseUid(data.firebaseUid);
+    if (byUid) return byUid;
+
+    // 2. Try by email (user may have signed up with email/password before)
+    const byEmail = await this.getUserByEmail(data.email);
+    if (byEmail) {
+      // Link the Firebase UID to the existing account
+      const [updated] = await db
+        .update(users)
+        .set({
+          firebaseUid: data.firebaseUid,
+          avatarUrl: byEmail.avatarUrl || data.avatarUrl || null,
+          phone: byEmail.phone || data.phone || null,
+        })
+        .where(eq(users.id, byEmail.id))
+        .returning();
+      return updated;
+    }
+
+    // 3. Create new user (no passwordHash for Firebase users)
+    const [created] = await db
+      .insert(users)
+      .values({
+        firebaseUid: data.firebaseUid,
+        fullName: data.fullName,
+        email: data.email.toLowerCase().trim(),
+        passwordHash: null,
+        avatarUrl: data.avatarUrl || null,
+        phone: data.phone || null,
+      })
+      .returning();
+    return created;
   }
 
   async updateUserProfile(id: number, data: {

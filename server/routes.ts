@@ -777,6 +777,62 @@ export async function registerRoutes(
     }
   });
 
+  // =================== FIREBASE AUTH ========================
+  // Verifies a Firebase ID token (from Google or Phone OTP) and
+  // creates/finds the corresponding user, then opens an Express session.
+
+  app.post("/api/auth/firebase", async (req, res, next) => {
+    try {
+      const { verifyFirebaseToken } = await import("./firebase");
+      const { idToken, fullName: providedName, email: providedEmail } = z.object({
+        idToken:       z.string().min(1),
+        fullName:      z.string().optional(),
+        email:         z.string().email().optional(),
+      }).parse(req.body);
+
+      const decoded = await verifyFirebaseToken(idToken);
+      if (!decoded) {
+        return res.status(401).json({ message: "Invalid or expired Firebase token" });
+      }
+
+      const uid        = decoded.uid;
+      const tokenEmail = decoded.email || null;
+      const tokenName  = decoded.name  || null;
+      const tokenPhone = decoded.phone_number || null;
+      const tokenPhoto = decoded.picture || null;
+
+      // Phone-only users may not have an email in the token yet.
+      // The client must supply one in that case.
+      const email = tokenEmail || providedEmail;
+      if (!email) {
+        // Return a signal so the frontend shows a "complete profile" step
+        return res.status(202).json({ status: "profile_required", uid, phone: tokenPhone });
+      }
+
+      const fullName = tokenName || providedName || email.split("@")[0];
+
+      const user = await storage.findOrCreateFirebaseUser({
+        firebaseUid: uid,
+        email,
+        fullName,
+        avatarUrl: tokenPhoto || undefined,
+        phone: tokenPhone || undefined,
+      });
+
+      req.login(user, (err) => {
+        if (err) return next(err);
+        const { passwordHash: _ph, ...safeUser } = user;
+        res.json(safeUser);
+      });
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ message: err.errors[0].message });
+      }
+      console.error("Firebase auth error:", err);
+      res.status(500).json({ message: "Firebase authentication failed" });
+    }
+  });
+
   // ===================== USER PROFILE ========================
 
   app.get("/api/user/profile", (req, res) => {

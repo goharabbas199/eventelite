@@ -19,7 +19,8 @@ export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   fullName: text("full_name").notNull(),
   email: text("email").notNull().unique(),
-  passwordHash: text("password_hash").notNull(),
+  passwordHash: text("password_hash"),           // null for Firebase-only accounts
+  firebaseUid: text("firebase_uid").unique(),    // set for Google / Phone auth
   role: text("role").notNull().default("owner"),
   phone: text("phone"),
   bio: text("bio"),
