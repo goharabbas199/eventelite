@@ -82,7 +82,7 @@ function PhoneFlow({
 
   function setupRecaptcha() {
     if (verifierRef.current) return verifierRef.current;
-    verifierRef.current = new RecaptchaVerifier(firebaseAuth, recaptchaRef.current!, {
+    verifierRef.current = new RecaptchaVerifier(firebaseAuth!, recaptchaRef.current!, {
       size: "invisible",
       callback: () => {},
     });
@@ -98,7 +98,7 @@ function PhoneFlow({
     setLoading(true);
     try {
       const verifier = setupRecaptcha();
-      confirmRef.current = await signInWithPhoneNumber(firebaseAuth, raw, verifier);
+      confirmRef.current = await signInWithPhoneNumber(firebaseAuth!, raw, verifier);
       setStep("otp");
       setCountdown(60);
       toast({ title: "OTP sent!", description: `Code sent to ${raw}` });
@@ -373,7 +373,7 @@ export default function Login() {
     setGoogleLoading(true);
     try {
       const provider = new GoogleAuthProvider();
-      const result   = await signInWithPopup(firebaseAuth, provider);
+      const result   = await signInWithPopup(firebaseAuth!, provider);
       const idToken  = await result.user.getIdToken();
       const user     = await apiPost("/api/auth/firebase", { idToken });
       toast({ title: "Signed in with Google!", description: `Welcome, ${user.fullName.split(" ")[0]}!` });

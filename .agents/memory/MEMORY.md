@@ -1,0 +1,1 @@
+- [Firebase token verification fallback](firebase-token-fallback.md) — when Admin SDK service-account creds are absent, verify Firebase ID tokens via REST API using the public Web API key (VITE_FIREBASE_API_KEY).
