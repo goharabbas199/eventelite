@@ -18,7 +18,14 @@ const colorConfig = {
   red:    { icon: "bg-rose-500/10 text-rose-600 dark:text-rose-400" },
 };
 
-export function StatsCard({ title, value, icon: Icon, color = "blue", subtitle, onClick }: StatsCardProps) {
+export function StatsCard({
+  title,
+  value,
+  icon: Icon,
+  color = "blue",
+  subtitle,
+  onClick,
+}: StatsCardProps) {
   const cfg = colorConfig[color];
 
   return (
@@ -26,15 +33,25 @@ export function StatsCard({ title, value, icon: Icon, color = "blue", subtitle, 
       onClick={onClick}
       data-tilt={onClick ? "" : undefined}
       data-tilt-max={onClick ? "4" : undefined}
-      className={`stat-card gradient-overlay flex items-center justify-between gap-3 transition-all duration-300 ${onClick ? "cursor-pointer glow-on-hover hover:shadow-2xl hover:border-indigo-200 dark:hover:border-indigo-800 active:scale-[0.98]" : ""}`}
+      className={`stat-card gradient-overlay flex items-center justify-between gap-3 relative overflow-hidden ${
+        onClick
+          ? "cursor-pointer glow-on-hover hover:shadow-lg hover:border-indigo-200/50 dark:hover:border-indigo-900/50 active:scale-[0.98]"
+          : ""
+      }`}
     >
       <div className="min-w-0 flex-1">
         <p className="eyebrow mb-1.5">{title}</p>
-        <p className="text-lg md:text-[22px] font-bold tracking-tight text-slate-900 dark:text-white leading-none transition-all duration-200">{value}</p>
-        {subtitle && <p className="text-[11px] text-slate-400 font-medium mt-1.5 leading-none transition-all duration-200">{subtitle}</p>}
+        <p className="text-lg md:text-[22px] font-bold tracking-tight text-zinc-900 dark:text-white leading-none">
+          {value}
+        </p>
+        {subtitle && (
+          <p className="text-[11px] text-zinc-400 dark:text-zinc-500 font-medium mt-1.5 leading-none">
+            {subtitle}
+          </p>
+        )}
       </div>
       <div className={`p-2.5 rounded-xl ${cfg.icon} shrink-0 transition-all duration-200`}>
-        <Icon className="w-4.5 h-4.5 w-[18px] h-[18px] transition-transform duration-200" strokeWidth={1.8} />
+        <Icon className="w-[18px] h-[18px] transition-transform duration-200" strokeWidth={1.8} />
       </div>
     </div>
   );

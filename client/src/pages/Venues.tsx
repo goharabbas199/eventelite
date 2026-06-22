@@ -53,16 +53,16 @@ export default function Venues() {
         </div>
         <div className="flex items-center gap-2">
           {/* View toggle */}
-          <div className="hidden sm:flex bg-slate-100 dark:bg-slate-800 border border-transparent dark:border-slate-700 rounded-xl p-1 gap-0.5">
+          <div className="hidden sm:flex bg-slate-100 dark:bg-zinc-900 border border-transparent dark:border-zinc-800 rounded-xl p-1 gap-0.5">
             <button
               onClick={() => setViewMode("grid")}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${viewMode === "grid" ? "bg-white dark:bg-slate-700 text-indigo-600 shadow-sm" : "text-slate-500 dark:text-slate-400"}`}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${viewMode === "grid" ? "bg-white dark:bg-zinc-800 text-indigo-600 shadow-sm" : "text-slate-500 dark:text-zinc-400"}`}
             >
               <LayoutGrid className="w-3.5 h-3.5" /> Grid
             </button>
             <button
               onClick={() => setViewMode("table")}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${viewMode === "table" ? "bg-white dark:bg-slate-700 text-indigo-600 shadow-sm" : "text-slate-500 dark:text-slate-400"}`}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${viewMode === "table" ? "bg-white dark:bg-zinc-800 text-indigo-600 shadow-sm" : "text-slate-500 dark:text-zinc-400"}`}
             >
               <List className="w-3.5 h-3.5" /> Table
             </button>
@@ -98,7 +98,7 @@ export default function Venues() {
       </div>
 
       {/* Filter bar */}
-      <Card className="border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm bg-white dark:bg-slate-800/80">
+      <Card className="border border-slate-100 dark:border-zinc-800 rounded-2xl shadow-sm bg-white dark:bg-zinc-900/60">
         <CardContent className="p-4">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="relative">
@@ -134,11 +134,11 @@ export default function Venues() {
           {[1, 2, 3].map((i) => <Skeleton key={i} className="h-64 w-full rounded-2xl" />)}
         </div>
       ) : filteredVenues.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-slate-800/80 rounded-2xl border border-slate-100 dark:border-slate-700 gap-3">
-          <div className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
+        <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-zinc-900/60 rounded-2xl border border-slate-100 dark:border-zinc-800 gap-3">
+          <div className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-zinc-800 flex items-center justify-center">
             <MapPin className="w-7 h-7 text-slate-400" />
           </div>
-          <p className="text-sm font-semibold text-slate-600 dark:text-slate-400">No venues found</p>
+          <p className="text-sm font-semibold text-slate-600 dark:text-zinc-400">No venues found</p>
           <p className="text-xs text-slate-400">Try adjusting your filters</p>
         </div>
       ) : viewMode === "grid" ? (
@@ -146,13 +146,13 @@ export default function Venues() {
           {filteredVenues.map((venue) => (
             <Card
               key={venue.id}
-              className="group relative border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-lg hover:border-indigo-200 dark:hover:border-indigo-700 hover:-translate-y-1 transition-all duration-200 rounded-2xl overflow-hidden bg-white dark:bg-slate-800"
+              className="group relative border border-slate-100 dark:border-zinc-800 shadow-sm hover:shadow-lg hover:border-indigo-200 dark:hover:border-indigo-700 hover:-translate-y-1 transition-all duration-200 rounded-2xl overflow-hidden bg-white dark:bg-zinc-900"
             >
               {/* Action menu */}
               <div className="absolute top-3 right-3 z-20" onClick={(e) => e.preventDefault()}>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm border border-slate-100 dark:border-slate-700 rounded-xl p-1.5 hover:bg-slate-50 dark:hover:bg-slate-700 transition shadow-sm">
+                    <button className="bg-white/90 dark:bg-zinc-900/80 backdrop-blur-sm border border-slate-100 dark:border-zinc-800 rounded-xl p-1.5 hover:bg-slate-50 dark:hover:bg-zinc-800 transition shadow-sm">
                       <MoreVertical className="w-3.5 h-3.5 text-slate-600" />
                     </button>
                   </DropdownMenuTrigger>
@@ -188,7 +188,7 @@ export default function Venues() {
                       </div>
                     )}
                     {/* Price badge */}
-                    <div className="absolute bottom-3 left-3 bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs font-bold text-slate-800 dark:text-slate-100 shadow-sm">
+                    <div className="absolute bottom-3 left-3 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs font-bold text-slate-800 dark:text-white shadow-sm">
                       ${Number(venue.basePrice).toLocaleString()}
                     </div>
                   </div>
@@ -201,7 +201,7 @@ export default function Venues() {
                       <MapPin className="w-3 h-3 shrink-0" />
                       {venue.location}
                     </p>
-                    <div className="flex items-center gap-1.5 mt-3 pt-3 border-t border-slate-100 dark:border-slate-700">
+                    <div className="flex items-center gap-1.5 mt-3 pt-3 border-t border-slate-100 dark:border-zinc-800">
                       <Users className="w-3.5 h-3.5 text-indigo-400" />
                       <span className="text-xs text-slate-500 font-medium">Capacity: {venue.capacity}</span>
                     </div>
@@ -212,30 +212,30 @@ export default function Venues() {
           ))}
         </div>
       ) : (
-        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden">
+        <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-slate-100 dark:border-zinc-800 overflow-hidden">
           <table className="w-full text-sm">
-            <thead className="bg-slate-50 dark:bg-slate-700/30 border-b border-slate-100 dark:border-slate-700">
+            <thead className="bg-slate-50 dark:bg-zinc-800/30 border-b border-slate-100 dark:border-zinc-800">
               <tr>
                 {["Name", "Location", "Capacity", "Base Price", "Actions"].map((h) => (
-                  <th key={h} className={`px-5 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 ${h === "Actions" ? "text-right" : ""}`}>{h}</th>
+                  <th key={h} className={`px-5 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-zinc-400 ${h === "Actions" ? "text-right" : ""}`}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {filteredVenues.map((venue) => (
-                <tr key={venue.id} className="border-t border-slate-100 dark:border-slate-700 hover:bg-slate-50/80 dark:hover:bg-slate-700/30 transition-colors">
-                  <td className="px-5 py-3.5 font-bold text-slate-800 dark:text-slate-200">
+                <tr key={venue.id} className="border-t border-slate-100 dark:border-zinc-800 hover:bg-slate-50/80 dark:hover:bg-zinc-800/30 transition-colors">
+                  <td className="px-5 py-3.5 font-bold text-slate-800 dark:text-zinc-100">
                     <Link href={`/venues/${venue.id}`}>
                       <span className="cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">{venue.name}</span>
                     </Link>
                   </td>
-                  <td className="px-5 py-3.5 text-slate-500 dark:text-slate-400 text-xs">{venue.location}</td>
-                  <td className="px-5 py-3.5 text-slate-500 dark:text-slate-400 text-xs">{venue.capacity}</td>
-                  <td className="px-5 py-3.5 font-semibold text-slate-800 dark:text-slate-200">${Number(venue.basePrice).toLocaleString()}</td>
+                  <td className="px-5 py-3.5 text-slate-500 dark:text-zinc-400 text-xs">{venue.location}</td>
+                  <td className="px-5 py-3.5 text-slate-500 dark:text-zinc-400 text-xs">{venue.capacity}</td>
+                  <td className="px-5 py-3.5 font-semibold text-slate-800 dark:text-zinc-100">${Number(venue.basePrice).toLocaleString()}</td>
                   <td className="px-5 py-3.5 text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <button className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition">
+                        <button className="p-1.5 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-lg transition">
                           <MoreVertical className="w-3.5 h-3.5 text-slate-500" />
                         </button>
                       </DropdownMenuTrigger>

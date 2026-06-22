@@ -222,7 +222,7 @@ export default function VenueDetails() {
                           e.stopPropagation();
                           setImageToDelete(img.id);
                         }}
-                        className="absolute top-1 right-1 bg-white dark:bg-slate-700 rounded-full p-1 shadow opacity-0 group-hover:opacity-100 transition"
+                        className="absolute top-1 right-1 bg-white dark:bg-zinc-800 rounded-full p-1 shadow opacity-0 group-hover:opacity-100 transition"
                       >
                         <Trash2 className="w-3 h-3 text-red-500" />
                       </button>
@@ -231,7 +231,7 @@ export default function VenueDetails() {
                 </div>
 
                 <div className="flex-1">
-                  <div className="h-[420px] bg-slate-50 dark:bg-slate-800 rounded-2xl flex items-center justify-center overflow-hidden">
+                  <div className="h-[420px] bg-slate-50 dark:bg-zinc-900 rounded-2xl flex items-center justify-center overflow-hidden">
                     <img
                       src={
                         images[
@@ -278,7 +278,7 @@ export default function VenueDetails() {
 
             <div className="grid grid-cols-2 gap-6">
               {/* Capacity Card */}
-              <div className="bg-white dark:bg-slate-800/80 px-6 py-5 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md transition">
+              <div className="bg-white dark:bg-zinc-900/60 px-6 py-5 rounded-2xl border border-slate-100 dark:border-zinc-800 shadow-sm hover:shadow-md transition">
                 <div className="flex items-center justify-between">
                   <span className="text-xs uppercase font-semibold text-slate-500">
                     Capacity
@@ -296,7 +296,7 @@ export default function VenueDetails() {
               </div>
 
               {/* Base Price Card */}
-              <div className="bg-white dark:bg-slate-800/80 px-6 py-5 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md transition">
+              <div className="bg-white dark:bg-zinc-900/60 px-6 py-5 rounded-2xl border border-slate-100 dark:border-zinc-800 shadow-sm hover:shadow-md transition">
                 <div className="flex items-center justify-between">
                   <span className="text-xs uppercase font-semibold text-slate-500">
                     Base Price
@@ -321,7 +321,7 @@ export default function VenueDetails() {
                     className="flex justify-between items-center cursor-pointer"
                     onClick={() => setShowContact(!showContact)}
                   >
-                    <h3 className="font-semibold text-slate-800 dark:text-slate-200">
+                    <h3 className="font-semibold text-slate-800 dark:text-zinc-100">
                       Booking & General Information
                     </h3>
                     {showContact ? (

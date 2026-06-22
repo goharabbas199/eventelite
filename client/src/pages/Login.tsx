@@ -246,7 +246,7 @@ export default function Login() {
       <div className="w-8 h-8 rounded-xl bg-indigo-600 flex items-center justify-center">
         <Zap className="w-4 h-4 text-white" fill="currentColor" />
       </div>
-      <p className="font-bold text-[17px] text-slate-900 dark:text-white">EventElite</p>
+      <p className="font-bold text-[17px] text-zinc-900 dark:text-white">EventElite</p>
     </div>
   );
 
@@ -263,7 +263,7 @@ export default function Login() {
       onClick={handleGoogle}
       disabled={loading}
       data-testid="button-google-signin"
-      className="w-full flex items-center justify-center gap-3 h-11 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-750 transition-all duration-200 disabled:opacity-60"
+      className="w-full flex items-center justify-center gap-3 h-11 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/80 text-slate-700 dark:text-zinc-100 text-sm font-medium hover:bg-slate-50 dark:hover:bg-zinc-800 transition-all duration-200 disabled:opacity-60"
     >
       {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <GoogleIcon />}
       Continue with Google
@@ -272,9 +272,9 @@ export default function Login() {
 
   const divider = (
     <div className="flex items-center gap-3 my-5">
-      <div className="flex-1 h-px bg-slate-100 dark:bg-slate-800" />
-      <span className="text-[11px] text-slate-400 font-medium uppercase tracking-wider">or continue with email</span>
-      <div className="flex-1 h-px bg-slate-100 dark:bg-slate-800" />
+      <div className="flex-1 h-px bg-slate-100 dark:bg-zinc-900/80" />
+      <span className="text-[11px] text-zinc-400 font-medium uppercase tracking-wider">or continue with email</span>
+      <div className="flex-1 h-px bg-slate-100 dark:bg-zinc-900/80" />
     </div>
   );
 
@@ -282,7 +282,7 @@ export default function Login() {
   if (mode === "email-sent") {
     const isVerify = emailSentType === "verify";
     return (
-      <div className="min-h-screen flex bg-[#f4f5f8] dark:bg-slate-950">
+      <div className="min-h-screen flex bg-zinc-950">
         {brandPanel}
         <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-12">
           {mobileLogo}
@@ -292,16 +292,16 @@ export default function Login() {
                 <MailCheck className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
               </div>
             </div>
-            <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight mb-2">
+            <h2 className="text-2xl font-black text-zinc-900 dark:text-white tracking-tight mb-2">
               {isVerify ? "Check your inbox" : "Reset email sent"}
             </h2>
-            <p className="text-slate-400 text-sm leading-relaxed mb-1">
+            <p className="text-zinc-400 text-sm leading-relaxed mb-1">
               {isVerify
                 ? "We sent a verification link to"
                 : "We sent a password reset link to"}
             </p>
-            <p className="font-semibold text-slate-700 dark:text-slate-300 text-sm mb-6">{sentToEmail}</p>
-            <p className="text-slate-400 text-xs leading-relaxed mb-8">
+            <p className="font-semibold text-slate-700 dark:text-zinc-300 text-sm mb-6">{sentToEmail}</p>
+            <p className="text-zinc-400 text-xs leading-relaxed mb-8">
               {isVerify
                 ? "Click the link in the email to verify your account, then come back here and sign in."
                 : "Click the link in the email to choose a new password, then sign in."}
@@ -314,7 +314,7 @@ export default function Login() {
               Back to sign in
             </Button>
             {isVerify && (
-              <p className="text-xs text-slate-400 mt-4">
+              <p className="text-xs text-zinc-400 mt-4">
                 Didn't get it? Check your spam folder, or{" "}
                 <button
                   type="button"
@@ -335,25 +335,25 @@ export default function Login() {
   // ── Forgot password screen ─────────────────────────────────────────────────
   if (mode === "forgot-password") {
     return (
-      <div className="min-h-screen flex bg-[#f4f5f8] dark:bg-slate-950">
+      <div className="min-h-screen flex bg-zinc-950">
         {brandPanel}
         <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-12">
           {mobileLogo}
           <div className="w-full max-w-sm">
-            <button onClick={() => switchMode("signin")} className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 mb-6 transition-colors">
+            <button onClick={() => switchMode("signin")} className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-slate-600 dark:hover:text-zinc-200 mb-6 transition-colors">
               <ArrowLeft className="w-3.5 h-3.5" /> Back to sign in
             </button>
             <div className="mb-7">
-              <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Forgot password?</h2>
-              <p className="text-slate-400 text-sm mt-1.5">Enter your email and we'll send a reset link.</p>
+              <h2 className="text-2xl font-black text-zinc-900 dark:text-white tracking-tight">Forgot password?</h2>
+              <p className="text-zinc-400 text-sm mt-1.5">Enter your email and we'll send a reset link.</p>
             </div>
             <form onSubmit={handleForgot} className="space-y-4">
               <div>
-                <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 block mb-1.5">Email address</label>
+                <label className="text-xs font-semibold text-slate-600 dark:text-zinc-400 block mb-1.5">Email address</label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 pointer-events-none" />
                   <Input type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)}
-                    className="pl-10 h-11 rounded-xl bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700"
+                    className="pl-10 h-11 rounded-xl bg-white dark:bg-zinc-900/80 border-slate-200 dark:border-zinc-800"
                     autoComplete="email" data-testid="input-forgot-email" />
                 </div>
               </div>
@@ -373,16 +373,16 @@ export default function Login() {
   // ── Sign in / Sign up screen ───────────────────────────────────────────────
   const isSignup = mode === "signup";
   return (
-    <div className="min-h-screen flex bg-[#f4f5f8] dark:bg-slate-950">
+    <div className="min-h-screen flex bg-zinc-950">
       {brandPanel}
       <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-12">
         {mobileLogo}
         <div className="w-full max-w-sm">
           <div className="mb-7">
-            <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+            <h2 className="text-2xl font-black text-zinc-900 dark:text-white tracking-tight">
               {isSignup ? "Create your account" : "Welcome back"}
             </h2>
-            <p className="text-slate-400 text-sm mt-1.5">
+            <p className="text-zinc-400 text-sm mt-1.5">
               {isSignup ? "Start managing your events today." : "Sign in to your agency dashboard"}
             </p>
           </div>
@@ -391,13 +391,13 @@ export default function Login() {
           {divider}
 
           {/* Sign in / Sign up tabs */}
-          <div className="flex rounded-xl bg-slate-100 dark:bg-slate-800/60 p-1 mb-5">
+          <div className="flex rounded-xl bg-slate-100 dark:bg-zinc-900/80/60 p-1 mb-5">
             <button
               type="button"
               onClick={() => switchMode("signin")}
               data-testid="tab-signin"
               className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all duration-200 ${
-                !isSignup ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm" : "text-slate-500 dark:text-slate-400 hover:text-slate-700"
+                !isSignup ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-sm" : "text-zinc-500 dark:text-zinc-400 hover:text-slate-700"
               }`}
             >
               Sign In
@@ -407,7 +407,7 @@ export default function Login() {
               onClick={() => switchMode("signup")}
               data-testid="tab-signup"
               className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all duration-200 ${
-                isSignup ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm" : "text-slate-500 dark:text-slate-400 hover:text-slate-700"
+                isSignup ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-sm" : "text-zinc-500 dark:text-zinc-400 hover:text-slate-700"
               }`}
             >
               Sign Up
@@ -417,29 +417,29 @@ export default function Login() {
           <form onSubmit={isSignup ? handleSignup : handleSignin} className="space-y-4">
             {isSignup && (
               <div>
-                <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 block mb-1.5">Full name</label>
+                <label className="text-xs font-semibold text-slate-600 dark:text-zinc-400 block mb-1.5">Full name</label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 pointer-events-none" />
                   <Input type="text" placeholder="Jane Smith" value={fullName} onChange={(e) => setFullName(e.target.value)}
-                    className="pl-10 h-11 rounded-xl bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700"
+                    className="pl-10 h-11 rounded-xl bg-white dark:bg-zinc-900/80 border-slate-200 dark:border-zinc-800"
                     autoComplete="name" data-testid="input-fullname" />
                 </div>
               </div>
             )}
 
             <div>
-              <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 block mb-1.5">Email address</label>
+              <label className="text-xs font-semibold text-slate-600 dark:text-zinc-400 block mb-1.5">Email address</label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 pointer-events-none" />
                 <Input type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10 h-11 rounded-xl bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700"
+                  className="pl-10 h-11 rounded-xl bg-white dark:bg-zinc-900/80 border-slate-200 dark:border-zinc-800"
                   autoComplete="email" data-testid="input-email" />
               </div>
             </div>
 
             <div>
               <div className="flex justify-between items-center mb-1.5">
-                <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">Password</label>
+                <label className="text-xs font-semibold text-slate-600 dark:text-zinc-400">Password</label>
                 {!isSignup && (
                   <button type="button" onClick={() => switchMode("forgot-password")}
                     className="text-xs text-indigo-500 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium transition-colors"
@@ -449,29 +449,29 @@ export default function Login() {
                 )}
               </div>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 pointer-events-none" />
                 <Input type={showPw ? "text" : "password"} placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10 pr-10 h-11 rounded-xl bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700"
+                  className="pl-10 pr-10 h-11 rounded-xl bg-white dark:bg-zinc-900/80 border-slate-200 dark:border-zinc-800"
                   autoComplete={isSignup ? "new-password" : "current-password"}
                   data-testid="input-password" />
                 <button type="button" onClick={() => setShowPw(!showPw)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors">
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-slate-600 transition-colors">
                   {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
-              {isSignup && <p className="text-[11px] text-slate-400 mt-1">Minimum 8 characters</p>}
+              {isSignup && <p className="text-[11px] text-zinc-400 mt-1">Minimum 8 characters</p>}
             </div>
 
             {isSignup && (
               <div>
-                <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 block mb-1.5">Confirm password</label>
+                <label className="text-xs font-semibold text-slate-600 dark:text-zinc-400 block mb-1.5">Confirm password</label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 pointer-events-none" />
                   <Input type={showConfirmPw ? "text" : "password"} placeholder="••••••••" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="pl-10 pr-10 h-11 rounded-xl bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700"
+                    className="pl-10 pr-10 h-11 rounded-xl bg-white dark:bg-zinc-900/80 border-slate-200 dark:border-zinc-800"
                     autoComplete="new-password" data-testid="input-confirm-password" />
                   <button type="button" onClick={() => setShowConfirmPw(!showConfirmPw)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors">
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-slate-600 transition-colors">
                     {showConfirmPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
@@ -490,7 +490,7 @@ export default function Login() {
             </Button>
           </form>
 
-          <p className="text-center text-xs text-slate-400 mt-5">
+          <p className="text-center text-xs text-zinc-400 mt-5">
             {isSignup ? "Already have an account? " : "Don't have an account? "}
             <button type="button"
               onClick={() => switchMode(isSignup ? "signin" : "signup")}

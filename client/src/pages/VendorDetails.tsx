@@ -180,7 +180,7 @@ export default function VendorDetails() {
 
       {/* Services & Products Section */}
       <Card className="border-none shadow-md overflow-hidden">
-        <CardHeader className="flex justify-between items-center px-6 py-4 border-b dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+        <CardHeader className="flex justify-between items-center px-6 py-4 border-b dark:border-zinc-800 bg-slate-50 dark:bg-zinc-800/50">
           <CardTitle className="text-lg font-semibold">
             Services & Products
           </CardTitle>
@@ -221,7 +221,7 @@ export default function VendorDetails() {
               {vendor.products?.map((product) => (
                 <div
                   key={product.id}
-                  className="flex items-center justify-between px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-700/40 transition-colors"
+                  className="flex items-center justify-between px-6 py-4 hover:bg-slate-50 dark:hover:bg-zinc-800/40 transition-colors"
                 >
                   <div>
                     <p className="font-medium">{product.name}</p>
@@ -233,7 +233,7 @@ export default function VendorDetails() {
                   </div>
 
                   <div className="flex items-center gap-6">
-                    <p className="font-semibold text-slate-700 dark:text-slate-300">
+                    <p className="font-semibold text-slate-700 dark:text-zinc-300">
                       {formatCurrency(product.price)}
                     </p>
 

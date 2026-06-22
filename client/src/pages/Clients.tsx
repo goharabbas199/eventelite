@@ -122,7 +122,7 @@ export default function Clients() {
     else { setSortBy(col); setSortOrder("asc"); }
   };
 
-  const selectCls = "h-9 border border-slate-100 dark:border-slate-700 rounded-xl px-3 text-sm bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20";
+  const selectCls = "h-9 border border-slate-100 dark:border-zinc-800 rounded-xl px-3 text-sm bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20";
 
   return (
     <Layout title="Clients">
@@ -156,7 +156,7 @@ export default function Clients() {
       {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
-          { label: "Total Clients",    value: totalClients,                               icon: Users,        cls: "text-slate-800 dark:text-slate-200" },
+          { label: "Total Clients",    value: totalClients,                               icon: Users,        cls: "text-slate-800 dark:text-zinc-100" },
           { label: "High Priority",    value: highPriorityCount,                          icon: AlertCircle,  cls: "text-red-600 dark:text-red-400"   },
           { label: "Upcoming (30d)",   value: upcomingCount,                              icon: Calendar,     cls: "text-amber-600 dark:text-amber-400" },
           { label: "Pipeline Budget",  value: `$${totalPipelineBudget.toLocaleString()}`, icon: DollarSign,   cls: "text-indigo-600 dark:text-indigo-400" },
@@ -172,7 +172,7 @@ export default function Clients() {
       </div>
 
       {/* Filter bar */}
-      <Card className="border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm bg-white dark:bg-slate-800/80 transition-all duration-300 hover:shadow-lg hover:border-indigo-200 dark:hover:border-indigo-800 gradient-overlay">
+      <Card className="border border-slate-100 dark:border-zinc-800 rounded-2xl shadow-sm bg-white dark:bg-zinc-900/60 transition-all duration-300 hover:shadow-lg hover:border-indigo-200 dark:hover:border-indigo-800 gradient-overlay">
         <div className="p-4 md:p-5">
           <div className="flex flex-col gap-2 md:flex-row md:gap-3">
             <Input
@@ -215,24 +215,24 @@ export default function Clients() {
       </Card>
 
       {/* Desktop Table */}
-      <Card className="border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm bg-white dark:bg-slate-800/80 hidden md:block">
+      <Card className="border border-slate-100 dark:border-zinc-800 rounded-2xl shadow-sm bg-white dark:bg-zinc-900/60 hidden md:block">
         <div className="overflow-auto">
           <Table>
             <TableHeader>
-              <TableRow className="border-b border-slate-100 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-700/30">
-                <TableHead className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 pl-5">Name</TableHead>
-                <TableHead className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 cursor-pointer hover:text-indigo-600 select-none" onClick={() => toggleSort("date")}>
+              <TableRow className="border-b border-slate-100 dark:border-zinc-800 bg-slate-50/80 dark:bg-zinc-800/30">
+                <TableHead className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-zinc-400 pl-5">Name</TableHead>
+                <TableHead className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-zinc-400 cursor-pointer hover:text-indigo-600 select-none" onClick={() => toggleSort("date")}>
                   <div className="flex items-center gap-1">Date <SortIcon col="date" /></div>
                 </TableHead>
-                <TableHead className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 cursor-pointer hover:text-indigo-600 select-none" onClick={() => toggleSort("priority")}>
+                <TableHead className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-zinc-400 cursor-pointer hover:text-indigo-600 select-none" onClick={() => toggleSort("priority")}>
                   <div className="flex items-center gap-1">Priority <SortIcon col="priority" /></div>
                 </TableHead>
-                <TableHead className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Type</TableHead>
-                <TableHead className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 cursor-pointer hover:text-indigo-600 text-right select-none" onClick={() => toggleSort("budget")}>
+                <TableHead className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-zinc-400">Type</TableHead>
+                <TableHead className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-zinc-400 cursor-pointer hover:text-indigo-600 text-right select-none" onClick={() => toggleSort("budget")}>
                   <div className="flex items-center justify-end gap-1">Budget <SortIcon col="budget" /></div>
                 </TableHead>
-                <TableHead className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Status</TableHead>
-                <TableHead className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 pr-5">Actions</TableHead>
+                <TableHead className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-zinc-400">Status</TableHead>
+                <TableHead className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-zinc-400 pr-5">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -240,7 +240,7 @@ export default function Clients() {
                 [...Array(4)].map((_, i) => (
                   <TableRow key={i}>
                     <TableCell colSpan={7} className="py-4">
-                      <div className="h-5 w-full bg-slate-100 dark:bg-slate-700 animate-pulse rounded-lg" />
+                      <div className="h-5 w-full bg-slate-100 dark:bg-zinc-800 animate-pulse rounded-lg" />
                     </TableCell>
                   </TableRow>
                 ))
@@ -248,10 +248,10 @@ export default function Clients() {
                 <TableRow>
                   <TableCell colSpan={7}>
                     <div className="flex flex-col items-center justify-center py-16 gap-3">
-                      <div className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
-                        <Users className="w-7 h-7 text-slate-400 dark:text-slate-500" />
+                      <div className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-zinc-800 flex items-center justify-center">
+                        <Users className="w-7 h-7 text-slate-400 dark:text-zinc-500" />
                       </div>
-                      <p className="text-sm font-semibold text-slate-600 dark:text-slate-400">No clients found</p>
+                      <p className="text-sm font-semibold text-slate-600 dark:text-zinc-400">No clients found</p>
                       <p className="text-xs text-slate-400">Try adjusting your filters</p>
                     </div>
                   </TableCell>
@@ -262,13 +262,13 @@ export default function Clients() {
                   return (
                     <TableRow
                       key={client.id}
-                      className="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50/80 dark:hover:bg-slate-700/30 transition-colors cursor-pointer group"
+                      className="border-b border-slate-100 dark:border-zinc-800 hover:bg-slate-50/80 dark:hover:bg-zinc-800/30 transition-colors cursor-pointer group"
                       onClick={() => setLocation(`/clients/${client.id}`)}
                     >
-                      <TableCell className="font-semibold text-slate-800 dark:text-slate-200 pl-5 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                      <TableCell className="font-semibold text-slate-800 dark:text-zinc-100 pl-5 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                         {client.name}
                       </TableCell>
-                      <TableCell className="text-sm text-slate-500 dark:text-slate-400">
+                      <TableCell className="text-sm text-slate-500 dark:text-zinc-400">
                         {format(new Date(client.eventDate), "MMM d, yyyy")}
                       </TableCell>
                       <TableCell>
@@ -279,8 +279,8 @@ export default function Clients() {
                           <p className="text-[10px] text-slate-400 mt-0.5">{priority.text}</p>
                         </div>
                       </TableCell>
-                      <TableCell className="text-sm text-slate-500 dark:text-slate-400">{client.eventType}</TableCell>
-                      <TableCell className="text-right font-bold text-slate-800 dark:text-slate-200">
+                      <TableCell className="text-sm text-slate-500 dark:text-zinc-400">{client.eventType}</TableCell>
+                      <TableCell className="text-right font-bold text-slate-800 dark:text-zinc-100">
                         {client.budget ? `$${Number(client.budget).toLocaleString()}` : "—"}
                       </TableCell>
                       <TableCell>
@@ -309,7 +309,7 @@ export default function Clients() {
                             <FileText className="w-3.5 h-3.5" />
                           </Button>
                           <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" onClick={() => setLocation(`/clients/${client.id}`)}>
-                            <Eye className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
+                            <Eye className="w-3.5 h-3.5 text-slate-500 dark:text-zinc-400" />
                           </Button>
                           <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" onClick={() => setDeleteId(client.id)}>
                             <Trash2 className="w-3.5 h-3.5 text-red-400" />
@@ -328,11 +328,11 @@ export default function Clients() {
       {/* Mobile Card List */}
       <div className="md:hidden space-y-3">
         {isLoading ? (
-          [...Array(3)].map((_, i) => <div key={i} className="h-28 bg-white dark:bg-slate-800 rounded-2xl animate-pulse border border-slate-100 dark:border-slate-700" />)
+          [...Array(3)].map((_, i) => <div key={i} className="h-28 bg-white dark:bg-zinc-900 rounded-2xl animate-pulse border border-slate-100 dark:border-zinc-800" />)
         ) : !filteredClients?.length ? (
-          <div className="flex flex-col items-center justify-center py-16 gap-3 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700">
-            <Users className="w-10 h-10 text-slate-300 dark:text-slate-600" />
-            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">No clients found</p>
+          <div className="flex flex-col items-center justify-center py-16 gap-3 bg-white dark:bg-zinc-900 rounded-2xl border border-slate-100 dark:border-zinc-800">
+            <Users className="w-10 h-10 text-slate-300 dark:text-zinc-600" />
+            <p className="text-sm font-medium text-slate-500 dark:text-zinc-400">No clients found</p>
           </div>
         ) : (
           filteredClients.map((client) => {
@@ -341,11 +341,11 @@ export default function Clients() {
               <div
                 key={client.id}
                 onClick={() => setLocation(`/clients/${client.id}`)}
-                className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 p-4 shadow-sm hover:shadow-md hover:border-indigo-200 dark:hover:border-indigo-800 active:scale-[0.98] transition-all duration-200 cursor-pointer"
+                className="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-100 dark:border-zinc-800 p-4 shadow-sm hover:shadow-md hover:border-indigo-200 dark:hover:border-indigo-800 active:scale-[0.98] transition-all duration-200 cursor-pointer"
               >
                 <div className="flex items-start justify-between mb-2">
                   <div>
-                    <p className="font-bold text-slate-800 dark:text-slate-200 text-sm">{client.name}</p>
+                    <p className="font-bold text-slate-800 dark:text-zinc-100 text-sm">{client.name}</p>
                     <p className="text-xs text-slate-400 mt-0.5">{client.eventType}</p>
                   </div>
                   <span className={`chip ${statusStyle[client.status] || "badge-slate"}`}>
@@ -357,11 +357,11 @@ export default function Clients() {
                     <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />{format(new Date(client.eventDate), "MMM d, yyyy")}</span>
                     <span className={`chip ${priority.color} text-[10px]`}>{priority.label}</span>
                   </div>
-                  <p className="text-sm font-bold text-slate-800 dark:text-slate-200">
+                  <p className="text-sm font-bold text-slate-800 dark:text-zinc-100">
                     {client.budget ? `$${Number(client.budget).toLocaleString()}` : "—"}
                   </p>
                 </div>
-                <div className="flex gap-2 mt-3 pt-3 border-t border-slate-100 dark:border-slate-700" onClick={(e) => e.stopPropagation()}>
+                <div className="flex gap-2 mt-3 pt-3 border-t border-slate-100 dark:border-zinc-800" onClick={(e) => e.stopPropagation()}>
                   <button
                     onClick={() => setLocation(`/events?clientId=${client.id}`)}
                     data-testid={`button-mobile-create-event-${client.id}`}
@@ -389,7 +389,7 @@ export default function Clients() {
           <DialogHeader>
             <DialogTitle>Delete Client</DialogTitle>
           </DialogHeader>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">Are you sure? This cannot be undone.</p>
+          <p className="text-sm text-slate-500 dark:text-zinc-400 mt-2">Are you sure? This cannot be undone.</p>
           <DialogFooter className="mt-4 gap-2">
             <Button variant="outline" onClick={() => setDeleteId(null)} className="rounded-xl">Cancel</Button>
             <Button variant="destructive" onClick={handleDelete} className="rounded-xl">Delete</Button>
@@ -446,8 +446,8 @@ function CreateClientForm({ onSuccess }: { onSuccess: () => void }) {
   };
 
   const inputCls = "h-9 rounded-xl text-sm";
-  const selectCls = "w-full h-9 border border-slate-200 dark:border-slate-700 rounded-xl px-3 text-sm bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20";
-  const labelCls = "text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 block";
+  const selectCls = "w-full h-9 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 text-sm bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20";
+  const labelCls = "text-xs font-semibold text-slate-600 dark:text-zinc-400 mb-1 block";
 
   return (
     <div className="space-y-4 pt-2">

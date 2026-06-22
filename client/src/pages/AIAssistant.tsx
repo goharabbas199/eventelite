@@ -117,15 +117,15 @@ function MessageBubble({ msg }: { msg: Message }) {
       </div>
       <div className="flex-1 max-w-[85%]">
         {isRaw ? (
-          <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl rounded-tl-sm shadow-sm overflow-hidden">
-            <div className="flex items-center justify-between px-4 py-2.5 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80">
+          <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl rounded-tl-sm shadow-sm overflow-hidden">
+            <div className="flex items-center justify-between px-4 py-2.5 border-b border-slate-100 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900/60">
               <div className="flex items-center gap-2">
                 <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
                 <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">AI Response</span>
               </div>
               <button
                 onClick={handleCopy}
-                className="flex items-center gap-1.5 text-[11px] text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
+                className="flex items-center gap-1.5 text-[11px] text-slate-400 hover:text-slate-700 dark:hover:text-zinc-100 transition-colors"
                 data-testid="button-copy-ai-response"
               >
                 {copied ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
@@ -137,7 +137,7 @@ function MessageBubble({ msg }: { msg: Message }) {
             </div>
           </div>
         ) : (
-          <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl rounded-tl-sm px-4 py-3 text-[13px] leading-relaxed text-slate-700 dark:text-slate-200 shadow-sm">
+          <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl rounded-tl-sm px-4 py-3 text-[13px] leading-relaxed text-slate-700 dark:text-zinc-100 shadow-sm">
             {msg.content}
           </div>
         )}
@@ -155,7 +155,7 @@ function TipsList({ tips, label = "Tips" }: { tips: string[]; label?: string }) 
     <div className="space-y-1">
       <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">{label}</p>
       {tips.map((tip: string, i: number) => (
-        <div key={i} className="flex items-start gap-1.5 text-[12px] text-slate-600 dark:text-slate-300">
+        <div key={i} className="flex items-start gap-1.5 text-[12px] text-slate-600 dark:text-zinc-300">
           <Lightbulb className="w-3 h-3 text-amber-500 mt-0.5 shrink-0" />
           {tip}
         </div>
@@ -165,19 +165,19 @@ function TipsList({ tips, label = "Tips" }: { tips: string[]; label?: string }) 
 }
 
 function AIResponseRenderer({ data }: { data: any }) {
-  if (!data || typeof data !== "object") return <p className="text-sm text-slate-600 dark:text-slate-300">{String(data)}</p>;
+  if (!data || typeof data !== "object") return <p className="text-sm text-slate-600 dark:text-zinc-300">{String(data)}</p>;
 
   // ── General message with optional extras ──────────────────────────────────
   if (data.message && !data.allocations && !data.lineItems && !data.vendorServices && !data.recommendations && !data.suggestions) {
     return (
       <div className="space-y-3">
-        <p className="text-[13px] text-slate-700 dark:text-slate-200 leading-relaxed whitespace-pre-wrap">{data.message}</p>
+        <p className="text-[13px] text-slate-700 dark:text-zinc-100 leading-relaxed whitespace-pre-wrap">{data.message}</p>
 
         {/* Capabilities list (help response) */}
         {data.capabilities?.length > 0 && (
           <div className="space-y-1.5 mt-2">
             {data.capabilities.map((cap: string, i: number) => (
-              <div key={i} className="flex items-start gap-2 p-2 bg-indigo-50 dark:bg-indigo-950/30 rounded-xl text-[12px] text-slate-700 dark:text-slate-300">
+              <div key={i} className="flex items-start gap-2 p-2 bg-indigo-50 dark:bg-indigo-950/30 rounded-xl text-[12px] text-slate-700 dark:text-zinc-300">
                 {cap}
               </div>
             ))}
@@ -190,7 +190,7 @@ function AIResponseRenderer({ data }: { data: any }) {
             <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Planning Checklist</p>
             <div className="space-y-1 max-h-60 overflow-y-auto">
               {data.checklist.map((item: string, i: number) => (
-                <div key={i} className="flex items-start gap-2 text-[12px] text-slate-600 dark:text-slate-300 py-1 border-b border-slate-100 dark:border-slate-700/50 last:border-0">
+                <div key={i} className="flex items-start gap-2 text-[12px] text-slate-600 dark:text-zinc-300 py-1 border-b border-slate-100 dark:border-zinc-800/50 last:border-0">
                   <span className="w-4 h-4 rounded bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center shrink-0 mt-0.5">
                     <span className="text-[8px] font-bold text-indigo-600">{i + 1}</span>
                   </span>
@@ -206,9 +206,9 @@ function AIResponseRenderer({ data }: { data: any }) {
           <div className="space-y-1.5">
             <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Your Upcoming Events</p>
             {data.upcomingEvents.map((ev: any, i: number) => (
-              <div key={i} className="flex items-start justify-between p-2.5 bg-slate-50 dark:bg-slate-700/40 rounded-xl">
+              <div key={i} className="flex items-start justify-between p-2.5 bg-slate-50 dark:bg-zinc-800/40 rounded-xl">
                 <div>
-                  <p className="text-[12px] font-bold text-slate-800 dark:text-slate-200">{ev.client}</p>
+                  <p className="text-[12px] font-bold text-slate-800 dark:text-zinc-100">{ev.client}</p>
                   <p className="text-[11px] text-slate-500">{ev.type} · {ev.date ? new Date(ev.date).toLocaleDateString() : "TBD"}</p>
                 </div>
                 <div className="text-right">
@@ -238,7 +238,7 @@ function AIResponseRenderer({ data }: { data: any }) {
       <div className="space-y-3">
         <div className="flex items-center gap-2 mb-2">
           <DollarSign className="w-4 h-4 text-emerald-500" />
-          <span className="text-sm font-bold text-slate-800 dark:text-slate-200">Budget Allocation — {data.eventType}</span>
+          <span className="text-sm font-bold text-slate-800 dark:text-zinc-100">Budget Allocation — {data.eventType}</span>
           <span className="ml-auto text-sm font-bold text-emerald-600">${data.totalBudget?.toLocaleString()}</span>
         </div>
         {data.perHeadTotal && (
@@ -252,25 +252,25 @@ function AIResponseRenderer({ data }: { data: any }) {
           {data.allocations?.map((a: any, i: number) => (
             <div key={i} className="flex-1">
               <div className="flex justify-between mb-0.5">
-                <span className="text-[12px] font-semibold text-slate-700 dark:text-slate-300">{a.category}</span>
+                <span className="text-[12px] font-semibold text-slate-700 dark:text-zinc-300">{a.category}</span>
                 <div className="flex items-center gap-2">
                   {a.perHead > 0 && <span className="text-[10px] text-slate-400">${a.perHead}/head</span>}
                   <span className="text-[12px] font-bold text-indigo-600">${a.amount?.toLocaleString()} <span className="text-slate-400 font-normal">({a.percentage}%)</span></span>
                 </div>
               </div>
-              <div className="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-1.5">
+              <div className="w-full bg-slate-100 dark:bg-zinc-800 rounded-full h-1.5">
                 <div className="h-full bg-gradient-to-r from-indigo-500 to-violet-500 rounded-full transition-all" style={{ width: `${a.percentage}%` }} />
               </div>
               {a.notes && <p className="text-[10px] text-slate-400 mt-0.5">{a.notes}</p>}
             </div>
           ))}
         </div>
-        {data.summary && <p className="text-[12px] text-slate-500 border-t border-slate-100 dark:border-slate-700 pt-2 mt-2">{data.summary}</p>}
+        {data.summary && <p className="text-[12px] text-slate-500 border-t border-slate-100 dark:border-zinc-800 pt-2 mt-2">{data.summary}</p>}
         {data.savingsTips?.length > 0 && (
           <div className="space-y-1">
             <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Savings Tips</p>
             {data.savingsTips.map((tip: string, i: number) => (
-              <div key={i} className="flex items-start gap-1.5 text-[12px] text-slate-600 dark:text-slate-300">
+              <div key={i} className="flex items-start gap-1.5 text-[12px] text-slate-600 dark:text-zinc-300">
                 <Zap className="w-3 h-3 text-amber-500 mt-0.5 shrink-0" />
                 {tip}
               </div>
@@ -287,27 +287,27 @@ function AIResponseRenderer({ data }: { data: any }) {
       <div className="space-y-3">
         <div className="flex items-center gap-2 mb-2">
           <DollarSign className="w-4 h-4 text-emerald-500" />
-          <span className="text-sm font-bold text-slate-800 dark:text-slate-200">{data.title || "Generated Quote"}</span>
+          <span className="text-sm font-bold text-slate-800 dark:text-zinc-100">{data.title || "Generated Quote"}</span>
         </div>
         <div className="space-y-1.5">
           {data.lineItems?.map((item: any, i: number) => (
-            <div key={i} className="flex items-start justify-between py-1.5 border-b border-slate-100 dark:border-slate-700/50 last:border-0">
+            <div key={i} className="flex items-start justify-between py-1.5 border-b border-slate-100 dark:border-zinc-800/50 last:border-0">
               <div className="flex-1">
-                <p className="text-[12px] font-semibold text-slate-800 dark:text-slate-200">{item.name}</p>
+                <p className="text-[12px] font-semibold text-slate-800 dark:text-zinc-100">{item.name}</p>
                 {item.description && <p className="text-[11px] text-slate-400">{item.description}</p>}
                 {item.markup && <p className="text-[10px] text-indigo-500">{item.markup}% markup</p>}
               </div>
               <div className="text-right ml-3 shrink-0">
-                <p className="text-[12px] font-bold text-slate-800 dark:text-slate-200">${item.clientPrice?.toLocaleString()}</p>
+                <p className="text-[12px] font-bold text-slate-800 dark:text-zinc-100">${item.clientPrice?.toLocaleString()}</p>
                 <p className="text-[10px] text-slate-400">Cost: ${item.vendorCost?.toLocaleString()}</p>
               </div>
             </div>
           ))}
         </div>
         <div className="grid grid-cols-3 gap-2 pt-2">
-          <div className="bg-slate-50 dark:bg-slate-700/40 rounded-xl p-2 text-center">
+          <div className="bg-slate-50 dark:bg-zinc-800/40 rounded-xl p-2 text-center">
             <p className="text-[10px] text-slate-400">Subtotal</p>
-            <p className="text-[13px] font-bold text-slate-700 dark:text-slate-200">${data.subtotal?.toLocaleString()}</p>
+            <p className="text-[13px] font-bold text-slate-700 dark:text-zinc-100">${data.subtotal?.toLocaleString()}</p>
           </div>
           <div className="bg-emerald-50 dark:bg-emerald-950/40 rounded-xl p-2 text-center">
             <p className="text-[10px] text-emerald-600">Client Price</p>
@@ -318,7 +318,7 @@ function AIResponseRenderer({ data }: { data: any }) {
             <p className="text-[13px] font-bold text-indigo-600">${data.estimatedProfit?.toLocaleString()}</p>
           </div>
         </div>
-        {data.notes && <p className="text-[11px] text-slate-400 italic border-t border-slate-100 dark:border-slate-700 pt-2 mt-1">{data.notes}</p>}
+        {data.notes && <p className="text-[11px] text-slate-400 italic border-t border-slate-100 dark:border-zinc-800 pt-2 mt-1">{data.notes}</p>}
       </div>
     );
   }
@@ -329,29 +329,29 @@ function AIResponseRenderer({ data }: { data: any }) {
       <div className="space-y-3">
         <div className="flex items-center gap-2 mb-2">
           <Calendar className="w-4 h-4 text-violet-500" />
-          <span className="text-sm font-bold text-slate-800 dark:text-slate-200">{data.eventName || "Event Plan"}</span>
+          <span className="text-sm font-bold text-slate-800 dark:text-zinc-100">{data.eventName || "Event Plan"}</span>
           <Badge variant="outline" className="text-[10px] ml-auto">{data.eventType}</Badge>
         </div>
         <div className="grid grid-cols-3 gap-2">
-          <div className="bg-slate-50 dark:bg-slate-700/40 rounded-xl p-2 text-center">
+          <div className="bg-slate-50 dark:bg-zinc-800/40 rounded-xl p-2 text-center">
             <p className="text-[10px] text-slate-400">Guests</p>
-            <p className="text-[14px] font-bold text-slate-700 dark:text-slate-200">{data.estimatedGuestCount}</p>
+            <p className="text-[14px] font-bold text-slate-700 dark:text-zinc-100">{data.estimatedGuestCount}</p>
           </div>
-          <div className="bg-slate-50 dark:bg-slate-700/40 rounded-xl p-2 text-center">
+          <div className="bg-slate-50 dark:bg-zinc-800/40 rounded-xl p-2 text-center">
             <p className="text-[10px] text-slate-400">Location</p>
-            <p className="text-[11px] font-bold text-slate-700 dark:text-slate-200 truncate">{data.location}</p>
+            <p className="text-[11px] font-bold text-slate-700 dark:text-zinc-100 truncate">{data.location}</p>
           </div>
           {data.preferredMonth && (
-            <div className="bg-slate-50 dark:bg-slate-700/40 rounded-xl p-2 text-center">
+            <div className="bg-slate-50 dark:bg-zinc-800/40 rounded-xl p-2 text-center">
               <p className="text-[10px] text-slate-400">Month</p>
-              <p className="text-[11px] font-bold text-slate-700 dark:text-slate-200">{data.preferredMonth}</p>
+              <p className="text-[11px] font-bold text-slate-700 dark:text-zinc-100">{data.preferredMonth}</p>
             </div>
           )}
         </div>
         {data.suggestedVenue && (
           <div className="bg-violet-50 dark:bg-violet-950/30 rounded-xl p-3 border border-violet-100 dark:border-violet-900/40">
             <p className="text-[11px] font-semibold text-violet-600 uppercase tracking-wider mb-1">Suggested Venue</p>
-            <p className="text-[13px] font-bold text-slate-800 dark:text-slate-200">{data.suggestedVenue.name}</p>
+            <p className="text-[13px] font-bold text-slate-800 dark:text-zinc-100">{data.suggestedVenue.name}</p>
             <p className="text-[11px] text-slate-500 mt-0.5">{data.suggestedVenue.reason}</p>
             <p className="text-[12px] font-semibold text-indigo-600 mt-1">${data.suggestedVenue.estimatedCost?.toLocaleString()}</p>
           </div>
@@ -360,20 +360,20 @@ function AIResponseRenderer({ data }: { data: any }) {
           <div className="space-y-1.5">
             <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Vendor Services</p>
             {data.vendorServices.map((s: any, i: number) => (
-              <div key={i} className="flex justify-between items-start py-1.5 border-b border-slate-100 dark:border-slate-700/50 last:border-0">
+              <div key={i} className="flex justify-between items-start py-1.5 border-b border-slate-100 dark:border-zinc-800/50 last:border-0">
                 <div className="flex-1">
-                  <p className="text-[12px] font-semibold text-slate-700 dark:text-slate-300">{s.service}</p>
+                  <p className="text-[12px] font-semibold text-slate-700 dark:text-zinc-300">{s.service}</p>
                   {s.description && <p className="text-[10px] text-slate-400">{s.description}</p>}
                 </div>
-                <p className="text-[12px] font-bold text-slate-700 dark:text-slate-300 shrink-0 ml-2">${s.estimatedCost?.toLocaleString()}</p>
+                <p className="text-[12px] font-bold text-slate-700 dark:text-zinc-300 shrink-0 ml-2">${s.estimatedCost?.toLocaleString()}</p>
               </div>
             ))}
           </div>
         )}
         <div className="grid grid-cols-2 gap-2 pt-1">
-          <div className="bg-slate-50 dark:bg-slate-700/40 rounded-xl p-2 text-center">
+          <div className="bg-slate-50 dark:bg-zinc-800/40 rounded-xl p-2 text-center">
             <p className="text-[10px] text-slate-400">Estimated Cost</p>
-            <p className="text-[13px] font-bold text-slate-700 dark:text-slate-200">${data.totalEstimatedCost?.toLocaleString()}</p>
+            <p className="text-[13px] font-bold text-slate-700 dark:text-zinc-100">${data.totalEstimatedCost?.toLocaleString()}</p>
           </div>
           <div className="bg-emerald-50 dark:bg-emerald-950/40 rounded-xl p-2 text-center">
             <p className="text-[10px] text-emerald-600">Client Price (+{data.suggestedMarkup}%)</p>
@@ -385,9 +385,9 @@ function AIResponseRenderer({ data }: { data: any }) {
             <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Key Timeline Milestones</p>
             <div className="space-y-1 max-h-48 overflow-y-auto">
               {data.timeline.slice(0, 8).map((t: any, i: number) => (
-                <div key={i} className="flex items-start gap-2 text-[11px] py-1 border-b border-slate-100 dark:border-slate-700/50 last:border-0">
+                <div key={i} className="flex items-start gap-2 text-[11px] py-1 border-b border-slate-100 dark:border-zinc-800/50 last:border-0">
                   <span className="text-[10px] text-indigo-500 font-semibold shrink-0 w-14">{t.daysBeforeEvent === 0 ? "Event day" : `${t.daysBeforeEvent}d`}</span>
-                  <span className="text-slate-600 dark:text-slate-400">{t.task}</span>
+                  <span className="text-slate-600 dark:text-zinc-400">{t.task}</span>
                 </div>
               ))}
             </div>
@@ -404,19 +404,19 @@ function AIResponseRenderer({ data }: { data: any }) {
       <div className="space-y-3">
         <div className="flex items-center gap-2 mb-2">
           <Store className="w-4 h-4 text-amber-500" />
-          <span className="text-sm font-bold text-slate-800 dark:text-slate-200">Vendor Recommendations</span>
+          <span className="text-sm font-bold text-slate-800 dark:text-zinc-100">Vendor Recommendations</span>
         </div>
         <div className="space-y-2">
           {data.recommendations?.map((r: any, i: number) => (
-            <div key={i} className="flex items-start gap-3 p-2.5 bg-slate-50 dark:bg-slate-700/40 rounded-xl">
+            <div key={i} className="flex items-start gap-3 p-2.5 bg-slate-50 dark:bg-zinc-800/40 rounded-xl">
               <div className="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center shrink-0">
                 <Store className="w-4 h-4 text-amber-600" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-2">
-                  <p className="text-[12px] font-bold text-slate-800 dark:text-slate-200 truncate">{r.vendorName}</p>
+                  <p className="text-[12px] font-bold text-slate-800 dark:text-zinc-100 truncate">{r.vendorName}</p>
                   <div className="flex items-center gap-1 shrink-0">
-                    <div className="h-1.5 w-10 bg-slate-200 dark:bg-slate-600 rounded-full overflow-hidden">
+                    <div className="h-1.5 w-10 bg-zinc-200 dark:bg-zinc-700 rounded-full overflow-hidden">
                       <div className="h-full bg-indigo-500 rounded-full" style={{ width: `${r.compatibilityScore}%` }} />
                     </div>
                     <span className="text-[10px] text-indigo-600 font-semibold">{r.compatibilityScore}%</span>
@@ -429,7 +429,7 @@ function AIResponseRenderer({ data }: { data: any }) {
             </div>
           ))}
         </div>
-        {data.summary && <p className="text-[12px] text-slate-500 border-t border-slate-100 dark:border-slate-700 pt-2 mt-2">{data.summary}</p>}
+        {data.summary && <p className="text-[12px] text-slate-500 border-t border-slate-100 dark:border-zinc-800 pt-2 mt-2">{data.summary}</p>}
       </div>
     );
   }
@@ -440,16 +440,16 @@ function AIResponseRenderer({ data }: { data: any }) {
       <div className="space-y-3">
         <div className="flex items-center gap-2 mb-2">
           <TrendingUp className="w-4 h-4 text-rose-500" />
-          <span className="text-sm font-bold text-slate-800 dark:text-slate-200">Profit Optimization</span>
+          <span className="text-sm font-bold text-slate-800 dark:text-zinc-100">Profit Optimization</span>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-          <div className="bg-slate-50 dark:bg-slate-700/40 rounded-xl p-2 text-center">
+          <div className="bg-slate-50 dark:bg-zinc-800/40 rounded-xl p-2 text-center">
             <p className="text-[10px] text-slate-400">Current Cost</p>
-            <p className="text-[13px] font-bold text-slate-700 dark:text-slate-200">${data.currentCost?.toLocaleString()}</p>
+            <p className="text-[13px] font-bold text-slate-700 dark:text-zinc-100">${data.currentCost?.toLocaleString()}</p>
           </div>
-          <div className="bg-slate-50 dark:bg-slate-700/40 rounded-xl p-2 text-center">
+          <div className="bg-slate-50 dark:bg-zinc-800/40 rounded-xl p-2 text-center">
             <p className="text-[10px] text-slate-400">Current Markup</p>
-            <p className="text-[13px] font-bold text-slate-700 dark:text-slate-200">{data.currentMarkup}%</p>
+            <p className="text-[13px] font-bold text-slate-700 dark:text-zinc-100">{data.currentMarkup}%</p>
           </div>
           <div className="bg-rose-50 dark:bg-rose-950/40 rounded-xl p-2 text-center">
             <p className="text-[10px] text-rose-600">Optimized</p>
@@ -464,10 +464,10 @@ function AIResponseRenderer({ data }: { data: any }) {
           <div className="space-y-1.5">
             <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Optimization Suggestions</p>
             {data.suggestions.map((s: any, i: number) => (
-              <div key={i} className="flex items-start gap-2 p-2 bg-slate-50 dark:bg-slate-700/40 rounded-xl">
+              <div key={i} className="flex items-start gap-2 p-2 bg-slate-50 dark:bg-zinc-800/40 rounded-xl">
                 <Zap className="w-3.5 h-3.5 text-amber-500 mt-0.5 shrink-0" />
                 <div>
-                  <p className="text-[12px] font-semibold text-slate-700 dark:text-slate-300">{s.type}</p>
+                  <p className="text-[12px] font-semibold text-slate-700 dark:text-zinc-300">{s.type}</p>
                   <p className="text-[11px] text-slate-500">{s.description}</p>
                   {s.potentialSaving > 0 && <p className="text-[11px] font-semibold text-emerald-600">Save ${s.potentialSaving?.toLocaleString()}</p>}
                 </div>
@@ -480,9 +480,9 @@ function AIResponseRenderer({ data }: { data: any }) {
             <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Package Options</p>
             <div className="grid grid-cols-3 gap-2">
               {data.alternativePackages.map((pkg: any, i: number) => (
-                <div key={i} className={`rounded-xl p-2 text-center border ${i === 1 ? "bg-indigo-50 dark:bg-indigo-950/30 border-indigo-200 dark:border-indigo-800" : "bg-slate-50 dark:bg-slate-700/40 border-slate-100 dark:border-slate-700"}`}>
+                <div key={i} className={`rounded-xl p-2 text-center border ${i === 1 ? "bg-indigo-50 dark:bg-indigo-950/30 border-indigo-200 dark:border-indigo-800" : "bg-slate-50 dark:bg-zinc-800/40 border-slate-100 dark:border-zinc-800"}`}>
                   <p className="text-[10px] font-semibold text-slate-500">{pkg.name}</p>
-                  <p className="text-[12px] font-bold text-slate-800 dark:text-slate-200 mt-0.5">${pkg.clientPrice?.toLocaleString()}</p>
+                  <p className="text-[12px] font-bold text-slate-800 dark:text-zinc-100 mt-0.5">${pkg.clientPrice?.toLocaleString()}</p>
                   <p className="text-[10px] text-emerald-600">+${pkg.profit?.toLocaleString()}</p>
                 </div>
               ))}
@@ -494,7 +494,7 @@ function AIResponseRenderer({ data }: { data: any }) {
   }
 
   return (
-    <pre className="text-[11px] text-slate-600 dark:text-slate-300 overflow-auto whitespace-pre-wrap">{formatJSON(data)}</pre>
+    <pre className="text-[11px] text-slate-600 dark:text-zinc-300 overflow-auto whitespace-pre-wrap">{formatJSON(data)}</pre>
   );
 }
 
@@ -680,7 +680,7 @@ export default function AIAssistant() {
               className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all border ${
                 activeFeature === feat
                   ? "bg-indigo-600 text-white border-indigo-600"
-                  : "text-slate-500 border-slate-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-700"
+                  : "text-slate-500 border-slate-200 dark:border-zinc-800 hover:border-indigo-300 dark:hover:border-indigo-700"
               }`}
             >
               {FEATURE_LABELS[feat]}
@@ -692,7 +692,7 @@ export default function AIAssistant() {
           <select
             value={activeFeature}
             onChange={(e) => setActiveFeature(e.target.value as AIFeature)}
-            className="w-full h-8 border border-slate-200 dark:border-slate-700 rounded-xl px-3 text-[12px] bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            className="w-full h-8 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 text-[12px] bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
             data-testid="select-ai-mode-mobile"
           >
             {(Object.entries(FEATURE_LABELS) as [AIFeature, string][]).map(([feat, label]) => (
@@ -702,7 +702,7 @@ export default function AIAssistant() {
         </div>
 
         {/* Messages */}
-        <Card className="flex-1 flex flex-col border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden bg-white dark:bg-slate-800/80 shadow-sm min-h-0">
+        <Card className="flex-1 flex flex-col border border-slate-200 dark:border-zinc-800 rounded-2xl overflow-hidden bg-white dark:bg-zinc-900/60 shadow-sm min-h-0">
           <CardContent className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
             {messages.map((msg) => (
               <MessageBubble key={msg.id} msg={msg} />
@@ -712,7 +712,7 @@ export default function AIAssistant() {
                 <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shrink-0 shadow-sm">
                   <Bot className="w-4 h-4 text-white" />
                 </div>
-                <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm">
+                <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm">
                   <div className="flex items-center gap-1.5">
                     <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-bounce" style={{ animationDelay: "0ms" }} />
                     <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-bounce" style={{ animationDelay: "150ms" }} />
@@ -725,13 +725,13 @@ export default function AIAssistant() {
           </CardContent>
 
           {/* Input */}
-          <div className="border-t border-slate-100 dark:border-slate-700 p-3 flex items-end gap-2">
+          <div className="border-t border-slate-100 dark:border-zinc-800 p-3 flex items-end gap-2">
             <Textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder={`Ask AI: "Plan a wedding", "Generate quote", "Optimize my budget"…`}
-              className="flex-1 min-h-[44px] max-h-[120px] rounded-xl resize-none text-[13px] border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 focus-visible:ring-1 focus-visible:ring-indigo-500"
+              className="flex-1 min-h-[44px] max-h-[120px] rounded-xl resize-none text-[13px] border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900/50 focus-visible:ring-1 focus-visible:ring-indigo-500"
               data-testid="input-ai-prompt"
               disabled={ai.isPending}
             />

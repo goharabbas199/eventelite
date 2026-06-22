@@ -27,7 +27,7 @@ function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void 
   return (
     <button
       onClick={() => onChange(!on)}
-      className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full transition-colors duration-200 ${on ? "bg-indigo-600" : "bg-slate-200 dark:bg-slate-700"}`}
+      className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full transition-colors duration-200 ${on ? "bg-indigo-600" : "bg-slate-200 dark:bg-zinc-800"}`}
     >
       <span className={`inline-block h-4 w-4 translate-y-0.5 rounded-full bg-white shadow-sm ring-0 transition-transform duration-200 ${on ? "translate-x-4" : "translate-x-0.5"}`} />
     </button>
@@ -79,7 +79,7 @@ export default function Settings() {
   const sidebar = (
     <div className="flex flex-col h-full">
       {/* Profile summary */}
-      <div className="p-5 border-b border-slate-100 dark:border-slate-800">
+      <div className="p-5 border-b border-slate-100 dark:border-zinc-800">
         <div className="flex items-center gap-3">
           <div className="relative shrink-0">
             <img
@@ -88,10 +88,10 @@ export default function Settings() {
               className="w-10 h-10 rounded-xl object-cover ring-2 ring-indigo-100 dark:ring-indigo-900"
               onError={(e) => { (e.target as HTMLImageElement).src = "https://github.com/shadcn.png"; }}
             />
-            <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white dark:border-slate-900" />
+            <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white dark:border-zinc-800/60" />
           </div>
           <div className="min-w-0">
-            <p className="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">{authUser?.fullName || profile.name || "User"}</p>
+            <p className="text-sm font-bold text-slate-900 dark:text-white truncate">{authUser?.fullName || profile.name || "User"}</p>
             <p className="text-xs text-slate-400 truncate capitalize">{authUser?.role || profile.role || "owner"}</p>
           </div>
         </div>
@@ -101,7 +101,7 @@ export default function Settings() {
       <nav className="flex-1 overflow-y-auto py-3 px-3 space-y-5">
         {NAV_SECTIONS.map(({ group, items }) => (
           <div key={group}>
-            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500 px-2 mb-1.5">{group}</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-zinc-500 px-2 mb-1.5">{group}</p>
             <div className="space-y-0.5">
               {items.map(({ id, label, desc, icon: Icon }) => {
                 const active = tab === id;
@@ -112,16 +112,16 @@ export default function Settings() {
                     className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all group ${
                       active
                         ? "bg-indigo-600 shadow-sm shadow-indigo-900/20"
-                        : "hover:bg-slate-100 dark:hover:bg-slate-800/70"
+                        : "hover:bg-slate-100 dark:hover:bg-zinc-800/70"
                     }`}
                   >
                     <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all ${
-                      active ? "bg-white/20" : "bg-slate-100 dark:bg-slate-800 group-hover:bg-slate-200 dark:group-hover:bg-slate-700"
+                      active ? "bg-white/20" : "bg-slate-100 dark:bg-zinc-900 group-hover:bg-slate-200 dark:group-hover:bg-slate-700"
                     }`}>
-                      <Icon className={`w-4 h-4 ${active ? "text-white" : "text-slate-500 dark:text-slate-400"}`} />
+                      <Icon className={`w-4 h-4 ${active ? "text-white" : "text-slate-500 dark:text-zinc-400"}`} />
                     </div>
                     <div className="min-w-0">
-                      <p className={`text-sm font-semibold leading-none ${active ? "text-white" : "text-slate-800 dark:text-slate-200"}`}>{label}</p>
+                      <p className={`text-sm font-semibold leading-none ${active ? "text-white" : "text-slate-800 dark:text-zinc-100"}`}>{label}</p>
                       <p className={`text-[11px] mt-0.5 truncate ${active ? "text-white/70" : "text-slate-400"}`}>{desc}</p>
                     </div>
                   </button>
@@ -133,7 +133,7 @@ export default function Settings() {
       </nav>
 
       {/* Sign out */}
-      <div className="p-3 border-t border-slate-100 dark:border-slate-800">
+      <div className="p-3 border-t border-slate-100 dark:border-zinc-800">
         <button
           onClick={handleLogout}
           data-testid="button-logout"
@@ -151,34 +151,34 @@ export default function Settings() {
   return (
     <Layout title="Settings">
       {/* Full-bleed two-panel layout */}
-      <div className="flex -mx-3 md:-mx-6 -mt-4 md:-mt-5 rounded-2xl overflow-hidden border border-slate-100 dark:border-slate-800 shadow-sm bg-white dark:bg-slate-900" style={{ minHeight: "calc(100vh - 130px)" }}>
+      <div className="flex -mx-3 md:-mx-6 -mt-4 md:-mt-5 rounded-2xl overflow-hidden border border-slate-100 dark:border-zinc-800 shadow-sm bg-white dark:bg-zinc-950" style={{ minHeight: "calc(100vh - 130px)" }}>
 
         {/* ── Left sidebar ── */}
         {/* Desktop: always visible */}
-        <div className={`hidden md:flex flex-col w-64 shrink-0 border-r border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/80`}>
-          <div className="h-14 flex items-center px-5 border-b border-slate-100 dark:border-slate-800">
-            <p className="text-[13px] font-bold text-slate-800 dark:text-slate-200 tracking-tight">Settings</p>
+        <div className={`hidden md:flex flex-col w-64 shrink-0 border-r border-slate-100 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-950/80`}>
+          <div className="h-14 flex items-center px-5 border-b border-slate-100 dark:border-zinc-800">
+            <p className="text-[13px] font-bold text-slate-800 dark:text-zinc-100 tracking-tight">Settings</p>
           </div>
           {sidebar}
         </div>
 
         {/* Mobile: list view (shown when no tab selected) */}
-        <div className={`md:hidden flex flex-col w-full border-r border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/80 ${tab ? "hidden" : "flex"}`}>
-          <div className="h-14 flex items-center px-5 border-b border-slate-100 dark:border-slate-800">
-            <p className="text-[13px] font-bold text-slate-800 dark:text-slate-200 tracking-tight">Settings</p>
+        <div className={`md:hidden flex flex-col w-full border-r border-slate-100 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-950/80 ${tab ? "hidden" : "flex"}`}>
+          <div className="h-14 flex items-center px-5 border-b border-slate-100 dark:border-zinc-800">
+            <p className="text-[13px] font-bold text-slate-800 dark:text-zinc-100 tracking-tight">Settings</p>
           </div>
           {sidebar}
         </div>
 
         {/* ── Right content panel ── */}
         {/* Desktop: always visible */}
-        <div className="hidden md:flex flex-col flex-1 min-w-0 bg-white dark:bg-slate-950">
-          <div className="h-14 flex items-center px-6 border-b border-slate-100 dark:border-slate-800 shrink-0">
+        <div className="hidden md:flex flex-col flex-1 min-w-0 bg-white dark:bg-zinc-950">
+          <div className="h-14 flex items-center px-6 border-b border-slate-100 dark:border-zinc-800 shrink-0">
             {activeItem ? (
               <div className="flex items-center gap-2.5">
                 <activeItem.icon className="w-4 h-4 text-indigo-500" />
                 <div>
-                  <p className="text-[13px] font-bold text-slate-800 dark:text-slate-200 leading-none">{activeItem.label}</p>
+                  <p className="text-[13px] font-bold text-slate-800 dark:text-zinc-100 leading-none">{activeItem.label}</p>
                   <p className="text-[11px] text-slate-400 mt-0.5">{activeItem.desc}</p>
                 </div>
               </div>
@@ -192,7 +192,7 @@ export default function Settings() {
                 <div className="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 flex items-center justify-center mb-4">
                   <Palette className="w-6 h-6 text-indigo-500" />
                 </div>
-                <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">Choose a setting</p>
+                <p className="text-sm font-semibold text-slate-700 dark:text-zinc-300">Choose a setting</p>
                 <p className="text-xs text-slate-400 mt-1 max-w-[200px]">Select a category from the left to get started</p>
               </div>
             )}
@@ -206,17 +206,17 @@ export default function Settings() {
         </div>
 
         {/* Mobile: content view (shown when tab is selected) */}
-        <div className={`md:hidden flex-col flex-1 min-w-0 bg-white dark:bg-slate-950 ${tab ? "flex" : "hidden"}`}>
-          <div className="h-14 flex items-center gap-3 px-4 border-b border-slate-100 dark:border-slate-800 shrink-0">
+        <div className={`md:hidden flex-col flex-1 min-w-0 bg-white dark:bg-zinc-950 ${tab ? "flex" : "hidden"}`}>
+          <div className="h-14 flex items-center gap-3 px-4 border-b border-slate-100 dark:border-zinc-800 shrink-0">
             <button
               onClick={() => setTab(null)}
-              className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
+              className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 transition-all"
             >
               <ChevronRight className="w-4 h-4 text-slate-500 rotate-180" />
             </button>
             {activeItem && (
               <div>
-                <p className="text-[13px] font-bold text-slate-800 dark:text-slate-200 leading-none">{activeItem.label}</p>
+                <p className="text-[13px] font-bold text-slate-800 dark:text-zinc-100 leading-none">{activeItem.label}</p>
                 <p className="text-[11px] text-slate-400 mt-0.5">{activeItem.desc}</p>
               </div>
             )}
@@ -292,7 +292,7 @@ function ProfileTab({ toast }: { toast: any }) {
     <div className="space-y-5">
       <SectionHeader title="Your Profile" description="Personal information visible to your team" />
 
-      <Card className="border border-slate-100 dark:border-slate-800 rounded-2xl shadow-sm">
+      <Card className="border border-slate-100 dark:border-zinc-800 rounded-2xl shadow-sm">
         <CardContent className="p-5 flex items-center gap-5">
           <div className="relative shrink-0">
             <img
@@ -301,26 +301,26 @@ function ProfileTab({ toast }: { toast: any }) {
               className="w-16 h-16 rounded-2xl object-cover ring-2 ring-indigo-100"
               onError={(e) => { (e.target as HTMLImageElement).src = "https://github.com/shadcn.png"; }}
             />
-            <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 border-2 border-white dark:border-slate-900" />
+            <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 border-2 border-white dark:border-zinc-800/60" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-bold text-slate-900 dark:text-slate-100">{form.name || "Your Name"}</p>
+            <p className="text-sm font-bold text-slate-900 dark:text-white">{form.name || "Your Name"}</p>
             <p className="text-xs text-slate-400 mt-0.5">{form.role} · {form.email}</p>
             <p className="text-xs text-slate-400 mt-2">To update your photo, paste an image URL below</p>
           </div>
         </CardContent>
       </Card>
 
-      <Card className="border border-slate-100 dark:border-slate-800 rounded-2xl shadow-sm">
+      <Card className="border border-slate-100 dark:border-zinc-800 rounded-2xl shadow-sm">
         <CardContent className="p-5 space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Field label="Full Name" value={form.name} onChange={F("name")} placeholder="Alex Morgan" />
             <Field label="Email Address" value={form.email} onChange={F("email")} placeholder="you@company.com" type="email" />
             <Field label="Phone" value={form.phone} onChange={F("phone")} placeholder="+1 555 0100" />
             <div>
-              <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5 block">Role</label>
+              <label className="text-xs font-semibold text-slate-600 dark:text-zinc-400 mb-1.5 block">Role</label>
               <select
-                className="w-full h-9 border border-slate-200 dark:border-slate-700 rounded-xl px-3 text-sm bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                className="w-full h-9 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 text-sm bg-white dark:bg-zinc-950 text-slate-700 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                 value={form.role}
                 onChange={F("role")}
               >
@@ -330,13 +330,13 @@ function ProfileTab({ toast }: { toast: any }) {
           </div>
           <Field label="Avatar URL" value={form.avatarUrl} onChange={F("avatarUrl")} placeholder="https://…" />
           <div>
-            <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5 block">Bio</label>
+            <label className="text-xs font-semibold text-slate-600 dark:text-zinc-400 mb-1.5 block">Bio</label>
             <textarea
               value={form.bio}
               onChange={F("bio")}
               rows={3}
               placeholder="A short bio about yourself…"
-              className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 resize-none"
+              className="w-full border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-2 text-sm bg-white dark:bg-zinc-950 text-slate-700 dark:text-zinc-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 resize-none"
             />
           </div>
           <SaveBtn onClick={save_} loading={saving} />
@@ -369,7 +369,7 @@ function BusinessTab({ toast }: { toast: any }) {
     <div className="space-y-5">
       <SectionHeader title="Business Profile" description="Your agency's public-facing information and settings" />
 
-      <Card className="border border-slate-100 dark:border-slate-800 rounded-2xl shadow-sm">
+      <Card className="border border-slate-100 dark:border-zinc-800 rounded-2xl shadow-sm">
         <CardContent className="p-5 space-y-4">
           <Field label="Agency / Company Name" value={form.companyName} onChange={F("companyName")} placeholder="EventElite Agency" icon={<Building2 className="w-3.5 h-3.5 text-slate-400" />} />
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -386,14 +386,14 @@ function BusinessTab({ toast }: { toast: any }) {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5 flex items-center gap-1.5 block"><Clock className="w-3.5 h-3.5 text-slate-400" />Timezone</label>
-              <select className="w-full h-9 border border-slate-200 dark:border-slate-700 rounded-xl px-3 text-sm bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" value={form.timezone} onChange={F("timezone")}>
+              <label className="text-xs font-semibold text-slate-600 dark:text-zinc-400 mb-1.5 flex items-center gap-1.5 block"><Clock className="w-3.5 h-3.5 text-slate-400" />Timezone</label>
+              <select className="w-full h-9 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 text-sm bg-white dark:bg-zinc-950 text-slate-700 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" value={form.timezone} onChange={F("timezone")}>
                 {["America/New_York","America/Chicago","America/Denver","America/Los_Angeles","America/Toronto","Europe/London","Europe/Paris","Europe/Berlin","Asia/Dubai","Asia/Singapore","Asia/Tokyo","Australia/Sydney"].map((tz) => <option key={tz}>{tz}</option>)}
               </select>
             </div>
             <div>
-              <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5 block">Default Currency</label>
-              <select className="w-full h-9 border border-slate-200 dark:border-slate-700 rounded-xl px-3 text-sm bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" value={form.currency} onChange={F("currency")}>
+              <label className="text-xs font-semibold text-slate-600 dark:text-zinc-400 mb-1.5 block">Default Currency</label>
+              <select className="w-full h-9 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 text-sm bg-white dark:bg-zinc-950 text-slate-700 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" value={form.currency} onChange={F("currency")}>
                 {["USD","EUR","GBP","CAD","AUD","AED","SGD","JPY"].map((c) => <option key={c}>{c}</option>)}
               </select>
             </div>
@@ -456,15 +456,15 @@ function NotificationsTab({ toast }: { toast: any }) {
     <div className="space-y-5">
       <SectionHeader title="Notifications" description="Choose when and how you want to be notified" />
       {groups.map((g) => (
-        <Card key={g.title} className="border border-slate-100 dark:border-slate-800 rounded-2xl shadow-sm">
+        <Card key={g.title} className="border border-slate-100 dark:border-zinc-800 rounded-2xl shadow-sm">
           <CardHeader className="pb-2 pt-4 px-5">
-            <CardTitle className="text-[13px] font-bold text-slate-800 dark:text-slate-200">{g.title}</CardTitle>
+            <CardTitle className="text-[13px] font-bold text-slate-800 dark:text-zinc-100">{g.title}</CardTitle>
           </CardHeader>
           <CardContent className="px-5 pb-4 space-y-4">
             {g.items.map(({ key, label, desc }) => (
               <div key={key} className="flex items-center justify-between gap-4">
                 <div>
-                  <p className="text-sm font-medium text-slate-800 dark:text-slate-200">{label}</p>
+                  <p className="text-sm font-medium text-slate-800 dark:text-zinc-100">{label}</p>
                   <p className="text-xs text-slate-400 mt-0.5">{desc}</p>
                 </div>
                 <Toggle on={notifs[key]} onChange={toggle(key)} />
@@ -530,20 +530,20 @@ function AppearanceTab({ toast }: { toast: any }) {
     <div className="space-y-5">
       <SectionHeader title="Appearance" description="Customize the look and feel of your dashboard" />
 
-      <Card className="border border-slate-100 dark:border-slate-800 rounded-2xl shadow-sm">
+      <Card className="border border-slate-100 dark:border-zinc-800 rounded-2xl shadow-sm">
         <CardContent className="p-5 space-y-6">
           {/* Theme */}
           <div>
-            <p className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-3">Theme</p>
+            <p className="text-xs font-semibold text-slate-600 dark:text-zinc-400 mb-3">Theme</p>
             <div className="grid grid-cols-3 gap-3">
               {themes.map(({ id, label, icon: Icon }) => (
                 <button
                   key={id}
                   onClick={() => set("theme", id)}
-                  className={`flex flex-col items-center gap-2 p-3.5 rounded-xl border-2 transition-all ${app.theme === id ? "border-indigo-600 bg-indigo-50 dark:bg-indigo-950" : "border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-slate-200 dark:hover:border-slate-600"}`}
+                  className={`flex flex-col items-center gap-2 p-3.5 rounded-xl border-2 transition-all ${app.theme === id ? "border-indigo-600 bg-indigo-50 dark:bg-indigo-950" : "border-slate-100 dark:border-zinc-800 bg-white dark:bg-zinc-950 hover:border-slate-200 dark:hover:border-zinc-700"}`}
                 >
                   <Icon className={`w-5 h-5 ${app.theme === id ? "text-indigo-600" : "text-slate-400"}`} />
-                  <span className={`text-xs font-semibold ${app.theme === id ? "text-indigo-700 dark:text-indigo-400" : "text-slate-500 dark:text-slate-400"}`}>{label}</span>
+                  <span className={`text-xs font-semibold ${app.theme === id ? "text-indigo-700 dark:text-indigo-400" : "text-slate-500 dark:text-zinc-400"}`}>{label}</span>
                 </button>
               ))}
             </div>
@@ -551,19 +551,19 @@ function AppearanceTab({ toast }: { toast: any }) {
 
           {/* Density */}
           <div>
-            <p className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-3">Layout Density</p>
+            <p className="text-xs font-semibold text-slate-600 dark:text-zinc-400 mb-3">Layout Density</p>
             <div className="space-y-2">
               {densities.map(({ id, label, desc }) => (
                 <button
                   key={id}
                   onClick={() => set("density", id)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border-2 transition-all text-left ${app.density === id ? "border-indigo-600 bg-indigo-50 dark:bg-indigo-950" : "border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-slate-200 dark:hover:border-slate-600"}`}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border-2 transition-all text-left ${app.density === id ? "border-indigo-600 bg-indigo-50 dark:bg-indigo-950" : "border-slate-100 dark:border-zinc-800 bg-white dark:bg-zinc-950 hover:border-slate-200 dark:hover:border-zinc-700"}`}
                 >
-                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${app.density === id ? "border-indigo-600" : "border-slate-300 dark:border-slate-600"}`}>
+                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${app.density === id ? "border-indigo-600" : "border-slate-300 dark:border-zinc-700"}`}>
                     {app.density === id && <div className="w-2 h-2 rounded-full bg-indigo-600" />}
                   </div>
                   <div>
-                    <p className={`text-sm font-semibold ${app.density === id ? "text-indigo-800 dark:text-indigo-400" : "text-slate-700 dark:text-slate-200"}`}>{label}</p>
+                    <p className={`text-sm font-semibold ${app.density === id ? "text-indigo-800 dark:text-indigo-400" : "text-slate-700 dark:text-zinc-100"}`}>{label}</p>
                     <p className="text-xs text-slate-400">{desc}</p>
                   </div>
                 </button>
@@ -573,7 +573,7 @@ function AppearanceTab({ toast }: { toast: any }) {
 
           {/* Accent color */}
           <div>
-            <p className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-3">Accent Color</p>
+            <p className="text-xs font-semibold text-slate-600 dark:text-zinc-400 mb-3">Accent Color</p>
             <div className="flex gap-3">
               {accents.map(({ id, color }) => (
                 <button
@@ -586,14 +586,14 @@ function AppearanceTab({ toast }: { toast: any }) {
           </div>
 
           {/* Toggles */}
-          <div className="space-y-4 pt-2 border-t border-slate-100 dark:border-slate-800">
+          <div className="space-y-4 pt-2 border-t border-slate-100 dark:border-zinc-800">
             {[
               { key: "animationsEnabled" as const, label: "Animations",        desc: "Smooth transitions and micro-animations" },
               { key: "sidebarCollapsed"  as const, label: "Collapse sidebar",  desc: "Start with the sidebar in icon-only mode" },
             ].map(({ key, label, desc }) => (
               <div key={key} className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-slate-800 dark:text-slate-200">{label}</p>
+                  <p className="text-sm font-medium text-slate-800 dark:text-zinc-100">{label}</p>
                   <p className="text-xs text-slate-400">{desc}</p>
                 </div>
                 <Toggle on={app[key] as boolean} onChange={(v) => set(key, v)} />
@@ -641,9 +641,9 @@ function SecurityTab({ toast }: { toast: any }) {
     <div className="space-y-5">
       <SectionHeader title="Security" description="Manage your password and account security settings" />
 
-      <Card className="border border-slate-100 dark:border-slate-800 rounded-2xl shadow-sm">
+      <Card className="border border-slate-100 dark:border-zinc-800 rounded-2xl shadow-sm">
         <CardHeader className="pb-2 pt-4 px-5">
-          <CardTitle className="text-[13px] font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+          <CardTitle className="text-[13px] font-bold text-slate-800 dark:text-zinc-100 flex items-center gap-2">
             <Lock className="w-4 h-4 text-slate-400" />Change Password
           </CardTitle>
         </CardHeader>
@@ -655,9 +655,9 @@ function SecurityTab({ toast }: { toast: any }) {
         </CardContent>
       </Card>
 
-      <Card className="border border-slate-100 dark:border-slate-800 rounded-2xl shadow-sm">
+      <Card className="border border-slate-100 dark:border-zinc-800 rounded-2xl shadow-sm">
         <CardHeader className="pb-2 pt-4 px-5">
-          <CardTitle className="text-[13px] font-bold text-slate-800 dark:text-slate-200">Security Settings</CardTitle>
+          <CardTitle className="text-[13px] font-bold text-slate-800 dark:text-zinc-100">Security Settings</CardTitle>
         </CardHeader>
         <CardContent className="px-5 pb-5 space-y-4">
           {([
@@ -666,7 +666,7 @@ function SecurityTab({ toast }: { toast: any }) {
           ]).map(({ key, label, desc }) => (
             <div key={key} className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-slate-800 dark:text-slate-200">{label}</p>
+                <p className="text-sm font-medium text-slate-800 dark:text-zinc-100">{label}</p>
                 <p className="text-xs text-slate-400">{desc}</p>
               </div>
               <Toggle on={sec[key]} onChange={toggleSec(key)} />
@@ -738,14 +738,14 @@ function SupportTab() {
         {links.map(({ icon: Icon, label, desc, cta, color, bg, onClick }) => (
           <Card
             key={label}
-            className="border border-slate-100 dark:border-slate-800 rounded-2xl shadow-sm hover:shadow-md transition-all cursor-pointer group"
+            className="border border-slate-100 dark:border-zinc-800 rounded-2xl shadow-sm hover:shadow-md transition-all cursor-pointer group"
             onClick={onClick}
           >
             <CardContent className="p-5">
               <div className={`w-9 h-9 rounded-xl ${bg} flex items-center justify-center mb-3`}>
                 <Icon className={`w-4 h-4 ${color}`} />
               </div>
-              <p className="text-sm font-bold text-slate-900 dark:text-slate-100 group-hover:text-indigo-600 transition-colors">{label}</p>
+              <p className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 transition-colors">{label}</p>
               <p className="text-xs text-slate-400 mt-1 mb-3">{desc}</p>
               <div className="flex items-center gap-1 text-xs font-semibold text-indigo-600">
                 {cta} <ChevronRight className="w-3.5 h-3.5" />
@@ -755,14 +755,14 @@ function SupportTab() {
         ))}
       </div>
 
-      <Card className="border border-slate-100 dark:border-slate-800 rounded-2xl shadow-sm bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950 dark:to-purple-950">
+      <Card className="border border-slate-100 dark:border-zinc-800 rounded-2xl shadow-sm bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950 dark:to-purple-950">
         <CardContent className="p-5 flex items-center gap-4">
           <div className="w-10 h-10 rounded-xl gradient-indigo flex items-center justify-center shrink-0">
             <Star className="w-5 h-5 text-white" fill="currentColor" />
           </div>
           <div>
-            <p className="text-sm font-bold text-slate-900 dark:text-slate-100">Enjoying EventElite?</p>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Leave us a review or share feedback to help us improve.</p>
+            <p className="text-sm font-bold text-slate-900 dark:text-white">Enjoying EventElite?</p>
+            <p className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">Leave us a review or share feedback to help us improve.</p>
           </div>
           <Button
             className="ml-auto h-9 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-xs shrink-0"
@@ -789,7 +789,7 @@ function SupportTab() {
 function SectionHeader({ title, description }: { title: string; description: string }) {
   return (
     <div className="pb-1">
-      <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">{title}</h3>
+      <h3 className="text-lg font-bold text-slate-900 dark:text-white">{title}</h3>
       <p className="text-sm text-slate-400 mt-0.5">{description}</p>
     </div>
   );
@@ -801,7 +801,7 @@ function Field({ label, value, onChange, placeholder, type = "text", icon }: {
 }) {
   return (
     <div>
-      <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5 block">{label}</label>
+      <label className="text-xs font-semibold text-slate-600 dark:text-zinc-400 mb-1.5 block">{label}</label>
       <div className="relative">
         {icon && <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">{icon}</div>}
         <Input
@@ -809,7 +809,7 @@ function Field({ label, value, onChange, placeholder, type = "text", icon }: {
           value={value}
           onChange={onChange}
           placeholder={placeholder}
-          className={`h-9 rounded-xl text-sm border-slate-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 ${icon ? "pl-9" : ""}`}
+          className={`h-9 rounded-xl text-sm border-slate-200 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100 ${icon ? "pl-9" : ""}`}
         />
       </div>
     </div>

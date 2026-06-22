@@ -3,7 +3,7 @@ import { Home, ArrowLeft } from "lucide-react";
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-[#f5f6fa] dark:bg-slate-950">
+    <div className="min-h-screen w-full flex items-center justify-center bg-[#f5f6fa] dark:bg-zinc-950">
       <div className="flex flex-col items-center text-center px-6 max-w-sm">
         {/* Big number */}
         <div className="text-[120px] font-black leading-none text-transparent bg-clip-text bg-gradient-to-br from-indigo-600 to-indigo-300 select-none">
@@ -16,7 +16,7 @@ export default function NotFound() {
         <div className="flex items-center gap-3 mt-8">
           <button
             onClick={() => window.history.back()}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm font-semibold text-slate-700 dark:text-zinc-100 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-all shadow-sm"
           >
             <ArrowLeft className="w-4 h-4" />
             Go back

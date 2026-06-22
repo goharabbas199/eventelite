@@ -178,7 +178,7 @@ export default function ClientDetails() {
         </div>
 
         {/* Profile card */}
-        <div className="bg-white dark:bg-slate-800/80 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 p-4 md:p-5">
+        <div className="bg-white dark:bg-zinc-900/60 rounded-2xl shadow-sm border border-slate-100 dark:border-zinc-800 p-4 md:p-5">
           <div className="flex flex-col sm:flex-row sm:items-center gap-4">
             {/* Avatar + name */}
             <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -224,7 +224,7 @@ export default function ClientDetails() {
       {/* FINANCIAL SUMMARY */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         {[
-          { label: "Budget",           value: `$${budget.toLocaleString()}`,             cls: "text-slate-800 dark:text-slate-200" },
+          { label: "Budget",           value: `$${budget.toLocaleString()}`,             cls: "text-slate-800 dark:text-zinc-100" },
           { label: "Total Expenses",   value: `$${totalCost.toLocaleString()}`,           cls: "text-amber-600" },
           { label: "Received",         value: `$${totalPaid.toLocaleString()}`,           cls: "text-emerald-600" },
           { label: "Balance Due",      value: `$${remainingBalance.toLocaleString()}`,    cls: remainingBalance > 0 ? "text-red-600" : "text-emerald-600" },
@@ -243,8 +243,8 @@ export default function ClientDetails() {
         <div className="lg:col-span-2 flex flex-col gap-6">
 
           {/* FEATURE 1 — PLANNED SERVICES TABLE */}
-          <Card className="border border-slate-100 dark:border-slate-700 shadow-sm">
-            <CardHeader className="flex flex-row items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+          <Card className="border border-slate-100 dark:border-zinc-800 shadow-sm">
+            <CardHeader className="flex flex-row items-center justify-between border-b border-slate-100 dark:border-zinc-800 pb-3">
               <CardTitle>Planned Services</CardTitle>
               <Dialog open={isServiceDialogOpen} onOpenChange={setIsServiceDialogOpen}>
                 <DialogTrigger asChild>
@@ -280,8 +280,8 @@ export default function ClientDetails() {
                 </TableHeader>
                 <TableBody>
                   {selectedVenue && (
-                    <TableRow className="bg-slate-50 dark:bg-slate-700/30">
-                      <TableCell className="font-semibold text-slate-700 dark:text-slate-300 pl-6">
+                    <TableRow className="bg-slate-50 dark:bg-zinc-800/30">
+                      <TableCell className="font-semibold text-slate-700 dark:text-zinc-300 pl-6">
                         Venue — {selectedVenue.name}
                       </TableCell>
                       <TableCell>${venueCost.toLocaleString()}</TableCell>
@@ -291,10 +291,10 @@ export default function ClientDetails() {
                   )}
                   {client.services?.map((service: any) => (
                     <TableRow key={service.id}>
-                      <TableCell className="font-semibold text-slate-700 dark:text-slate-300 pl-6">
+                      <TableCell className="font-semibold text-slate-700 dark:text-zinc-300 pl-6">
                         {service.serviceName}
                       </TableCell>
-                      <TableCell className="font-medium text-slate-800 dark:text-slate-200">
+                      <TableCell className="font-medium text-slate-800 dark:text-zinc-100">
                         ${Number(service.cost).toLocaleString()}
                       </TableCell>
                       <TableCell className="text-slate-500">
@@ -327,7 +327,7 @@ export default function ClientDetails() {
                     </TableRow>
                   ))}
                   {totalCost > 0 && (
-                    <TableRow className="bg-blue-50 dark:bg-blue-950/30 font-semibold border-t-2 dark:border-slate-600">
+                    <TableRow className="bg-blue-50 dark:bg-blue-950/30 font-semibold border-t-2 dark:border-zinc-700">
                       <TableCell className="pl-6">Total</TableCell>
                       <TableCell className="text-blue-800 dark:text-blue-300 text-lg">
                         ${totalCost.toLocaleString()}
@@ -342,8 +342,8 @@ export default function ClientDetails() {
           </Card>
 
           {/* FEATURE 2 — CLIENT PAYMENT TRACKER */}
-          <Card className="border border-slate-100 dark:border-slate-700 shadow-sm">
-            <CardHeader className="flex flex-row items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+          <Card className="border border-slate-100 dark:border-zinc-800 shadow-sm">
+            <CardHeader className="flex flex-row items-center justify-between border-b border-slate-100 dark:border-zinc-800 pb-3">
               <div>
                 <CardTitle>Client Payments</CardTitle>
                 <p className="text-sm text-slate-500 mt-1">
@@ -387,14 +387,14 @@ export default function ClientDetails() {
                   <TableBody>
                     {client.payments.map((p: any) => (
                       <TableRow key={p.id}>
-                        <TableCell className="pl-6 text-slate-600 dark:text-slate-400">
+                        <TableCell className="pl-6 text-slate-600 dark:text-zinc-400">
                           {format(new Date(p.paymentDate), "MMM dd, yyyy")}
                         </TableCell>
                         <TableCell className="font-semibold text-emerald-600">
                           ${Number(p.amount).toLocaleString()}
                         </TableCell>
-                        <TableCell className="text-slate-500 dark:text-slate-400">{p.paymentMethod}</TableCell>
-                        <TableCell className="text-slate-500 dark:text-slate-400">{p.notes || "-"}</TableCell>
+                        <TableCell className="text-slate-500 dark:text-zinc-400">{p.paymentMethod}</TableCell>
+                        <TableCell className="text-slate-500 dark:text-zinc-400">{p.notes || "-"}</TableCell>
                         <TableCell className="text-right pr-6">
                           <button
                             onClick={() => deletePayment.mutate({ id: p.id, clientId: client.id })}
@@ -413,8 +413,8 @@ export default function ClientDetails() {
           </Card>
 
           {/* FEATURE 3 — VENDOR PAYMENT TRACKER */}
-          <Card className="border border-slate-100 dark:border-slate-700 shadow-sm">
-            <CardHeader className="flex flex-row items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+          <Card className="border border-slate-100 dark:border-zinc-800 shadow-sm">
+            <CardHeader className="flex flex-row items-center justify-between border-b border-slate-100 dark:border-zinc-800 pb-3">
               <div>
                 <CardTitle>Vendor Payments</CardTitle>
                 <p className="text-sm text-slate-500 mt-1">
@@ -458,10 +458,10 @@ export default function ClientDetails() {
                   <TableBody>
                     {client.vendorPayments.map((vp: any) => (
                       <TableRow key={vp.id}>
-                        <TableCell className="pl-6 font-medium text-slate-700 dark:text-slate-300">
+                        <TableCell className="pl-6 font-medium text-slate-700 dark:text-zinc-300">
                           {getVendorName(vp.vendorId)}
                         </TableCell>
-                        <TableCell className="font-semibold text-slate-800 dark:text-slate-200">
+                        <TableCell className="font-semibold text-slate-800 dark:text-zinc-100">
                           ${Number(vp.amount).toLocaleString()}
                         </TableCell>
                         <TableCell>
@@ -512,8 +512,8 @@ export default function ClientDetails() {
             </CardContent>
           </Card>
           {/* FEATURE 4 — TASK CHECKLIST */}
-          <Card className="border border-slate-100 dark:border-slate-700 shadow-sm">
-            <CardHeader className="border-b border-slate-100 dark:border-slate-700 pb-3">
+          <Card className="border border-slate-100 dark:border-zinc-800 shadow-sm">
+            <CardHeader className="border-b border-slate-100 dark:border-zinc-800 pb-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <ListChecks className="w-4 h-4 text-slate-500" />
@@ -622,7 +622,7 @@ export default function ClientDetails() {
 
         {/* RIGHT COLUMN — Budget Overview + Profit Simulator */}
         <div className="flex flex-col gap-4">
-          <Card className="border border-slate-100 dark:border-slate-700 shadow-sm bg-white dark:bg-slate-800/80">
+          <Card className="border border-slate-100 dark:border-zinc-800 shadow-sm bg-white dark:bg-zinc-900/60">
             <CardHeader>
               <CardTitle className="text-base">Budget Overview</CardTitle>
             </CardHeader>
@@ -631,7 +631,7 @@ export default function ClientDetails() {
                 <div>
                   <p className="text-xs uppercase text-slate-400 mb-2">Revenue</p>
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-slate-500 dark:text-slate-400">Client Budget</span>
+                    <span className="text-sm text-slate-500 dark:text-zinc-400">Client Budget</span>
                     <span className="font-bold text-lg text-slate-900 dark:text-white">
                       ${budget.toLocaleString()}
                     </span>
@@ -665,7 +665,7 @@ export default function ClientDetails() {
                 <div className="border-t pt-4">
                   <p className="text-xs uppercase text-slate-400 mb-2">Profit</p>
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-slate-500 dark:text-slate-400">Gross Profit</span>
+                    <span className="text-sm text-slate-500 dark:text-zinc-400">Gross Profit</span>
                     <div className="text-right">
                       <span
                         className={`font-bold text-lg ${
@@ -674,7 +674,7 @@ export default function ClientDetails() {
                       >
                         ${profit.toLocaleString()}
                       </span>
-                      <div className="text-xs text-slate-400 dark:text-slate-500">{profitPercentage}% margin</div>
+                      <div className="text-xs text-slate-400 dark:text-zinc-500">{profitPercentage}% margin</div>
                     </div>
                   </div>
                 </div>
@@ -931,8 +931,8 @@ function ProfitSimulator({ totalCost }: { totalCost: number }) {
   }, [totalCost, markup]);
 
   return (
-    <Card className="border border-slate-100 dark:border-slate-700 shadow-sm bg-white dark:bg-slate-800/80">
-      <CardHeader className="pb-3 border-b border-slate-100 dark:border-slate-700">
+    <Card className="border border-slate-100 dark:border-zinc-800 shadow-sm bg-white dark:bg-zinc-900/60">
+      <CardHeader className="pb-3 border-b border-slate-100 dark:border-zinc-800">
         <div className="flex items-center gap-2">
           <TrendingUp className="w-4 h-4 text-indigo-500" />
           <CardTitle className="text-base">Profit Simulator</CardTitle>
@@ -944,12 +944,12 @@ function ProfitSimulator({ totalCost }: { totalCost: number }) {
           {/* Cost base */}
           <div className="flex justify-between text-sm">
             <span className="text-slate-500">Total Cost</span>
-            <span className="font-semibold text-slate-800 dark:text-slate-200">${totalCost.toLocaleString()}</span>
+            <span className="font-semibold text-slate-800 dark:text-zinc-100">${totalCost.toLocaleString()}</span>
           </div>
 
           {/* Markup input */}
           <div>
-            <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 block mb-1.5">
+            <label className="text-xs font-semibold text-slate-600 dark:text-zinc-400 block mb-1.5">
               Markup Percentage
             </label>
             <div className="flex items-center gap-3">
@@ -963,7 +963,7 @@ function ProfitSimulator({ totalCost }: { totalCost: number }) {
                 className="flex-1 accent-indigo-600 h-2 cursor-pointer"
                 data-testid="input-markup-slider"
               />
-              <div className="flex items-center gap-1 border border-slate-200 dark:border-slate-600 rounded-lg px-2.5 py-1 bg-slate-50 dark:bg-slate-700 min-w-[60px] justify-center">
+              <div className="flex items-center gap-1 border border-slate-200 dark:border-zinc-700 rounded-lg px-2.5 py-1 bg-slate-50 dark:bg-zinc-800 min-w-[60px] justify-center">
                 <Input
                   type="number"
                   min={0}
@@ -987,7 +987,7 @@ function ProfitSimulator({ totalCost }: { totalCost: number }) {
                 className={`text-[10px] font-semibold px-2.5 py-1 rounded-lg transition-all ${
                   markup === p
                     ? "bg-indigo-600 text-white"
-                    : "bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600"
+                    : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700"
                 }`}
                 data-testid={`button-markup-preset-${p}`}
               >
@@ -997,21 +997,21 @@ function ProfitSimulator({ totalCost }: { totalCost: number }) {
           </div>
 
           {/* Results */}
-          <div className="border-t dark:border-slate-700 pt-4 space-y-3">
+          <div className="border-t dark:border-zinc-800 pt-4 space-y-3">
             <div className="flex justify-between items-center">
-              <span className="text-sm text-slate-500 dark:text-slate-400">Suggested Price</span>
+              <span className="text-sm text-slate-500 dark:text-zinc-400">Suggested Price</span>
               <span className="font-bold text-base text-indigo-600" data-testid="text-suggested-price">
                 ${Math.round(sim.suggestedPrice).toLocaleString()}
               </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-slate-500 dark:text-slate-400">Expected Profit</span>
+              <span className="text-sm text-slate-500 dark:text-zinc-400">Expected Profit</span>
               <span className={`font-bold text-base ${sim.expectedProfit >= 0 ? "text-emerald-600" : "text-red-500"}`} data-testid="text-expected-profit">
                 ${Math.round(sim.expectedProfit).toLocaleString()}
               </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-slate-500 dark:text-slate-400">Profit Margin</span>
+              <span className="text-sm text-slate-500 dark:text-zinc-400">Profit Margin</span>
               <span className={`font-semibold text-sm ${sim.profitMargin >= 0 ? "text-emerald-600" : "text-red-500"}`} data-testid="text-profit-margin">
                 {sim.profitMargin.toFixed(1)}%
               </span>
@@ -1020,7 +1020,7 @@ function ProfitSimulator({ totalCost }: { totalCost: number }) {
             {/* Margin bar */}
             {totalCost > 0 && (
               <div className="mt-1">
-                <div className="w-full h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                <div className="w-full h-2 bg-slate-100 dark:bg-zinc-800 rounded-full overflow-hidden">
                   <div
                     className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-emerald-500 transition-all duration-300"
                     style={{ width: `${Math.min(sim.profitMargin, 100).toFixed(1)}%` }}

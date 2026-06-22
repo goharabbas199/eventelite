@@ -39,9 +39,6 @@ export function Layout({
   }, [appearance.animationsEnabled]);
 
   // ── Entrance reveal via IntersectionObserver + MutationObserver ──
-  // The IO adds "visible" when elements enter the viewport.
-  // The MO watches for .reveal elements added after data loads (async renders)
-  // so they are also observed even if they didn't exist at navigation time.
   useEffect(() => {
     const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (prefersReduced) return;
@@ -64,10 +61,8 @@ export function Layout({
       ).forEach((el) => io.observe(el));
     };
 
-    // Observe elements already in the DOM
     observeNew(document);
 
-    // Watch for elements added later (e.g. after async data loads)
     const mo = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         mutation.addedNodes.forEach((node) => {
@@ -147,7 +142,7 @@ export function Layout({
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#f4f5f8] dark:bg-slate-950">
+    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
       <Sidebar collapsed={collapsed} />
 
       <div

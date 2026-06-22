@@ -34,7 +34,7 @@ const STATUS_CONFIG: Record<string, {
   lead:      { label: "Lead",      badgeColor: "bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300",      borderColor: "border-l-amber-400",   dotColor: "bg-amber-400",   icon: AlertCircle },
   pending:   { label: "Pending",   badgeColor: "bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300",          borderColor: "border-l-blue-500",    dotColor: "bg-blue-500",    icon: Clock },
   confirmed: { label: "Confirmed", badgeColor: "bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300", borderColor: "border-l-emerald-500", dotColor: "bg-emerald-500", icon: CheckCircle },
-  completed: { label: "Completed", badgeColor: "bg-slate-100 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400",      borderColor: "border-l-slate-400",   dotColor: "bg-slate-400",   icon: Zap },
+  completed: { label: "Completed", badgeColor: "bg-slate-100 dark:bg-zinc-800/50 text-slate-500 dark:text-zinc-400",      borderColor: "border-l-slate-400",   dotColor: "bg-slate-400",   icon: Zap },
 };
 
 const EVENT_TYPE_EMOJI: Record<string, string> = {
@@ -65,7 +65,7 @@ function CountdownBadge({ eventDate, status }: { eventDate: string; status: stri
   const days = differenceInDays(new Date(eventDate), new Date());
   if (days < 0) return null;
 
-  let cls = "bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400";
+  let cls = "bg-slate-100 dark:bg-zinc-800 text-slate-500 dark:text-zinc-400";
   if (days <= 3)  cls = "bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400";
   else if (days <= 14) cls = "bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400";
   else if (days <= 30) cls = "bg-indigo-100 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400";
@@ -233,16 +233,16 @@ export default function Events() {
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { label: "Total Events",   value: stats.total,     color: "text-slate-700 dark:text-slate-200",   icon: CalendarDays },
+            { label: "Total Events",   value: stats.total,     color: "text-slate-700 dark:text-zinc-100",   icon: CalendarDays },
             { label: "Leads",          value: stats.lead,      color: "text-amber-600 dark:text-amber-400",   icon: AlertCircle },
             { label: "Confirmed",      value: stats.confirmed, color: "text-emerald-600 dark:text-emerald-400", icon: CheckCircle },
-            { label: "Completed",      value: stats.completed, color: "text-slate-400 dark:text-slate-500",   icon: Zap },
+            { label: "Completed",      value: stats.completed, color: "text-slate-400 dark:text-zinc-500",   icon: Zap },
           ].map((s) => {
             const Icon = s.icon;
             return (
-              <Card key={s.label} className="border border-slate-100 dark:border-slate-700 shadow-sm">
+              <Card key={s.label} className="border border-slate-100 dark:border-zinc-800 shadow-sm">
                 <CardContent className="p-3 md:p-4 flex items-center gap-2.5">
-                  <div className="rounded-lg p-1.5 md:p-2 bg-slate-50 dark:bg-slate-800 shrink-0">
+                  <div className="rounded-lg p-1.5 md:p-2 bg-slate-50 dark:bg-zinc-900 shrink-0">
                     <Icon className={`w-4 h-4 ${s.color}`} />
                   </div>
                   <div className="min-w-0">
@@ -276,11 +276,11 @@ export default function Events() {
                 className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors flex items-center gap-1.5 ${
                   statusFilter === p.key
                     ? "bg-indigo-600 text-white shadow-sm"
-                    : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
+                    : "bg-slate-100 dark:bg-zinc-900 text-slate-500 dark:text-zinc-400 hover:bg-slate-200 dark:hover:bg-zinc-800"
                 }`}
               >
                 {p.label}
-                <span className={`px-1.5 py-0 rounded-full text-[10px] font-bold ${statusFilter === p.key ? "bg-white/20" : "bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400"}`}>
+                <span className={`px-1.5 py-0 rounded-full text-[10px] font-bold ${statusFilter === p.key ? "bg-white/20" : "bg-slate-200 dark:bg-zinc-800 text-slate-500 dark:text-zinc-400"}`}>
                   {p.count}
                 </span>
               </button>
@@ -292,13 +292,13 @@ export default function Events() {
         {isLoading ? (
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-44 rounded-xl bg-slate-100 dark:bg-slate-800 animate-pulse" />
+              <div key={i} className="h-44 rounded-xl bg-slate-100 dark:bg-zinc-900 animate-pulse" />
             ))}
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-20">
-            <div className="w-16 h-16 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-4">
-              <CalendarDays className="w-8 h-8 text-slate-300 dark:text-slate-600" />
+            <div className="w-16 h-16 rounded-2xl bg-slate-100 dark:bg-zinc-900 flex items-center justify-center mx-auto mb-4">
+              <CalendarDays className="w-8 h-8 text-slate-300 dark:text-zinc-600" />
             </div>
             <p className="text-slate-500 font-semibold">No events found</p>
             <p className="text-slate-400 text-sm mt-1">
@@ -329,7 +329,7 @@ export default function Events() {
                   <Card
                     key={event.id}
                     data-testid={`card-event-${event.id}`}
-                    className={`border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-xl hover:border-indigo-200 dark:hover:border-indigo-800 transition-all duration-300 border-l-4 cursor-pointer card-3d gradient-overlay hover:-translate-y-1 ${sc.borderColor}`}
+                    className={`border border-slate-100 dark:border-zinc-800 shadow-sm hover:shadow-xl hover:border-indigo-200 dark:hover:border-indigo-800 transition-all duration-300 border-l-4 cursor-pointer card-3d gradient-overlay hover:-translate-y-1 ${sc.borderColor}`}
                   >
                     <CardHeader className="pb-2 pt-4">
                       <div className="flex items-start justify-between gap-2">
@@ -353,36 +353,36 @@ export default function Events() {
                     </CardHeader>
                     <CardContent className="pt-0 space-y-1.5 pb-3">
                       {client && (
-                        <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-                          <Users className="w-3.5 h-3.5 text-slate-300 dark:text-slate-600 shrink-0" />
+                        <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-zinc-400">
+                          <Users className="w-3.5 h-3.5 text-slate-300 dark:text-zinc-600 shrink-0" />
                           <span className="truncate">{client.name}</span>
                         </div>
                       )}
-                      <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-                        <CalendarDays className="w-3.5 h-3.5 text-slate-300 dark:text-slate-600 shrink-0" />
+                      <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-zinc-400">
+                        <CalendarDays className="w-3.5 h-3.5 text-slate-300 dark:text-zinc-600 shrink-0" />
                         <span>{event.eventDate ? format(new Date(event.eventDate), "EEE, MMM d, yyyy") : "—"}</span>
                       </div>
                       {venue && (
-                        <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-                          <MapPin className="w-3.5 h-3.5 text-slate-300 dark:text-slate-600 shrink-0" />
+                        <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-zinc-400">
+                          <MapPin className="w-3.5 h-3.5 text-slate-300 dark:text-zinc-600 shrink-0" />
                           <span className="truncate">{venue.name}</span>
                         </div>
                       )}
-                      <div className="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400 pt-0.5">
+                      <div className="flex items-center gap-4 text-xs text-slate-500 dark:text-zinc-400 pt-0.5">
                         {event.guestCount && (
                           <span className="flex items-center gap-1">
-                            <Users className="w-3 h-3 text-slate-300 dark:text-slate-600" />
+                            <Users className="w-3 h-3 text-slate-300 dark:text-zinc-600" />
                             {event.guestCount} guests
                           </span>
                         )}
                         {event.budget && (
-                          <span className="flex items-center gap-1 font-semibold text-slate-600 dark:text-slate-300">
-                            <DollarSign className="w-3 h-3 text-slate-300 dark:text-slate-600" />
+                          <span className="flex items-center gap-1 font-semibold text-slate-600 dark:text-zinc-300">
+                            <DollarSign className="w-3 h-3 text-slate-300 dark:text-zinc-600" />
                             ${Number(event.budget).toLocaleString()}
                           </span>
                         )}
                       </div>
-                      <div className="flex items-center gap-2 pt-2 border-t border-slate-50 dark:border-slate-800">
+                      <div className="flex items-center gap-2 pt-2 border-t border-slate-50 dark:border-zinc-800">
                         <Button
                           size="sm"
                           variant="outline"

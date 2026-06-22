@@ -162,7 +162,7 @@ export default function BudgetPlanner() {
           </Button>
           <div className="min-w-[240px]">
             <Select value={selectedClientId} onValueChange={(v) => { setSelectedClientId(v); setAiBudget(null); }}>
-              <SelectTrigger className="h-9 rounded-xl text-sm border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800" data-testid="select-budget-client">
+              <SelectTrigger className="h-9 rounded-xl text-sm border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900" data-testid="select-budget-client">
                 <SelectValue placeholder="Select a client…" />
               </SelectTrigger>
               <SelectContent>
@@ -183,13 +183,13 @@ export default function BudgetPlanner() {
 
       {/* AI Budget Result Panel */}
       {aiBudget && aiBudget.allocations && (
-        <div className="bg-white dark:bg-slate-800/80 border border-violet-200 dark:border-violet-800/50 rounded-2xl p-4 shadow-sm">
+        <div className="bg-white dark:bg-zinc-900/60 border border-violet-200 dark:border-violet-800/50 rounded-2xl p-4 shadow-sm">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center">
                 <Sparkles className="w-3 h-3 text-white" />
               </div>
-              <span className="text-sm font-bold text-slate-800 dark:text-slate-200">AI Budget Allocation</span>
+              <span className="text-sm font-bold text-slate-800 dark:text-zinc-100">AI Budget Allocation</span>
               <span className="text-xs text-violet-600 bg-violet-50 dark:bg-violet-950/40 px-2 py-0.5 rounded-lg font-semibold">Total: {fmt(Number(aiBudget.totalBudget) || 0)}</span>
             </div>
             <button onClick={() => setAiBudget(null)} className="text-slate-400 hover:text-slate-600">
@@ -198,13 +198,13 @@ export default function BudgetPlanner() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 mb-3">
             {aiBudget.allocations.map((a: any, i: number) => (
-              <div key={i} className="flex items-center gap-2.5 p-2.5 bg-slate-50 dark:bg-slate-700/40 rounded-xl">
+              <div key={i} className="flex items-center gap-2.5 p-2.5 bg-slate-50 dark:bg-zinc-800/40 rounded-xl">
                 <div className="flex-1">
                   <div className="flex justify-between mb-1">
-                    <span className="text-[12px] font-semibold text-slate-700 dark:text-slate-200">{a.category}</span>
+                    <span className="text-[12px] font-semibold text-slate-700 dark:text-zinc-100">{a.category}</span>
                     <span className="text-[12px] font-bold text-indigo-600">{fmt(a.amount)}</span>
                   </div>
-                  <div className="w-full bg-slate-200 dark:bg-slate-600 rounded-full h-1.5">
+                  <div className="w-full bg-zinc-200 dark:bg-zinc-700 rounded-full h-1.5">
                     <div className="h-full bg-indigo-500 rounded-full" style={{ width: `${a.percentage}%` }} />
                   </div>
                   <p className="text-[10px] text-slate-400 mt-0.5">{a.percentage}% · {a.notes}</p>
@@ -214,11 +214,11 @@ export default function BudgetPlanner() {
           </div>
           {aiBudget.summary && <p className="text-[12px] text-slate-500 italic">{aiBudget.summary}</p>}
           {aiBudget.savingsTips?.length > 0 && (
-            <div className="mt-2 pt-2 border-t border-slate-100 dark:border-slate-700">
+            <div className="mt-2 pt-2 border-t border-slate-100 dark:border-zinc-800">
               <p className="text-[11px] font-semibold text-slate-400 mb-1">Savings Tips</p>
               <div className="flex flex-wrap gap-2">
                 {aiBudget.savingsTips.map((tip: string, i: number) => (
-                  <span key={i} className="text-[11px] text-slate-600 dark:text-slate-300 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/30 px-2 py-1 rounded-lg">{tip}</span>
+                  <span key={i} className="text-[11px] text-slate-600 dark:text-zinc-300 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/30 px-2 py-1 rounded-lg">{tip}</span>
                 ))}
               </div>
             </div>
@@ -237,7 +237,7 @@ export default function BudgetPlanner() {
               className={`flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-xl border text-left transition-all ${
                 String(c.id) === selectedClientId
                   ? "border-indigo-400 bg-indigo-50 dark:bg-indigo-950/40 shadow-sm"
-                  : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600"
+                  : "border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-slate-300 dark:hover:border-zinc-700"
               }`}
             >
               <div className={`w-2 h-2 rounded-full ${
@@ -245,7 +245,7 @@ export default function BudgetPlanner() {
                 c.status === "Lead" ? "bg-amber-400" : "bg-slate-300"
               }`} />
               <div>
-                <p className="text-xs font-bold text-slate-800 dark:text-slate-200 whitespace-nowrap">{c.name.split(" ").slice(0, 2).join(" ")}</p>
+                <p className="text-xs font-bold text-slate-800 dark:text-zinc-100 whitespace-nowrap">{c.name.split(" ").slice(0, 2).join(" ")}</p>
                 <p className="text-[10px] text-slate-400">{fmt(c.budget)}</p>
               </div>
               {String(c.id) === selectedClientId && (
@@ -264,8 +264,8 @@ export default function BudgetPlanner() {
           eventType={selectedClient.eventType}
         />
       ) : (
-        <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-slate-800/80 rounded-2xl border border-slate-100 dark:border-slate-700 gap-3">
-          <div className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
+        <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-zinc-900/60 rounded-2xl border border-slate-100 dark:border-zinc-800 gap-3">
+          <div className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-zinc-800 flex items-center justify-center">
             <PieIcon className="w-7 h-7 text-slate-400" />
           </div>
           <p className="text-sm font-semibold text-slate-600">Select a client to view their budget</p>
@@ -296,7 +296,7 @@ function ClientBudgetView({
     return (
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {[...Array(4)].map((_, i) => (
-          <div key={i} className="h-24 bg-white dark:bg-slate-800 rounded-2xl animate-pulse border border-slate-100 dark:border-slate-700" />
+          <div key={i} className="h-24 bg-white dark:bg-zinc-900 rounded-2xl animate-pulse border border-slate-100 dark:border-zinc-800" />
         ))}
       </div>
     );
@@ -352,11 +352,11 @@ function ClientBudgetView({
         <div className="stat-card">
           <div className="flex items-center justify-between mb-2">
             <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Total Budget</p>
-            <div className="p-2 rounded-xl bg-slate-100 dark:bg-slate-700">
+            <div className="p-2 rounded-xl bg-slate-100 dark:bg-zinc-800">
               <DollarSign className="w-3.5 h-3.5 text-slate-600" />
             </div>
           </div>
-          <p className="text-xl md:text-2xl font-bold text-slate-800 dark:text-slate-200">{fmt(initialBudget)}</p>
+          <p className="text-xl md:text-2xl font-bold text-slate-800 dark:text-zinc-100">{fmt(initialBudget)}</p>
           <p className="text-[11px] text-slate-400 mt-1">{eventType}</p>
         </div>
 
@@ -404,10 +404,10 @@ function ClientBudgetView({
       </div>
 
       {/* Budget progress bar */}
-      <div className="bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700 rounded-2xl p-4 shadow-sm">
+      <div className="bg-white dark:bg-zinc-900/60 border border-slate-100 dark:border-zinc-800 rounded-2xl p-4 shadow-sm">
         <div className="flex items-center justify-between mb-1.5">
           <div className="flex items-center gap-2">
-            <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">{clientName}</p>
+            <p className="text-xs font-semibold text-slate-700 dark:text-zinc-300">{clientName}</p>
             {isOverBudget && (
               <Badge className="bg-red-100 text-red-600 text-[10px] px-1.5 py-0 border-0">Over Budget</Badge>
             )}
@@ -419,7 +419,7 @@ function ClientBudgetView({
             {spendPercent.toFixed(1)}% used
           </p>
         </div>
-        <div className="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-3 overflow-hidden">
+        <div className="w-full bg-slate-100 dark:bg-zinc-800 rounded-full h-3 overflow-hidden">
           <div
             className={`h-full rounded-full transition-all duration-700 ${
               isOverBudget ? "bg-red-500" : isNearBudget ? "bg-amber-400" : "bg-indigo-500"
@@ -434,7 +434,7 @@ function ClientBudgetView({
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-slate-100 dark:bg-slate-800 border border-transparent dark:border-slate-700 rounded-xl p-1 w-fit">
+      <div className="flex gap-1 bg-slate-100 dark:bg-zinc-900 border border-transparent dark:border-zinc-800 rounded-xl p-1 w-fit">
         {tabs.map((tab) => (
           <button
             key={tab.id}
@@ -442,8 +442,8 @@ function ClientBudgetView({
             data-testid={`tab-budget-${tab.id}`}
             className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${
               activeTab === tab.id
-                ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm"
-                : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+                ? "bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-sm"
+                : "text-slate-500 dark:text-zinc-400 hover:text-slate-700 dark:hover:text-zinc-100"
             }`}
           >
             {tab.label}
@@ -463,9 +463,9 @@ function ClientBudgetView({
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
           {/* Category breakdown chart */}
           <div className="lg:col-span-2">
-            <Card className="border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm bg-white dark:bg-slate-800/80 h-full">
-              <CardHeader className="border-b border-slate-100 dark:border-slate-700 pb-3">
-                <CardTitle className="text-sm font-bold text-slate-900 dark:text-slate-100">Spending Breakdown by Category</CardTitle>
+            <Card className="border border-slate-100 dark:border-zinc-800 rounded-2xl shadow-sm bg-white dark:bg-zinc-900/60 h-full">
+              <CardHeader className="border-b border-slate-100 dark:border-zinc-800 pb-3">
+                <CardTitle className="text-sm font-bold text-slate-900 dark:text-white">Spending Breakdown by Category</CardTitle>
                 <p className="text-xs text-slate-400 mt-0.5">Services + expenses combined</p>
               </CardHeader>
               <CardContent className="pt-4">
@@ -479,14 +479,14 @@ function ClientBudgetView({
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
                               <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: color }} />
-                              <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">{item.name}</span>
+                              <span className="text-xs font-semibold text-slate-700 dark:text-zinc-300">{item.name}</span>
                             </div>
                             <div className="flex items-center gap-3">
                               <span className="text-[10px] text-slate-400">{share.toFixed(0)}%</span>
-                              <span className="text-xs font-bold text-slate-800 dark:text-slate-200">{fmt(item.value)}</span>
+                              <span className="text-xs font-bold text-slate-800 dark:text-zinc-100">{fmt(item.value)}</span>
                             </div>
                           </div>
-                          <div className="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-1.5 overflow-hidden">
+                          <div className="w-full bg-slate-100 dark:bg-zinc-800 rounded-full h-1.5 overflow-hidden">
                             <div
                               className="h-full rounded-full transition-all duration-500"
                               style={{ width: `${share}%`, backgroundColor: color }}
@@ -507,9 +507,9 @@ function ClientBudgetView({
           </div>
 
           {/* Pie chart */}
-          <Card className="border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm bg-white dark:bg-slate-800/80">
+          <Card className="border border-slate-100 dark:border-zinc-800 rounded-2xl shadow-sm bg-white dark:bg-zinc-900/60">
             <CardHeader className="pb-2 border-b border-slate-100">
-              <CardTitle className="text-sm font-bold text-slate-900 dark:text-slate-100">Budget Split</CardTitle>
+              <CardTitle className="text-sm font-bold text-slate-900 dark:text-white">Budget Split</CardTitle>
             </CardHeader>
             <CardContent className="pt-4">
               {categoryData.length > 0 ? (
@@ -541,7 +541,7 @@ function ClientBudgetView({
                           style={{ backgroundColor: CATEGORY_COLORS[item.name] || PALETTE[i % PALETTE.length] }}
                         />
                         <span className="text-[11px] text-slate-500 flex-1 truncate">{item.name}</span>
-                        <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300">{fmt(item.value)}</span>
+                        <span className="text-[11px] font-bold text-slate-700 dark:text-zinc-300">{fmt(item.value)}</span>
                       </div>
                     ))}
                     {categoryData.length > 5 && (
@@ -561,10 +561,10 @@ function ClientBudgetView({
       )}
 
       {activeTab === "services" && (
-        <Card className="border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm bg-white dark:bg-slate-800/80">
-          <CardHeader className="flex flex-row items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-700">
+        <Card className="border border-slate-100 dark:border-zinc-800 rounded-2xl shadow-sm bg-white dark:bg-zinc-900/60">
+          <CardHeader className="flex flex-row items-center justify-between pb-3 border-b border-slate-100 dark:border-zinc-800">
             <div>
-              <CardTitle className="text-sm font-bold text-slate-900 dark:text-slate-100">Planned Services</CardTitle>
+              <CardTitle className="text-sm font-bold text-slate-900 dark:text-white">Planned Services</CardTitle>
               <p className="text-xs text-slate-400 mt-0.5">{services.length} service{services.length !== 1 ? "s" : ""} · {fmt(servicesTotal)} total</p>
             </div>
             <Wrench className="w-4 h-4 text-slate-300" />
@@ -584,26 +584,26 @@ function ClientBudgetView({
                   ) || "Other";
                   const color = CATEGORY_COLORS[matched] || "#94a3b8";
                   return (
-                    <div key={sv.id} className="flex items-center gap-3 px-5 py-3.5 hover:bg-slate-50 dark:hover:bg-slate-700/40 transition-colors" data-testid={`service-row-${sv.id}`}>
+                    <div key={sv.id} className="flex items-center gap-3 px-5 py-3.5 hover:bg-slate-50 dark:hover:bg-zinc-800/40 transition-colors" data-testid={`service-row-${sv.id}`}>
                       <div className="w-1 h-8 rounded-full shrink-0" style={{ backgroundColor: color }} />
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate">{sv.serviceName}</p>
+                        <p className="text-sm font-semibold text-slate-800 dark:text-zinc-100 truncate">{sv.serviceName}</p>
                         <p className="text-[11px] text-slate-400">{matched}</p>
                       </div>
                       <div className="flex items-center gap-3 ml-3 shrink-0">
                         <Badge className={`text-[10px] px-2 py-0 border-0 ${
                           sv.status === "Confirmed" ? "bg-emerald-100 text-emerald-700" :
                           sv.status === "Cancelled" ? "bg-red-100 text-red-600" :
-                          "bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400"
+                          "bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400"
                         }`}>
                           {sv.status}
                         </Badge>
-                        <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{fmt(Number(sv.cost))}</p>
+                        <p className="text-sm font-bold text-slate-800 dark:text-zinc-100">{fmt(Number(sv.cost))}</p>
                       </div>
                     </div>
                   );
                 })}
-                <div className="flex items-center justify-between px-5 py-3.5 bg-slate-50/80 dark:bg-slate-700/30">
+                <div className="flex items-center justify-between px-5 py-3.5 bg-slate-50/80 dark:bg-zinc-800/30">
                   <span className="text-xs font-bold text-slate-600">Total Services</span>
                   <span className="text-sm font-bold text-indigo-600">{fmt(servicesTotal)}</span>
                 </div>
@@ -614,10 +614,10 @@ function ClientBudgetView({
       )}
 
       {activeTab === "expenses" && (
-        <Card className="border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm bg-white dark:bg-slate-800/80">
-          <CardHeader className="flex flex-row items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-700">
+        <Card className="border border-slate-100 dark:border-zinc-800 rounded-2xl shadow-sm bg-white dark:bg-zinc-900/60">
+          <CardHeader className="flex flex-row items-center justify-between pb-3 border-b border-slate-100 dark:border-zinc-800">
             <div>
-              <CardTitle className="text-sm font-bold text-slate-900 dark:text-slate-100">Expenses</CardTitle>
+              <CardTitle className="text-sm font-bold text-slate-900 dark:text-white">Expenses</CardTitle>
               <p className="text-xs text-slate-400 mt-0.5">
                 {expenses.length} item{expenses.length !== 1 ? "s" : ""} · {fmt(paidExpenses)} paid · {fmt(unpaidExpenses)} pending
               </p>
@@ -644,22 +644,22 @@ function ClientBudgetView({
                 <p className="text-xs text-slate-300">Click "Add Expense" to track spending</p>
               </div>
             ) : (
-              <div className="divide-y divide-slate-50 dark:divide-slate-700/40">
+              <div className="divide-y divide-slate-50 dark:divide-zinc-800/60">
                 {expenses.map((expense) => {
                   const color = CATEGORY_COLORS[expense.category] || "#94a3b8";
                   return (
                     <div
                       key={expense.id}
-                      className="flex items-center gap-3 px-5 py-3.5 hover:bg-slate-50 dark:hover:bg-slate-700/40 transition-colors group"
+                      className="flex items-center gap-3 px-5 py-3.5 hover:bg-slate-50 dark:hover:bg-zinc-800/40 transition-colors group"
                       data-testid={`expense-row-${expense.id}`}
                     >
                       <div className="w-1 h-8 rounded-full shrink-0" style={{ backgroundColor: color }} />
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate">{expense.item}</p>
+                        <p className="text-sm font-semibold text-slate-800 dark:text-zinc-100 truncate">{expense.item}</p>
                         <p className="text-[11px] text-slate-400">{expense.category}</p>
                       </div>
                       <div className="flex items-center gap-2.5 ml-3 shrink-0">
-                        <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{fmt(Number(expense.cost))}</p>
+                        <p className="text-sm font-bold text-slate-800 dark:text-zinc-100">{fmt(Number(expense.cost))}</p>
                         <PaidToggle expense={expense} clientId={clientId} />
                         <button
                           onClick={() => handleDelete(expense.id)}
@@ -672,7 +672,7 @@ function ClientBudgetView({
                     </div>
                   );
                 })}
-                <div className="flex items-center justify-between px-5 py-3.5 bg-slate-50/80 dark:bg-slate-700/30">
+                <div className="flex items-center justify-between px-5 py-3.5 bg-slate-50/80 dark:bg-zinc-800/30">
                   <span className="text-xs font-bold text-slate-600">Total Expenses</span>
                   <span className="text-sm font-bold text-indigo-600">{fmt(expensesTotal)}</span>
                 </div>
@@ -694,7 +694,7 @@ function PaidToggle({ expense, clientId }: { expense: any; clientId: number }) {
       className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold border transition-all ${
         expense.isPaid
           ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-900/50 hover:bg-emerald-100 dark:hover:bg-emerald-950/60"
-          : "bg-slate-50 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-600 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-700 dark:hover:text-amber-300 hover:border-amber-200 dark:hover:border-amber-900/50"
+          : "bg-slate-50 dark:bg-zinc-800/50 text-slate-500 dark:text-zinc-400 border-slate-200 dark:border-zinc-700 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-700 dark:hover:text-amber-300 hover:border-amber-200 dark:hover:border-amber-900/50"
       }`}
     >
       {expense.isPaid
@@ -794,7 +794,7 @@ function CreateExpenseForm({ clientId, onSuccess }: { clientId: number; onSucces
                   data-testid="toggle-expense-ispaid"
                   className={`w-10 h-5 rounded-full transition-all relative ${field.value ? "bg-emerald-500" : "bg-slate-200"}`}
                 >
-                  <div className={`absolute top-0.5 w-4 h-4 bg-white dark:bg-slate-200 rounded-full shadow transition-all ${field.value ? "left-5" : "left-0.5"}`} />
+                  <div className={`absolute top-0.5 w-4 h-4 bg-white dark:bg-white rounded-full shadow transition-all ${field.value ? "left-5" : "left-0.5"}`} />
                 </button>
                 <FormLabel className={labelCls}>Mark as paid</FormLabel>
               </div>

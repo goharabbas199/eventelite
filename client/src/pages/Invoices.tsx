@@ -199,14 +199,14 @@ export default function Invoices() {
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { label: "Total Invoices",  value: `${stats.total}`,                          sub: "all time",       icon: ReceiptText,  color: "text-slate-600 dark:text-slate-300" },
+            { label: "Total Invoices",  value: `${stats.total}`,                          sub: "all time",       icon: ReceiptText,  color: "text-slate-600 dark:text-zinc-300" },
             { label: "Total Value",     value: `$${stats.totalAmount.toLocaleString()}`,   sub: "all invoices",   icon: DollarSign,   color: "text-slate-700 dark:text-white" },
             { label: "Collected",       value: `$${stats.paid.toLocaleString()}`,          sub: `${stats.collectionRate}% collected`, icon: TrendingUp,  color: "text-emerald-600 dark:text-emerald-400" },
             { label: "Outstanding",     value: `$${stats.unpaid.toLocaleString()}`,        sub: `${stats.overdue} overdue`, icon: AlertCircle, color: stats.overdue > 0 ? "text-red-500 dark:text-red-400" : "text-amber-600 dark:text-amber-400" },
           ].map((s) => {
             const Icon = s.icon;
             return (
-              <Card key={s.label} className="border border-slate-100 dark:border-slate-700 shadow-sm transition-all duration-300 hover:shadow-lg hover:border-indigo-200 dark:hover:border-indigo-800 hover:-translate-y-1 gradient-overlay card-3d">
+              <Card key={s.label} className="border border-slate-100 dark:border-zinc-800 shadow-sm transition-all duration-300 hover:shadow-lg hover:border-indigo-200 dark:hover:border-indigo-800 hover:-translate-y-1 gradient-overlay card-3d">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-2 mb-2">
                     <Icon className={`w-3.5 h-3.5 ${s.color}`} />
@@ -222,13 +222,13 @@ export default function Invoices() {
 
         {/* Collection progress bar */}
         {stats.total > 0 && (
-          <Card className="border border-slate-100 dark:border-slate-700 shadow-sm transition-all duration-300 hover:shadow-lg hover:border-indigo-200 dark:hover:border-indigo-800 hover:-translate-y-1 gradient-overlay card-3d">
+          <Card className="border border-slate-100 dark:border-zinc-800 shadow-sm transition-all duration-300 hover:shadow-lg hover:border-indigo-200 dark:hover:border-indigo-800 hover:-translate-y-1 gradient-overlay card-3d">
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-xs font-semibold text-slate-500">Collection Progress</p>
-                <p className="text-xs font-bold text-slate-600 dark:text-slate-300">{stats.collectionRate}% collected</p>
+                <p className="text-xs font-bold text-slate-600 dark:text-zinc-300">{stats.collectionRate}% collected</p>
               </div>
-              <div className="h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+              <div className="h-2 rounded-full bg-slate-100 dark:bg-zinc-900 overflow-hidden">
                 <div
                   className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-emerald-400 transition-all duration-500"
                   style={{ width: `${stats.collectionRate}%` }}
@@ -252,7 +252,7 @@ export default function Invoices() {
             <CardContent className="p-4 flex items-center gap-4">
               <FileText className="w-8 h-8 text-indigo-500 shrink-0" />
               <div className="flex-1">
-                <p className="font-semibold text-slate-800 dark:text-slate-200 text-sm">Generate from Accepted Quote</p>
+                <p className="font-semibold text-slate-800 dark:text-zinc-100 text-sm">Generate from Accepted Quote</p>
                 <p className="text-xs text-slate-500 mt-0.5">
                   {(quotations as any[]).filter((q) => q.status === "Accepted").length} accepted quote(s) ready to invoice
                 </p>
@@ -303,12 +303,12 @@ export default function Invoices() {
                 className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors flex items-center gap-1.5 ${
                   statusFilter === p.key
                     ? "bg-indigo-600 text-white shadow-sm"
-                    : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
+                    : "bg-slate-100 dark:bg-zinc-900 text-slate-500 dark:text-zinc-400 hover:bg-slate-200 dark:hover:bg-zinc-800"
                 }`}
               >
                 {p.label}
                 {p.count > 0 && (
-                  <span className={`px-1.5 rounded-full text-[10px] font-bold ${statusFilter === p.key ? "bg-white/20" : "bg-slate-200 dark:bg-slate-700"}`}>
+                  <span className={`px-1.5 rounded-full text-[10px] font-bold ${statusFilter === p.key ? "bg-white/20" : "bg-slate-200 dark:bg-zinc-800"}`}>
                     {p.count}
                   </span>
                 )}
@@ -321,13 +321,13 @@ export default function Invoices() {
         {isLoading ? (
           <div className="space-y-2">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-20 rounded-xl bg-slate-100 dark:bg-slate-800 animate-pulse" />
+              <div key={i} className="h-20 rounded-xl bg-slate-100 dark:bg-zinc-900 animate-pulse" />
             ))}
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-20">
-            <div className="w-16 h-16 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-4">
-              <ReceiptText className="w-8 h-8 text-slate-300 dark:text-slate-600" />
+            <div className="w-16 h-16 rounded-2xl bg-slate-100 dark:bg-zinc-900 flex items-center justify-center mx-auto mb-4">
+              <ReceiptText className="w-8 h-8 text-slate-300 dark:text-zinc-600" />
             </div>
             <p className="text-slate-500 font-semibold">No invoices found</p>
             <p className="text-slate-400 text-sm mt-1">
@@ -348,15 +348,15 @@ export default function Invoices() {
                 const sc = STATUS_CONFIG[invoice.status] || STATUS_CONFIG.unpaid;
                 const StatusIcon = sc.icon;
                 return (
-                  <Card key={invoice.id} data-testid={`card-invoice-${invoice.id}`} className="border border-slate-100 dark:border-slate-700 shadow-sm">
+                  <Card key={invoice.id} data-testid={`card-invoice-${invoice.id}`} className="border border-slate-100 dark:border-zinc-800 shadow-sm">
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between gap-3 mb-3">
                         <div className="min-w-0">
-                          <p className="font-mono text-sm font-bold text-slate-700 dark:text-slate-200">{invoice.invoiceNumber}</p>
+                          <p className="font-mono text-sm font-bold text-slate-700 dark:text-zinc-100">{invoice.invoiceNumber}</p>
                           <p className="text-xs text-slate-400 mt-0.5 truncate">{client?.name || "No client"}</p>
                         </div>
                         <div className="text-right shrink-0">
-                          <p className="text-lg font-bold text-slate-800 dark:text-slate-100">
+                          <p className="text-lg font-bold text-slate-800 dark:text-white">
                             ${Number(invoice.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </p>
                           {invoice.dueDate && (
@@ -422,10 +422,10 @@ export default function Invoices() {
             </div>
 
             {/* Desktop table */}
-            <Card className="hidden sm:block border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden">
+            <Card className="hidden sm:block border border-slate-100 dark:border-zinc-800 shadow-sm overflow-hidden">
               <Table>
                 <TableHeader>
-                  <TableRow className="bg-slate-50/50 dark:bg-slate-800/30">
+                  <TableRow className="bg-slate-50/50 dark:bg-zinc-800/30">
                     <TableHead className="pl-6 text-xs font-semibold text-slate-500">Invoice #</TableHead>
                     <TableHead className="text-xs font-semibold text-slate-500">Client</TableHead>
                     <TableHead className="text-xs font-semibold text-slate-500">Amount</TableHead>
@@ -440,12 +440,12 @@ export default function Invoices() {
                     const sc = STATUS_CONFIG[invoice.status] || STATUS_CONFIG.unpaid;
                     const StatusIcon = sc.icon;
                     return (
-                      <TableRow key={invoice.id} data-testid={`row-invoice-${invoice.id}`} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
-                        <TableCell className="pl-6 font-mono text-sm font-semibold text-slate-700 dark:text-slate-300">
+                      <TableRow key={invoice.id} data-testid={`row-invoice-${invoice.id}`} className="hover:bg-slate-50/50 dark:hover:bg-zinc-800/30">
+                        <TableCell className="pl-6 font-mono text-sm font-semibold text-slate-700 dark:text-zinc-300">
                           {invoice.invoiceNumber}
                         </TableCell>
-                        <TableCell className="text-slate-600 dark:text-slate-400 text-sm">{client?.name || "—"}</TableCell>
-                        <TableCell className="font-bold text-slate-800 dark:text-slate-200">
+                        <TableCell className="text-slate-600 dark:text-zinc-400 text-sm">{client?.name || "—"}</TableCell>
+                        <TableCell className="font-bold text-slate-800 dark:text-zinc-100">
                           ${Number(invoice.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </TableCell>
                         <TableCell>
@@ -670,7 +670,7 @@ export default function Invoices() {
               <Copy className="w-4 h-4" />
             </Button>
           </div>
-          <div className="mt-3 p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
+          <div className="mt-3 p-3 bg-slate-50 dark:bg-zinc-900 rounded-lg">
             <p className="text-xs text-slate-500">The portal page shows the invoice amount, status, event details, and any linked quote items. No login required for your client.</p>
           </div>
         </DialogContent>

@@ -25,8 +25,8 @@ function fmtMoney(n: number) {
 const CustomBarTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl shadow-lg px-4 py-3 text-xs">
-      <p className="font-semibold text-slate-600 dark:text-slate-300 mb-1.5">{label}</p>
+    <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-xl shadow-lg px-4 py-3 text-xs">
+      <p className="font-semibold text-slate-600 dark:text-zinc-300 mb-1.5">{label}</p>
       {payload.map((p: any) => (
         <p key={p.name} className="flex items-center gap-2 font-medium" style={{ color: p.fill }}>
           <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: p.fill }} />
@@ -124,7 +124,7 @@ export default function Analytics() {
   };
 
   const kpis = [
-    { label: "Total Events",   value: String(totalEvents),      icon: Users,      color: "text-slate-800 dark:text-slate-200",  bg: "bg-slate-100 dark:bg-slate-700/50" },
+    { label: "Total Events",   value: String(totalEvents),      icon: Users,      color: "text-slate-800 dark:text-zinc-100",  bg: "bg-slate-100 dark:bg-zinc-800/50" },
     { label: "Total Revenue",  value: fmtMoney(totalRevenue),   icon: DollarSign, color: "text-indigo-600 dark:text-indigo-400", bg: "bg-indigo-50 dark:bg-indigo-950/40" },
     { label: "Total Expenses", value: fmtMoney(totalExpenses),  icon: Activity,   color: "text-amber-600 dark:text-amber-400",  bg: "bg-amber-50 dark:bg-amber-950/40"  },
     { label: "Net Profit",     value: fmtMoney(totalProfit),    icon: TrendingUp,
@@ -170,7 +170,7 @@ export default function Analytics() {
 
       {/* Secondary KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 reveal reveal-d2">
-          <div className="bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700 rounded-2xl px-4 py-3 shadow-sm flex items-center justify-between gap-2" data-testid="card-avg-profit">
+          <div className="bg-white dark:bg-zinc-900/60 border border-slate-100 dark:border-zinc-800 rounded-2xl px-4 py-3 shadow-sm flex items-center justify-between gap-2" data-testid="card-avg-profit">
           <div className="min-w-0">
             <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">Avg Profit / Event</p>
             <p className="text-xs text-slate-400 mt-0.5 hidden sm:block">Across all {totalEvents} events</p>
@@ -180,7 +180,7 @@ export default function Analytics() {
           </span>
         </div>
 
-          <div className="bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700 rounded-2xl px-4 py-3 shadow-sm flex items-center justify-between gap-2" data-testid="card-profit-margin">
+          <div className="bg-white dark:bg-zinc-900/60 border border-slate-100 dark:border-zinc-800 rounded-2xl px-4 py-3 shadow-sm flex items-center justify-between gap-2" data-testid="card-profit-margin">
           <div className="min-w-0">
             <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">Profit Margin</p>
             <p className="text-xs text-slate-400 mt-0.5 hidden sm:block">Revenue vs. total expenses</p>
@@ -193,7 +193,7 @@ export default function Analytics() {
           </div>
         </div>
 
-          <div className="bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700 rounded-2xl px-4 py-3 shadow-sm flex items-center justify-between gap-2" data-testid="card-completion-rate">
+          <div className="bg-white dark:bg-zinc-900/60 border border-slate-100 dark:border-zinc-800 rounded-2xl px-4 py-3 shadow-sm flex items-center justify-between gap-2" data-testid="card-completion-rate">
           <div className="min-w-0">
             <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">Completion Rate</p>
             <p className="text-xs text-slate-400 mt-0.5 hidden sm:block">{completedCount} events completed</p>
@@ -210,9 +210,9 @@ export default function Analytics() {
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 reveal reveal-d3">
         {/* Revenue by Month */}
-        <Card className="border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm bg-white dark:bg-slate-800/80" data-testid="card-revenue-by-month">
+        <Card className="border border-slate-100 dark:border-zinc-800 rounded-2xl shadow-sm bg-white dark:bg-zinc-900/60" data-testid="card-revenue-by-month">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-bold text-slate-900 dark:text-slate-100">Revenue by Event Month</CardTitle>
+            <CardTitle className="text-sm font-bold text-slate-900 dark:text-white">Revenue by Event Month</CardTitle>
           </CardHeader>
           <CardContent>
             {barData.length === 0 ? (
@@ -231,9 +231,9 @@ export default function Analytics() {
         </Card>
 
         {/* Events by Type */}
-        <Card className="border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm bg-white dark:bg-slate-800/80" data-testid="card-events-by-type">
+        <Card className="border border-slate-100 dark:border-zinc-800 rounded-2xl shadow-sm bg-white dark:bg-zinc-900/60" data-testid="card-events-by-type">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-bold text-slate-900 dark:text-slate-100">Events by Type</CardTitle>
+            <CardTitle className="text-sm font-bold text-slate-900 dark:text-white">Events by Type</CardTitle>
           </CardHeader>
           <CardContent>
             {pieData.length === 0 ? (
@@ -262,9 +262,9 @@ export default function Analytics() {
 
         {/* Revenue vs Expenses per Client */}
         {revExpData.length > 0 && (
-          <Card className="border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm bg-white dark:bg-slate-800/80 lg:col-span-2" data-testid="card-revenue-vs-expenses">
+          <Card className="border border-slate-100 dark:border-zinc-800 rounded-2xl shadow-sm bg-white dark:bg-zinc-900/60 lg:col-span-2" data-testid="card-revenue-vs-expenses">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-bold text-slate-900 dark:text-slate-100">Revenue vs Expenses per Client</CardTitle>
+              <CardTitle className="text-sm font-bold text-slate-900 dark:text-white">Revenue vs Expenses per Client</CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={220}>
@@ -284,18 +284,18 @@ export default function Analytics() {
 
         {/* Status Breakdown */}
         {Object.keys(byStatus).length > 0 && (
-          <Card className="border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm bg-white dark:bg-slate-800/80" data-testid="card-pipeline-status">
+          <Card className="border border-slate-100 dark:border-zinc-800 rounded-2xl shadow-sm bg-white dark:bg-zinc-900/60" data-testid="card-pipeline-status">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-bold text-slate-900 dark:text-slate-100">Pipeline by Status</CardTitle>
+              <CardTitle className="text-sm font-bold text-slate-900 dark:text-white">Pipeline by Status</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
                 {Object.entries(byStatus).map(([status, count], i) => (
                   <div key={status} className="flex items-center gap-3">
                     <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }} />
-                    <span className="text-sm text-slate-600 dark:text-slate-400 flex-1 font-medium">{status}</span>
-                    <span className="text-sm font-bold text-slate-800 dark:text-slate-200">{count as number}</span>
-                    <div className="w-24 bg-slate-100 dark:bg-slate-700 rounded-full h-1.5 overflow-hidden">
+                    <span className="text-sm text-slate-600 dark:text-zinc-400 flex-1 font-medium">{status}</span>
+                    <span className="text-sm font-bold text-slate-800 dark:text-zinc-100">{count as number}</span>
+                    <div className="w-24 bg-slate-100 dark:bg-zinc-800 rounded-full h-1.5 overflow-hidden">
                       <div
                         className="h-full rounded-full transition-all"
                         style={{ width: `${((count as number / totalEvents) * 100).toFixed(0)}%`, backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }}
@@ -310,10 +310,10 @@ export default function Analytics() {
 
         {/* Top Clients by Revenue */}
         {topClients.length > 0 && (
-          <Card className="border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm bg-white dark:bg-slate-800/80" data-testid="card-top-clients">
+          <Card className="border border-slate-100 dark:border-zinc-800 rounded-2xl shadow-sm bg-white dark:bg-zinc-900/60" data-testid="card-top-clients">
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-bold text-slate-900 dark:text-slate-100">Top Clients by Revenue</CardTitle>
+                <CardTitle className="text-sm font-bold text-slate-900 dark:text-white">Top Clients by Revenue</CardTitle>
                 <Trophy className="w-4 h-4 text-amber-400" />
               </div>
             </CardHeader>
@@ -328,7 +328,7 @@ export default function Analytics() {
                       <div className="flex items-center justify-between mb-1">
                         <div className="flex items-center gap-2">
                           <span className="text-[10px] font-bold text-slate-400 w-4 text-center">#{i + 1}</span>
-                          <span className="text-sm font-semibold text-slate-700 dark:text-slate-300 truncate max-w-[140px]">{c.name}</span>
+                          <span className="text-sm font-semibold text-slate-700 dark:text-zinc-300 truncate max-w-[140px]">{c.name}</span>
                         </div>
                         <div className="flex items-center gap-1.5">
                           <span className="text-[10px] text-slate-400">{c.eventType}</span>
@@ -336,7 +336,7 @@ export default function Analytics() {
                           <ArrowUpRight className="w-3 h-3 text-emerald-500" />
                         </div>
                       </div>
-                      <div className="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-1.5 overflow-hidden">
+                      <div className="w-full bg-slate-100 dark:bg-zinc-800 rounded-full h-1.5 overflow-hidden">
                         <div
                           className="h-full rounded-full transition-all duration-500"
                           style={{ width: `${pct}%`, backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }}
@@ -357,8 +357,8 @@ export default function Analytics() {
 function EmptyChart({ message }: { message: string }) {
   return (
     <div className="flex items-center justify-center h-48 flex-col gap-2">
-      <div className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-700/50 flex items-center justify-center">
-        <Activity className="w-5 h-5 text-slate-300 dark:text-slate-500" />
+      <div className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-zinc-800/50 flex items-center justify-center">
+        <Activity className="w-5 h-5 text-slate-300 dark:text-zinc-500" />
       </div>
       <p className="text-sm text-slate-400">{message}</p>
     </div>

@@ -91,7 +91,7 @@ export default function Vendors() {
       </div>
 
       {/* Filter bar */}
-      <Card className="border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm bg-white dark:bg-slate-800/80">
+      <Card className="border border-slate-100 dark:border-zinc-800 rounded-2xl shadow-sm bg-white dark:bg-zinc-900/60">
         <CardContent className="p-4 flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
@@ -120,11 +120,11 @@ export default function Vendors() {
           {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-20 w-full rounded-2xl" />)}
         </div>
       ) : filteredVendors.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-slate-800/80 rounded-2xl border border-slate-100 dark:border-slate-700 gap-3">
-          <div className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
+        <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-zinc-900/60 rounded-2xl border border-slate-100 dark:border-zinc-800 gap-3">
+          <div className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-zinc-800 flex items-center justify-center">
             <Store className="w-7 h-7 text-slate-400" />
           </div>
-          <p className="text-sm font-semibold text-slate-600 dark:text-slate-400">No vendors found</p>
+          <p className="text-sm font-semibold text-slate-600 dark:text-zinc-400">No vendors found</p>
           <p className="text-xs text-slate-400">Try a different search or category</p>
         </div>
       ) : (
@@ -136,7 +136,7 @@ export default function Vendors() {
               <div
                 key={vendor.id}
                 onClick={() => navigate(`/vendors/${vendor.id}`)}
-                className="bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700 rounded-2xl px-4 py-4 shadow-sm hover:shadow-md hover:border-indigo-200 dark:hover:border-indigo-700 transition-all duration-150 cursor-pointer group"
+                className="bg-white dark:bg-zinc-900/60 border border-slate-100 dark:border-zinc-800 rounded-2xl px-4 py-4 shadow-sm hover:shadow-md hover:border-indigo-200 dark:hover:border-indigo-700 transition-all duration-150 cursor-pointer group"
               >
                 <div className="flex items-center justify-between gap-3">
                   {/* Left info */}
@@ -145,7 +145,7 @@ export default function Vendors() {
                       <Store className="w-5 h-5 text-indigo-500" />
                     </div>
                     <div className="min-w-0">
-                      <p className="font-bold text-slate-800 dark:text-slate-200 text-sm group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate">{vendor.name}</p>
+                      <p className="font-bold text-slate-800 dark:text-zinc-100 text-sm group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate">{vendor.name}</p>
                       <Badge className={`${getCategoryColor(vendor.category)} text-[10px] px-2 py-0 font-semibold mt-0.5`}>
                         {vendor.category}
                       </Badge>
@@ -215,7 +215,7 @@ export default function Vendors() {
           <DialogHeader>
             <DialogTitle>Delete Vendor</DialogTitle>
           </DialogHeader>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">Are you sure? This action cannot be undone.</p>
+          <p className="text-sm text-slate-500 dark:text-zinc-400 mt-2">Are you sure? This action cannot be undone.</p>
           <div className="flex justify-end gap-2 mt-4">
             <Button variant="outline" onClick={() => setDeletingId(null)} className="rounded-xl">Cancel</Button>
             <Button

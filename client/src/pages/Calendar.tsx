@@ -22,7 +22,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; dot: string;
   lead:      { label: "Lead",      color: "bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300",        dot: "bg-amber-400",   textColor: "text-amber-600" },
   pending:   { label: "Pending",   color: "bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300",            dot: "bg-blue-500",    textColor: "text-blue-600" },
   confirmed: { label: "Confirmed", color: "bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300", dot: "bg-emerald-500", textColor: "text-emerald-600" },
-  completed: { label: "Completed", color: "bg-slate-100 dark:bg-slate-700/50 text-slate-600 dark:text-slate-300",        dot: "bg-slate-400",   textColor: "text-slate-500" },
+  completed: { label: "Completed", color: "bg-slate-100 dark:bg-zinc-800/50 text-slate-600 dark:text-zinc-300",        dot: "bg-slate-400",   textColor: "text-slate-500" },
 };
 
 const EVENT_EMOJI: Record<string, string> = {
@@ -88,7 +88,7 @@ export default function Calendar() {
             <Button variant="outline" size="sm" onClick={() => setCurrentMonth(subMonths(currentMonth, 1))} data-testid="button-prev-month">
               <ChevronLeft className="w-4 h-4" />
             </Button>
-            <span className="text-sm font-bold text-slate-700 dark:text-slate-200 min-w-[110px] sm:min-w-[140px] text-center px-1">
+            <span className="text-sm font-bold text-slate-700 dark:text-zinc-100 min-w-[110px] sm:min-w-[140px] text-center px-1">
               {format(currentMonth, "MMM yyyy")}
             </span>
             <Button variant="outline" size="sm" onClick={() => setCurrentMonth(addMonths(currentMonth, 1))} data-testid="button-next-month">
@@ -111,9 +111,9 @@ export default function Calendar() {
         </div>
 
         {/* Calendar Grid — desktop only (too cramped on mobile) */}
-        <Card className="hidden sm:block border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden">
+        <Card className="hidden sm:block border border-slate-100 dark:border-zinc-800 shadow-sm overflow-hidden">
           <CardContent className="p-0">
-            <div className="grid grid-cols-7 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-700">
+            <div className="grid grid-cols-7 bg-slate-50 dark:bg-zinc-800/50 border-b border-slate-100 dark:border-zinc-800">
               {WEEKDAYS.map((d) => (
                 <div key={d} className="py-2.5 text-center text-[11px] font-bold text-slate-400 uppercase tracking-wide">
                   {d}
@@ -122,7 +122,7 @@ export default function Calendar() {
             </div>
             <div className="grid grid-cols-7">
               {Array.from({ length: startPad }).map((_, i) => (
-                <div key={`pad-${i}`} className="min-h-[108px] border-b border-r border-slate-50 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-900/20" />
+                <div key={`pad-${i}`} className="min-h-[108px] border-b border-r border-slate-50 dark:border-zinc-800 bg-slate-50/40 dark:bg-zinc-950/20" />
               ))}
               {days.map((day, idx) => {
                 const dayEvents = getEventsForDay(day);
@@ -131,12 +131,12 @@ export default function Calendar() {
                 return (
                   <div
                     key={day.toISOString()}
-                    className={`min-h-[108px] p-1.5 border-b ${isLastCol ? "" : "border-r"} border-slate-100 dark:border-slate-800 ${today ? "bg-indigo-50/70 dark:bg-indigo-950/20" : ""}`}
+                    className={`min-h-[108px] p-1.5 border-b ${isLastCol ? "" : "border-r"} border-slate-100 dark:border-zinc-800 ${today ? "bg-indigo-50/70 dark:bg-indigo-950/20" : ""}`}
                   >
                     <div className={`w-6 h-6 flex items-center justify-center rounded-full text-xs font-bold mb-1.5 ${
                       today
                         ? "bg-indigo-600 text-white shadow-sm"
-                        : "text-slate-500 dark:text-slate-400"
+                        : "text-slate-500 dark:text-zinc-400"
                     }`}>
                       {format(day, "d")}
                     </div>
@@ -190,19 +190,19 @@ export default function Calendar() {
                     key={event.id}
                     data-testid={`list-event-${event.id}`}
                     onClick={() => setSelectedEvent(event)}
-                    className="flex items-center gap-4 p-3 rounded-xl border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800/50 hover:border-indigo-200 dark:hover:border-indigo-700 cursor-pointer transition-all hover:shadow-sm"
+                    className="flex items-center gap-4 p-3 rounded-xl border border-slate-100 dark:border-zinc-800 bg-white dark:bg-zinc-800/50 hover:border-indigo-200 dark:hover:border-indigo-700 cursor-pointer transition-all hover:shadow-sm"
                   >
                     <div className="w-12 shrink-0 text-center">
                       <p className="text-[10px] font-bold text-slate-400 uppercase">
                         {format(new Date(event.eventDate), "MMM")}
                       </p>
-                      <p className="text-xl font-black text-slate-700 dark:text-slate-100 leading-none">
+                      <p className="text-xl font-black text-slate-700 dark:text-white leading-none">
                         {format(new Date(event.eventDate), "d")}
                       </p>
                     </div>
                     <div className="text-xl shrink-0">{emoji}</div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-slate-800 dark:text-slate-200 truncate text-sm">{event.eventName}</p>
+                      <p className="font-semibold text-slate-800 dark:text-zinc-100 truncate text-sm">{event.eventName}</p>
                       <p className="text-xs text-slate-400 truncate mt-0.5">
                         {event.eventType}
                         {client ? ` · ${client.name}` : ""}
@@ -214,7 +214,7 @@ export default function Calendar() {
                         <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                           daysLeft <= 7 ? "bg-red-100 text-red-600 dark:bg-red-950/50 dark:text-red-400" :
                           daysLeft <= 14 ? "bg-amber-100 text-amber-600 dark:bg-amber-950/50 dark:text-amber-400" :
-                          "bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-400"
+                          "bg-slate-100 text-slate-500 dark:bg-zinc-800 dark:text-zinc-400"
                         }`}>
                           {daysLeft === 0 ? "Today" : `${daysLeft}d`}
                         </span>
@@ -227,10 +227,10 @@ export default function Calendar() {
             </div>
           </div>
         ) : (
-          <div className="rounded-2xl border border-dashed border-slate-200 dark:border-slate-700 py-12 text-center">
-            <CalendarDays className="w-10 h-10 text-slate-200 dark:text-slate-700 mx-auto mb-3" />
+          <div className="rounded-2xl border border-dashed border-slate-200 dark:border-zinc-800 py-12 text-center">
+            <CalendarDays className="w-10 h-10 text-zinc-300 dark:text-zinc-700 mx-auto mb-3" />
             <p className="text-slate-400 font-medium text-sm">No events in {format(currentMonth, "MMMM yyyy")}</p>
-            <p className="text-slate-300 dark:text-slate-600 text-xs mt-1">Navigate to another month or create new events</p>
+            <p className="text-slate-300 dark:text-zinc-600 text-xs mt-1">Navigate to another month or create new events</p>
             {upcomingOverall.length > 0 && (
               <div className="mt-6 text-left max-w-sm mx-auto px-4">
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-2">Next upcoming events</p>
@@ -248,7 +248,7 @@ export default function Calendar() {
                     >
                       <div className={`w-2 h-2 rounded-full shrink-0 ${cfg.dot}`} />
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-slate-600 dark:text-slate-400 group-hover:text-indigo-600 transition-colors truncate">{e.eventName}</p>
+                        <p className="text-sm font-medium text-slate-600 dark:text-zinc-400 group-hover:text-indigo-600 transition-colors truncate">{e.eventName}</p>
                         <p className="text-xs text-slate-400">{format(new Date(e.eventDate), "MMM d, yyyy")}</p>
                       </div>
                       <span className="text-xs text-slate-400">{daysLeft}d away</span>
@@ -275,34 +275,34 @@ export default function Calendar() {
                 {(STATUS_CONFIG[selectedEvent.status] || STATUS_CONFIG.lead).label}
               </Badge>
               <div className="space-y-2.5">
-                <div className="flex items-center gap-2.5 text-sm text-slate-600 dark:text-slate-400">
+                <div className="flex items-center gap-2.5 text-sm text-slate-600 dark:text-zinc-400">
                   <CalendarDays className="w-4 h-4 text-slate-400 shrink-0" />
                   <span>{format(new Date(selectedEvent.eventDate), "EEEE, MMMM d, yyyy")}</span>
                 </div>
-                <div className="flex items-center gap-2.5 text-sm text-slate-600 dark:text-slate-400">
+                <div className="flex items-center gap-2.5 text-sm text-slate-600 dark:text-zinc-400">
                   <Zap className="w-4 h-4 text-slate-400 shrink-0" />
                   <span>{selectedEvent.eventType}</span>
                 </div>
                 {getClient(selectedEvent.clientId) && (
-                  <div className="flex items-center gap-2.5 text-sm text-slate-600 dark:text-slate-400">
+                  <div className="flex items-center gap-2.5 text-sm text-slate-600 dark:text-zinc-400">
                     <Users className="w-4 h-4 text-slate-400 shrink-0" />
                     <span>{getClient(selectedEvent.clientId)?.name}</span>
                   </div>
                 )}
                 {selectedEvent.venueId && getVenue(selectedEvent.venueId) && (
-                  <div className="flex items-center gap-2.5 text-sm text-slate-600 dark:text-slate-400">
+                  <div className="flex items-center gap-2.5 text-sm text-slate-600 dark:text-zinc-400">
                     <MapPin className="w-4 h-4 text-slate-400 shrink-0" />
                     <span>{getVenue(selectedEvent.venueId)?.name}</span>
                   </div>
                 )}
                 {selectedEvent.guestCount && (
-                  <div className="flex items-center gap-2.5 text-sm text-slate-600 dark:text-slate-400">
+                  <div className="flex items-center gap-2.5 text-sm text-slate-600 dark:text-zinc-400">
                     <Users className="w-4 h-4 text-slate-400 shrink-0" />
                     <span>{selectedEvent.guestCount} guests</span>
                   </div>
                 )}
                 {selectedEvent.budget && (
-                  <div className="flex items-center gap-2.5 text-sm text-slate-600 dark:text-slate-400">
+                  <div className="flex items-center gap-2.5 text-sm text-slate-600 dark:text-zinc-400">
                     <DollarSign className="w-4 h-4 text-slate-400 shrink-0" />
                     <span>${Number(selectedEvent.budget).toLocaleString()}</span>
                   </div>
@@ -315,10 +315,10 @@ export default function Calendar() {
                   <div className={`rounded-lg p-3 text-center ${
                     days <= 3 ? "bg-red-50 dark:bg-red-950/30" :
                     days <= 14 ? "bg-amber-50 dark:bg-amber-950/30" :
-                    "bg-slate-50 dark:bg-slate-800/50"
+                    "bg-slate-50 dark:bg-zinc-800/50"
                   }`}>
                     <p className={`text-2xl font-black ${
-                      days <= 3 ? "text-red-600" : days <= 14 ? "text-amber-600" : "text-slate-600 dark:text-slate-300"
+                      days <= 3 ? "text-red-600" : days <= 14 ? "text-amber-600" : "text-slate-600 dark:text-zinc-300"
                     }`}>{days === 0 ? "TODAY" : `${days}`}</p>
                     {days > 0 && <p className="text-xs text-slate-400 mt-0.5">days until event</p>}
                   </div>
