@@ -8,6 +8,9 @@ import { passport } from "./auth";
 const app = express();
 const httpServer = createServer(app);
 
+// Trust Replit's reverse proxy so cookies and secure detection work correctly
+app.set("trust proxy", 1);
+
 declare module "http" {
   interface IncomingMessage {
     rawBody: unknown;
@@ -31,6 +34,7 @@ app.use(
 
 app.use(express.urlencoded({ extended: false, limit: "15mb" }));
 
+const isProduction = process.env.NODE_ENV === "production";
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "eventelite-dev-secret",
@@ -38,7 +42,8 @@ app.use(
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: false,
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     },
   }),

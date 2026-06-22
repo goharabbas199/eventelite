@@ -23,6 +23,7 @@ async function apiPost(url: string, body: object) {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
+    credentials: "include",
   });
   const data = await res.json();
   if (!res.ok) throw Object.assign(new Error(data.message || "Something went wrong"), { data });

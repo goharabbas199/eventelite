@@ -14,11 +14,12 @@ import admin from "firebase-admin";
 
 // Normalised payload returned by either strategy
 export interface FirebaseTokenPayload {
-  uid:          string;
-  email?:       string;
-  name?:        string;
-  phone_number?: string;
-  picture?:     string;
+  uid:            string;
+  email?:         string;
+  email_verified?: boolean;
+  name?:          string;
+  phone_number?:  string;
+  picture?:       string;
 }
 
 // ── Strategy 1: Admin SDK ────────────────────────────────────────────────────
