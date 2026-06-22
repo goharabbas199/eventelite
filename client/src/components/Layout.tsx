@@ -38,32 +38,57 @@ export function Layout({
     }
   }, [appearance.animationsEnabled]);
 
-  // ── Entrance reveal via IntersectionObserver ──
+  // ── Entrance reveal via IntersectionObserver + MutationObserver ──
+  // The IO adds "visible" when elements enter the viewport.
+  // The MO watches for .reveal elements added after data loads (async renders)
+  // so they are also observed even if they didn't exist at navigation time.
   useEffect(() => {
     const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (prefersReduced) return;
 
-    const timeout = setTimeout(() => {
-      const elements = document.querySelectorAll<HTMLElement>(".reveal:not(.visible)");
-      if (!elements.length) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            (entry.target as HTMLElement).classList.add("visible");
+            io.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.07, rootMargin: "0px 0px -16px 0px" }
+    );
 
-      const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              (entry.target as HTMLElement).classList.add("visible");
-              observer.unobserve(entry.target);
-            }
-          });
-        },
-        { threshold: 0.07, rootMargin: "0px 0px -16px 0px" }
-      );
+    const observeNew = (root: Element | Document) => {
+      (root instanceof Element ? root : document).querySelectorAll<HTMLElement>(
+        ".reveal:not(.visible)"
+      ).forEach((el) => io.observe(el));
+    };
 
-      elements.forEach((el) => observer.observe(el));
-      return () => observer.disconnect();
-    }, 60);
+    // Observe elements already in the DOM
+    observeNew(document);
 
-    return () => clearTimeout(timeout);
+    // Watch for elements added later (e.g. after async data loads)
+    const mo = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        mutation.addedNodes.forEach((node) => {
+          if (node.nodeType !== Node.ELEMENT_NODE) return;
+          const el = node as Element;
+          if (el.classList?.contains("reveal") && !el.classList.contains("visible")) {
+            io.observe(el as HTMLElement);
+          }
+          el.querySelectorAll?.<HTMLElement>(".reveal:not(.visible)").forEach(
+            (child) => io.observe(child)
+          );
+        });
+      });
+    });
+
+    mo.observe(document.body, { childList: true, subtree: true });
+
+    return () => {
+      io.disconnect();
+      mo.disconnect();
+    };
   }, [location]);
 
   // ── 3D tilt via event delegation on [data-tilt] ──
