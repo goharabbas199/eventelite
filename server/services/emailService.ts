@@ -1,15 +1,19 @@
 import nodemailer from "nodemailer";
+import { Resend } from "resend";
 
+// ── Provider detection ─────────────────────────────────────────────────────────
+const resendApiKey = process.env.RESEND_API_KEY;
 const smtpConfigured = !!(
   process.env.SMTP_HOST &&
   process.env.SMTP_USER &&
   process.env.SMTP_PASS
 );
 
-let transporter: nodemailer.Transporter | null = null;
+const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
+let smtpTransporter: nodemailer.Transporter | null = null;
 if (smtpConfigured) {
-  transporter = nodemailer.createTransport({
+  smtpTransporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
     port: parseInt(process.env.SMTP_PORT || "587"),
     secure: process.env.SMTP_PORT === "465",
@@ -20,6 +24,12 @@ if (smtpConfigured) {
   });
 }
 
+const FROM_ADDRESS =
+  process.env.SMTP_FROM ||
+  process.env.SMTP_USER ||
+  "noreply@eventelite.app";
+
+// ── Email template ─────────────────────────────────────────────────────────────
 function otpEmailHtml(otp: string, type: "email_verify" | "password_reset") {
   const isVerify = type === "email_verify";
   const title = isVerify ? "Verify your email address" : "Reset your password";
@@ -52,6 +62,7 @@ function otpEmailHtml(otp: string, type: "email_verify" | "password_reset") {
 </html>`;
 }
 
+// ── Send function ──────────────────────────────────────────────────────────────
 export async function sendOtpEmail(
   email: string,
   otp: string,
@@ -62,21 +73,38 @@ export async function sendOtpEmail(
       ? "Your EventElite verification code"
       : "Your EventElite password reset code";
 
-  if (smtpConfigured && transporter) {
-    await transporter.sendMail({
-      from: `"EventElite" <${process.env.SMTP_USER}>`,
+  const html = otpEmailHtml(otp, type);
+
+  // 1. Try Resend (preferred — single API key, free tier)
+  if (resend) {
+    const { error } = await resend.emails.send({
+      from: `EventElite <${FROM_ADDRESS}>`,
       to: email,
       subject,
-      html: otpEmailHtml(otp, type),
+      html,
+    });
+    if (error) {
+      console.error("[EventElite] Resend error:", error);
+      throw new Error("Failed to send email via Resend");
+    }
+    return {};
+  }
+
+  // 2. Try SMTP (nodemailer)
+  if (smtpTransporter) {
+    await smtpTransporter.sendMail({
+      from: `"EventElite" <${FROM_ADDRESS}>`,
+      to: email,
+      subject,
+      html,
     });
     return {};
   }
 
+  // 3. Dev fallback — log OTP to console
   console.log(`\n${"=".repeat(50)}`);
   console.log(`[EventElite Auth] OTP for ${email} (${type}): ${otp}`);
-  console.log(
-    `[EventElite Auth] Set SMTP_HOST/SMTP_USER/SMTP_PASS to send real emails`
-  );
+  console.log(`[EventElite Auth] Add RESEND_API_KEY or SMTP_HOST/USER/PASS to send real emails`);
   console.log(`${"=".repeat(50)}\n`);
 
   return { devOtp: otp };
