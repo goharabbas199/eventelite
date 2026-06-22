@@ -208,24 +208,6 @@ export async function registerRoutes(
     res.json(safeUser(req.user));
   });
 
-  // GET /api/auth/google — Google OAuth (only if credentials configured)
-  app.get("/api/auth/google", (req, res, next) => {
-    if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
-      return res.status(501).json({ message: "Google login is not configured. Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables." });
-    }
-    passport.authenticate("google", { scope: ["profile", "email"] })(req, res, next);
-  });
-
-  app.get("/api/auth/google/callback", (req, res, next) => {
-    passport.authenticate("google", (err: any, user: any) => {
-      if (err || !user) return res.redirect("/login?error=google_failed");
-      req.login(user, (loginErr) => {
-        if (loginErr) return res.redirect("/login?error=google_failed");
-        res.redirect("/");
-      });
-    })(req, res, next);
-  });
-
   // ===================== VENDORS ========================
 
   app.get(api.vendors.list.path, async (_req, res) => {

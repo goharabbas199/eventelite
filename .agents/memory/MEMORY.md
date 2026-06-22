@@ -1,1 +1,2 @@
-- [Firebase token verification fallback](firebase-token-fallback.md) — when Admin SDK service-account creds are absent, verify Firebase ID tokens via REST API using the public Web API key (VITE_FIREBASE_API_KEY).
+- [Auth merge strategy](auth-merge.md) — Firebase Google Sign-In (popup) coexists with email OTP + forgot/reset password; passport-google-oauth20 must NOT be imported.
+- [Schema-to-DB migration gap](schema-migration-gap.md) — New Drizzle schema columns don't auto-apply to the live DB; must run ALTER TABLE manually or via drizzle-kit push.
