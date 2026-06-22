@@ -44,7 +44,7 @@ export interface IStorage {
   createUser(data: { fullName: string; email: string; passwordHash?: string | null; googleId?: string; emailVerified?: boolean }): Promise<User>;
   updateUserProfile(id: number, data: { fullName?: string; email?: string; phone?: string | null; bio?: string | null; avatarUrl?: string | null; role?: string }): Promise<User>;
   findUserByFirebaseUid(firebaseUid: string): Promise<User | undefined>;
-  findOrCreateFirebaseUser(data: { firebaseUid: string; email: string; fullName: string; avatarUrl?: string; phone?: string }): Promise<User>;
+  findOrCreateFirebaseUser(data: { firebaseUid: string; email: string; fullName: string; avatarUrl?: string; phone?: string; emailVerified?: boolean }): Promise<User>;
   updateUserEmailVerified(id: number): Promise<User>;
   updateUserPassword(id: number, passwordHash: string): Promise<User>;
   linkGoogleId(userId: number, googleId: string): Promise<User>;
@@ -170,9 +170,21 @@ export class DatabaseStorage implements IStorage {
     fullName: string;
     avatarUrl?: string;
     phone?: string;
+    emailVerified?: boolean;
   }): Promise<User> {
     const byUid = await this.findUserByFirebaseUid(data.firebaseUid);
-    if (byUid) return byUid;
+    if (byUid) {
+      // Always sync emailVerified from Firebase token
+      if (data.emailVerified && !byUid.emailVerified) {
+        const [updated] = await db
+          .update(users)
+          .set({ emailVerified: true })
+          .where(eq(users.id, byUid.id))
+          .returning();
+        return updated;
+      }
+      return byUid;
+    }
 
     const byEmail = await this.getUserByEmail(data.email);
     if (byEmail) {
@@ -182,6 +194,7 @@ export class DatabaseStorage implements IStorage {
           firebaseUid: data.firebaseUid,
           avatarUrl: byEmail.avatarUrl || data.avatarUrl || null,
           phone: byEmail.phone || data.phone || null,
+          emailVerified: data.emailVerified ?? byEmail.emailVerified,
         })
         .where(eq(users.id, byEmail.id))
         .returning();
@@ -197,6 +210,7 @@ export class DatabaseStorage implements IStorage {
         passwordHash: null,
         avatarUrl: data.avatarUrl || null,
         phone: data.phone || null,
+        emailVerified: data.emailVerified ?? false,
       })
       .returning();
     return created;
