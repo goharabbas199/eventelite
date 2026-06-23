@@ -1,3 +1,5 @@
+// Load env vars before any other module reads process.env at import time.
+import "./load-env";
 import express, { type Request, Response, NextFunction } from "express";
 import session from "express-session";
 import { registerRoutes } from "./routes";
