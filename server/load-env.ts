@@ -1,3 +1,4 @@
+// Loads env vars from local env files before any other module reads process.env.
 import { config } from "dotenv";
 
 // Load environment variables from local env files before any other module
@@ -7,4 +8,3 @@ import { config } from "dotenv";
 config({ path: ".env.development.local" });
 config({ path: ".env.local" });
 config(); // .env fallback
-// env loaded

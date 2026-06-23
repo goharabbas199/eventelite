@@ -127,15 +127,42 @@ app.use((req, res, next) => {
 
     const port = parseInt(process.env.PORT || "5000", 10);
 
-    httpServer.listen(
-      {
-        port,
-        host: "0.0.0.0",
-      },
-      () => {
-        log(`serving on port ${port}`);
-      },
-    );
+    // Resilient bind: during a dev-server restart the previous process may still
+    // be releasing the port for a brief moment. Instead of letting the
+    // unhandled 'error' event hard-crash Node (which stops the supervisor from
+    // restarting), retry the bind a few times before giving up.
+    const MAX_BIND_ATTEMPTS = 10;
+    let bindAttempts = 0;
+
+    const startListening = () => {
+      httpServer.listen(
+        {
+          port,
+          host: "0.0.0.0",
+        },
+        () => {
+          log(`serving on port ${port}`);
+        },
+      );
+    };
+
+    httpServer.on("error", (err: NodeJS.ErrnoException) => {
+      if (err.code === "EADDRINUSE" && bindAttempts < MAX_BIND_ATTEMPTS) {
+        bindAttempts += 1;
+        log(
+          `port ${port} in use, retrying (${bindAttempts}/${MAX_BIND_ATTEMPTS})...`,
+        );
+        setTimeout(() => {
+          httpServer.close();
+          startListening();
+        }, 1000);
+        return;
+      }
+      console.error("HTTP server error:", err);
+      process.exit(1);
+    });
+
+    startListening();
   } catch (err) {
     console.error("Server startup failed:", err);
     process.exit(1);
