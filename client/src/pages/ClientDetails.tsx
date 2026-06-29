@@ -131,52 +131,57 @@ function ServiceRow({
   onDeleteTask,
 }: ServiceRowProps) {
   const completedCount = serviceTasks.filter((t) => t.status === "Completed").length;
+  const progress = serviceTasks.length > 0 ? Math.round((completedCount / serviceTasks.length) * 100) : 0;
 
   return (
     <React.Fragment>
-      <TableRow className="hover:bg-slate-50/80 dark:hover:bg-slate-700/20 transition-colors">
-        <TableCell className="pl-6">
+      <TableRow className="hover:bg-slate-50/60 dark:hover:bg-slate-800/30 transition-colors duration-150">
+        <TableCell className="pl-6 py-4">
           <div className="flex flex-col gap-0.5">
-            <span className="font-semibold text-slate-700 dark:text-slate-300 text-sm">
+            <span className="font-semibold text-slate-700 dark:text-slate-200 text-sm leading-snug">
               {service.serviceName}
             </span>
             {vendor && (
-              <span className="text-xs text-indigo-500 dark:text-indigo-400">
+              <span className="text-xs text-indigo-500 dark:text-indigo-400 font-medium">
                 {vendor.name}
               </span>
             )}
           </div>
         </TableCell>
-        <TableCell className="font-medium text-slate-800 dark:text-slate-200 text-sm">
+        <TableCell className="py-4 font-semibold text-slate-800 dark:text-slate-100 text-sm tabular-nums">
           ${Number(service.cost).toLocaleString()}
         </TableCell>
-        <TableCell className="text-sm text-slate-500 dark:text-slate-400">
-          {service.notes || "—"}
+        <TableCell className="py-4 text-sm text-slate-400 dark:text-slate-500 max-w-[200px]">
+          <span className="truncate block">{service.notes || "—"}</span>
         </TableCell>
-        <TableCell className="text-right pr-6">
-          <div className="flex justify-end items-center gap-2">
+        <TableCell className="py-4 text-right pr-6">
+          <div className="flex justify-end items-center gap-1.5">
             {serviceTasks.length > 0 && (
               <button
                 onClick={onToggleExpand}
-                title="View AI tasks"
-                className="flex items-center gap-1 text-xs font-medium text-indigo-500 hover:text-indigo-700 transition-colors"
+                title={isExpanded ? "Collapse checklist" : "View AI checklist"}
+                className={`flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-md border transition-all duration-150 ${
+                  isExpanded
+                    ? "bg-indigo-100 dark:bg-indigo-500/20 border-indigo-200 dark:border-indigo-500/30 text-indigo-700 dark:text-indigo-300"
+                    : "bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:border-indigo-300 dark:hover:border-indigo-500/40 hover:text-indigo-600 dark:hover:text-indigo-400"
+                }`}
               >
                 <Bot className="w-3.5 h-3.5" />
-                <span>{completedCount}/{serviceTasks.length}</span>
+                <span className="tabular-nums">{completedCount}/{serviceTasks.length}</span>
                 {isExpanded
-                  ? <ChevronDown className="w-3.5 h-3.5" />
-                  : <ChevronRight className="w-3.5 h-3.5" />}
+                  ? <ChevronDown className="w-3 h-3" />
+                  : <ChevronRight className="w-3 h-3" />}
               </button>
             )}
             <button
               onClick={onEdit}
-              className="p-1 rounded-md text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-colors"
+              className="p-1.5 rounded-md text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-all duration-150"
             >
               <Pencil className="w-3.5 h-3.5" />
             </button>
             <button
               onClick={onDelete}
-              className="p-1 rounded-md text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
+              className="p-1.5 rounded-md text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-all duration-150"
             >
               <Trash2 className="w-3.5 h-3.5" />
             </button>
@@ -185,44 +190,72 @@ function ServiceRow({
       </TableRow>
 
       {isExpanded && serviceTasks.length > 0 && (
-        <TableRow>
-          <TableCell
-            colSpan={4}
-            className="p-0 bg-indigo-50/50 dark:bg-indigo-950/20 border-b border-indigo-100 dark:border-indigo-900/30"
-          >
-            <div className="px-6 py-3">
-              <div className="flex items-center gap-1.5 mb-2.5">
-                <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
-                <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 uppercase tracking-wide">
-                  AI Checklist — {service.serviceName}
-                </span>
-                <span className="text-xs text-slate-400 ml-1">
-                  {completedCount}/{serviceTasks.length} done
-                </span>
+        <TableRow className="hover:bg-transparent">
+          <TableCell colSpan={4} className="p-0 border-0">
+            <div className="mx-4 mb-4 mt-1 rounded-xl border border-zinc-200/80 dark:border-zinc-700/60 bg-zinc-50 dark:bg-zinc-900/60 overflow-hidden">
+              {/* Checklist header */}
+              <div className="flex items-center justify-between px-5 py-3 border-b border-zinc-200/60 dark:border-zinc-700/40">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-1.5 rounded-md bg-indigo-100 dark:bg-indigo-500/15">
+                    <Sparkles className="w-3 h-3 text-indigo-600 dark:text-indigo-400" />
+                  </div>
+                  <div>
+                    <span className="text-[11px] font-bold tracking-widest uppercase text-indigo-600 dark:text-indigo-400">
+                      AI Checklist
+                    </span>
+                    <span className="text-[11px] text-zinc-400 dark:text-zinc-500 ml-1.5">
+                      {service.serviceName}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  {/* Progress bar */}
+                  <div className="hidden sm:flex items-center gap-2">
+                    <div className="w-24 h-1.5 rounded-full bg-zinc-200 dark:bg-zinc-700/60 overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-emerald-500 transition-all duration-500"
+                        style={{ width: `${progress}%` }}
+                      />
+                    </div>
+                    <span className="text-[11px] tabular-nums text-zinc-400 dark:text-zinc-500">
+                      {progress}%
+                    </span>
+                  </div>
+                  <span className="text-[11px] tabular-nums px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400">
+                    {completedCount} / {serviceTasks.length}
+                  </span>
+                </div>
               </div>
-              <ul className="space-y-0.5">
+
+              {/* Task list */}
+              <ul className="divide-y divide-zinc-100 dark:divide-zinc-800/60">
                 {serviceTasks.map((task) => (
-                  <li key={task.id} className="flex items-center gap-2.5 py-1 group rounded-lg">
+                  <li
+                    key={task.id}
+                    className="flex items-start gap-3 px-5 py-3 group hover:bg-zinc-100/60 dark:hover:bg-zinc-800/30 transition-colors duration-100"
+                  >
                     <button
                       onClick={() => onToggleTask(task.id, task.status)}
-                      className="shrink-0 text-slate-400 hover:text-emerald-500 transition-colors"
+                      className="shrink-0 mt-0.5 transition-all duration-200 hover:scale-110 active:scale-95"
                     >
-                      {task.status === "Completed"
-                        ? <SquareCheck className="w-4 h-4 text-emerald-500" />
-                        : <Square className="w-4 h-4" />}
+                      {task.status === "Completed" ? (
+                        <SquareCheck className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
+                      ) : (
+                        <Square className="w-4 h-4 text-zinc-400 dark:text-zinc-600 hover:text-zinc-600 dark:hover:text-zinc-400 transition-colors" />
+                      )}
                     </button>
                     <span
-                      className={`text-sm flex-1 ${
+                      className={`flex-1 text-sm font-medium leading-snug transition-colors duration-200 ${
                         task.status === "Completed"
-                          ? "line-through text-slate-400"
-                          : "text-slate-700 dark:text-slate-300"
+                          ? "line-through text-zinc-400 dark:text-zinc-600"
+                          : "text-zinc-700 dark:text-zinc-200"
                       }`}
                     >
                       {task.title}
                     </span>
                     <button
                       onClick={() => onDeleteTask(task.id)}
-                      className="opacity-0 group-hover:opacity-100 p-1 text-red-400 hover:text-red-600 transition-all"
+                      className="opacity-0 group-hover:opacity-100 p-1 rounded-md text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all duration-150"
                     >
                       <Trash2 className="w-3 h-3" />
                     </button>

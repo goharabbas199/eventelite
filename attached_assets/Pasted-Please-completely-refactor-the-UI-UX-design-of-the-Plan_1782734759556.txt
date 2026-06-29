@@ -1,0 +1,23 @@
+Please completely refactor the UI/UX design of the "Planned Services" table and its nested "AI Generated Checklist" section inside `src/pages/ClientDetails.tsx` to match premium enterprise SaaS design standards. 
+
+THE VISUAL PROBLEM (Based on image_bd917a.png):
+Currently, expanding a service row to see the AI Checklist drops raw text and uneven checkboxes directly into a squeezed table cell expansion. This looks messy, unaligned, and breaks the table's structural flow.
+
+PLEASE IMPLEMENT THESE FIXES STAGE-BY-STAGE:
+
+1. Move or Redesign the Checklist Container:
+   - Completely remove the current messy inline table expansion.
+   - Instead, when a row is clicked or a "View Checklist" action button is pressed, display the checklist in a beautiful, isolated modern card nested container directly below the row, OR use a clean slide-out Side Panel Sheet component (`@/components/ui/sheet`) if available.
+   - If keeping it inline, wrap the expanded content in a clean container with proper padding (`p-6`), a sleek subtle background (`bg-zinc-900/40`), rounded corners (`rounded-xl`), and an inner border (`border border-zinc-800/60`).
+
+2. Clean Up Checklist Items & Typography:
+   - Every checklist item must be perfectly aligned. Use a flex row layout (`flex items-start gap-3 py-2 border-b border-zinc-800/40 last:border-0`).
+   - Replace standard primitive checkboxes with minimalist, polished custom interactive icons (e.g., using `Square` and `SquareCheck` or `Circle` and `CheckCircle2` from lucide-react with smooth transition animations).
+   - Use absolute typographic hierarchy: Task names should be clear and legible (`text-sm font-medium text-zinc-200`), and dates/details should be minimalist and muted (`text-xs text-zinc-500`).
+
+3. Simplify and De-Clutter the Surrounding UI:
+   - Clean up table padding (`px-6 py-4`) so columns have room to breathe and never clip text.
+   - Remove any loose, non-essential duplicate action text or cluttered borders. Let the whitespace create the design.
+
+SAFETY GUARDRAIL:
+- Absolutely do NOT break, remove, or modify any underlying state variables, data-fetching logic (`useTasks`, `useUpdateTask`), click-event handlers, or mutation tracking hooks. Only change the visual structure, layout nesting, and Tailwind CSS styles. Maintain our high-end dark SaaS design system theme.
