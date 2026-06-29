@@ -26,7 +26,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -66,15 +65,12 @@ import {
   ChevronRight,
   Sparkles,
   Bot,
-  Square,
-  SquareCheck,
+  Circle,
+  CheckCircle2,
   ListChecks,
   CalendarDays,
   FileText,
   MoreHorizontal,
-  LayoutDashboard,
-  CreditCard,
-  TrendingUp,
 } from "lucide-react";
 import { format } from "date-fns";
 import type {
@@ -192,9 +188,9 @@ function ServiceRow({
       {isExpanded && serviceTasks.length > 0 && (
         <TableRow className="hover:bg-transparent">
           <TableCell colSpan={4} className="p-0 border-0">
-            <div className="mx-4 mb-4 mt-1 rounded-xl border border-zinc-200/80 dark:border-zinc-700/60 bg-zinc-50 dark:bg-zinc-900/60 overflow-hidden">
+            <div className="bg-zinc-900/60 backdrop-blur-md border border-zinc-800/80 rounded-xl mx-4 my-2 shadow-inner overflow-hidden">
               {/* Checklist header */}
-              <div className="flex items-center justify-between px-5 py-3 border-b border-zinc-200/60 dark:border-zinc-700/40">
+              <div className="flex items-center justify-between px-5 py-3 border-b border-zinc-800/60">
                 <div className="flex items-center gap-2.5">
                   <div className="p-1.5 rounded-md bg-indigo-100 dark:bg-indigo-500/15">
                     <Sparkles className="w-3 h-3 text-indigo-600 dark:text-indigo-400" />
@@ -228,34 +224,34 @@ function ServiceRow({
               </div>
 
               {/* Task list */}
-              <ul className="divide-y divide-zinc-100 dark:divide-zinc-800/60">
+              <ul>
                 {serviceTasks.map((task) => (
                   <li
                     key={task.id}
-                    className="flex items-start gap-3 px-5 py-3 group hover:bg-zinc-100/60 dark:hover:bg-zinc-800/30 transition-colors duration-100"
+                    className="flex items-center gap-3 px-5 py-2 border-b border-zinc-800/30 last:border-0 group hover:bg-zinc-800/20 transition-colors duration-100"
                   >
                     <button
                       onClick={() => onToggleTask(task.id, task.status)}
-                      className="shrink-0 mt-0.5 transition-all duration-200 hover:scale-110 active:scale-95"
+                      className="shrink-0 transition-all duration-200 hover:scale-110 active:scale-95"
                     >
                       {task.status === "Completed" ? (
-                        <SquareCheck className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
+                        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                       ) : (
-                        <Square className="w-4 h-4 text-zinc-400 dark:text-zinc-600 hover:text-zinc-600 dark:hover:text-zinc-400 transition-colors" />
+                        <Circle className="w-4 h-4 text-zinc-500 hover:text-zinc-300 transition-colors" />
                       )}
                     </button>
                     <span
                       className={`flex-1 text-sm font-medium leading-snug transition-colors duration-200 ${
                         task.status === "Completed"
-                          ? "line-through text-zinc-400 dark:text-zinc-600"
-                          : "text-zinc-700 dark:text-zinc-200"
+                          ? "line-through text-zinc-600"
+                          : "text-zinc-200"
                       }`}
                     >
                       {task.title}
                     </span>
                     <button
                       onClick={() => onDeleteTask(task.id)}
-                      className="opacity-0 group-hover:opacity-100 p-1 rounded-md text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all duration-150"
+                      className="opacity-0 group-hover:opacity-100 p-1 rounded-md text-zinc-500 hover:text-red-400 hover:bg-red-500/10 transition-all duration-150"
                     >
                       <Trash2 className="w-3 h-3" />
                     </button>
@@ -500,27 +496,13 @@ export default function ClientDetails() {
           ))}
         </div>
 
-        {/* ── Tabs ── */}
-        <Tabs defaultValue="overview">
-          <TabsList className="w-full sm:w-auto grid grid-cols-3 sm:inline-flex h-10 rounded-xl bg-slate-100 dark:bg-slate-800 p-1 gap-0.5">
-            <TabsTrigger value="overview" className="rounded-lg text-xs gap-1.5 data-[state=active]:shadow-sm">
-              <LayoutDashboard className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Overview &amp;</span> Checklist
-            </TabsTrigger>
-            <TabsTrigger value="ledger" className="rounded-lg text-xs gap-1.5 data-[state=active]:shadow-sm">
-              <CreditCard className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Financial</span> Ledger
-            </TabsTrigger>
-            <TabsTrigger value="simulations" className="rounded-lg text-xs gap-1.5 data-[state=active]:shadow-sm">
-              <TrendingUp className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Simulations &amp;</span> Insights
-            </TabsTrigger>
-          </TabsList>
+        {/* ── Main 2-column grid ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-          {/* ──────────────────────────────────────────────
-              TAB 1 — Overview & Checklist
-          ────────────────────────────────────────────── */}
-          <TabsContent value="overview" className="mt-4">
+          {/* ── Left column — interactive tables ── */}
+          <div className="lg:col-span-2 space-y-5">
+
+            {/* Event Checklist */}
             <Card className="border border-slate-100 dark:border-slate-700 shadow-sm">
               <CardHeader className="border-b border-slate-100 dark:border-slate-700 pb-3">
                 <div className="flex items-center justify-between">
@@ -528,7 +510,7 @@ export default function ClientDetails() {
                     <ListChecks className="w-4 h-4 text-slate-400" />
                     <CardTitle className="text-base">Event Checklist</CardTitle>
                     <span className="text-xs text-slate-400 ml-1">
-                      {taskList.filter((t) => t.status === "Completed").length}/{taskList.length} done
+                      {taskList.filter((t) => !t.serviceId && t.status === "Completed").length}/{taskList.filter((t) => !t.serviceId).length} done
                     </span>
                   </div>
                 </div>
@@ -562,13 +544,13 @@ export default function ClientDetails() {
               </CardHeader>
 
               <CardContent className="p-0">
-                {taskList.length === 0 ? (
+                {taskList.filter((t) => !t.serviceId).length === 0 ? (
                   <p className="text-sm text-slate-400 text-center py-10">
                     No tasks yet — add one above.
                   </p>
                 ) : (
                   <ul className="divide-y divide-slate-100 dark:divide-slate-800">
-                    {taskList.map((task) => (
+                    {taskList.filter((t) => !t.serviceId).map((task) => (
                       <li
                         key={task.id}
                         className="flex items-center gap-3 px-5 py-3 hover:bg-slate-50/80 dark:hover:bg-slate-700/20 transition-colors group"
@@ -581,12 +563,12 @@ export default function ClientDetails() {
                               status: task.status === "Completed" ? "Pending" : "Completed",
                             })
                           }
-                          className="shrink-0 text-slate-300 hover:text-emerald-500 transition-colors"
+                          className="shrink-0 transition-all duration-200 hover:scale-110 active:scale-95"
                           data-testid={`button-toggle-task-${task.id}`}
                         >
                           {task.status === "Completed"
-                            ? <SquareCheck className="w-5 h-5 text-emerald-500" />
-                            : <Square className="w-5 h-5" />}
+                            ? <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                            : <Circle className="w-5 h-5 text-slate-300 dark:text-slate-600" />}
                         </button>
 
                         <div className="flex-1 min-w-0">
@@ -629,17 +611,8 @@ export default function ClientDetails() {
                 )}
               </CardContent>
             </Card>
-          </TabsContent>
 
-          {/* ──────────────────────────────────────────────
-              TAB 2 — Financial Ledger
-          ────────────────────────────────────────────── */}
-          <TabsContent value="ledger" className="mt-4">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-              {/* Left — tables */}
-              <div className="lg:col-span-2 flex flex-col gap-4">
-
-                {/* Planned Services */}
+            {/* Planned Services */}
                 <Card className="border border-slate-100 dark:border-slate-700 shadow-sm">
                   <CardHeader className="flex flex-row items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
                     <CardTitle className="text-base">Planned Services</CardTitle>
@@ -940,11 +913,12 @@ export default function ClientDetails() {
                     )}
                   </CardContent>
                 </Card>
-              </div>
+          </div>
 
-              {/* Right — Budget Overview */}
-              <div>
-                <Card className="border border-slate-100 dark:border-slate-700 shadow-sm sticky top-4">
+          {/* ── Right column — summary sidebar ── */}
+          <div className="lg:col-span-1">
+            <div className="sticky top-4 space-y-5">
+              <Card className="border border-slate-100 dark:border-slate-700 shadow-sm">
                   <CardHeader className="pb-3 border-b border-slate-100 dark:border-slate-700">
                     <CardTitle className="text-base">Budget Overview</CardTitle>
                   </CardHeader>
@@ -1023,19 +997,12 @@ export default function ClientDetails() {
                     </div>
                   </CardContent>
                 </Card>
-              </div>
-            </div>
-          </TabsContent>
 
-          {/* ──────────────────────────────────────────────
-              TAB 3 — Simulations & Insights
-          ────────────────────────────────────────────── */}
-          <TabsContent value="simulations" className="mt-4">
-            <div className="max-w-md">
               <ProfitSimulator totalCost={totalCost} />
             </div>
-          </TabsContent>
-        </Tabs>
+          </div>
+
+        </div>
       </div>
     </Layout>
   );

@@ -1,4 +1,4 @@
-import { useCreatePlannedService, useUpdatePlannedService } from "@/hooks/use-clients";
+import { useCreatePlannedService, useUpdatePlannedService, useCreateVendorPayment } from "@/hooks/use-clients";
 import { useVendors } from "@/hooks/use-vendors";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -34,6 +34,7 @@ interface ServiceFormProps {
 export function ServiceForm({ clientId, editingService, onSuccess }: ServiceFormProps) {
   const { mutate: create, isPending: isCreating } = useCreatePlannedService();
   const { mutate: update, isPending: isUpdating } = useUpdatePlannedService();
+  const { mutate: createVendorPayment } = useCreateVendorPayment();
   const { data: vendors } = useVendors();
 
   const form = useForm<Omit<InsertPlannedService, "clientId">>({
@@ -55,7 +56,23 @@ export function ServiceForm({ clientId, editingService, onSuccess }: ServiceForm
     } else {
       create(
         { clientId, ...data },
-        { onSuccess: () => { form.reset(); onSuccess(); } }
+        {
+          onSuccess: (createdService) => {
+            // If vendor + cost assigned, immediately create the vendor payment record
+            if (createdService.vendorId && Number(createdService.cost) > 0) {
+              createVendorPayment({
+                clientId,
+                vendorId: createdService.vendorId,
+                serviceId: createdService.id,
+                amount: String(createdService.cost),
+                status: "Unpaid",
+                notes: `Auto-generated from Planned Service: ${createdService.serviceName}`,
+              });
+            }
+            form.reset();
+            onSuccess();
+          },
+        }
       );
     }
   }

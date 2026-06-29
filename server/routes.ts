@@ -396,25 +396,12 @@ export async function registerRoutes(
         clientId,
       });
 
-      // ── Automation: vendor payment + AI checklist ──────────────────────────
-      // Run both in parallel, non-blocking (don't fail the request if they fail)
+      // ── Automation: AI checklist ────────────────────────────────────────────
+      // Vendor payments are created client-side (in ServiceForm) to ensure
+      // immediate cache invalidation and UI update.
       const automations: Promise<void>[] = [];
 
-      // 1. Auto-create a vendor payment record if a vendor is assigned
-      if (service.vendorId && service.cost && Number(service.cost) > 0) {
-        automations.push(
-          storage.createVendorPayment({
-            vendorId: service.vendorId,
-            clientId,
-            serviceId: service.id,
-            amount: String(service.cost),
-            status: "Unpaid",
-            notes: `Auto-generated from Planned Service: ${service.serviceName}`,
-          }).then(() => {}).catch((e) => console.error("[Auto vendor payment] Failed:", e))
-        );
-      }
-
-      // 2. Generate AI checklist tasks for this service
+      // Generate AI checklist tasks for this service
       automations.push(
         runAI({
           feature: "service_checklist",
