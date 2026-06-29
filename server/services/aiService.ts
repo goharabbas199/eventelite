@@ -6,7 +6,8 @@ export type AIFeature =
   | "vendor_recommendation"
   | "budget_planner"
   | "profit_optimizer"
-  | "assistant";
+  | "assistant"
+  | "service_checklist";
 
 interface AIRequest {
   feature: AIFeature;
@@ -104,6 +105,12 @@ const SYSTEM_PROMPTS: Record<AIFeature, string> = {
   assistant: `You are an intelligent AI assistant for EventElite, a professional event management agency. You help users with event planning, budget analysis, vendor recommendations, and quote generation. When responding to structured requests (generate quote, plan event, budget allocation, etc.), respond with JSON. For general chat, respond naturally but concisely. Always be helpful and professional.
 
 If the user asks you to generate structured data, use JSON format. For open-ended questions, respond in plain text.`,
+
+  service_checklist: `You are a professional event planning AI. Given a service name, generate 6-10 specific, actionable preparation tasks for managing that service. Return valid JSON only — no markdown, no explanation. Use this exact structure:
+{
+  "tasks": ["task description 1", "task description 2", ...]
+}
+Focus on practical vendor coordination, preparation steps, and day-of logistics. Do NOT include any dates or deadlines in the task descriptions.`,
 };
 
 async function runWithOpenAI(request: AIRequest): Promise<any> {

@@ -1,3 +1,4 @@
+import React from "react";
 import { Layout } from "@/components/Layout";
 import {
   useClient,
@@ -48,6 +49,10 @@ import {
   ListChecks,
   CalendarDays,
   FileText,
+  ChevronDown,
+  ChevronRight,
+  Sparkles,
+  Bot,
 } from "lucide-react";
 import {
   Dialog,
@@ -110,6 +115,16 @@ export default function ClientDetails() {
   const [isVendorPaymentDialogOpen, setIsVendorPaymentDialogOpen] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [newTaskDueDate, setNewTaskDueDate] = useState("");
+  const [expandedServiceIds, setExpandedServiceIds] = useState<Set<number>>(new Set());
+
+  const toggleServiceExpand = (serviceId: number) => {
+    setExpandedServiceIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(serviceId)) next.delete(serviceId);
+      else next.add(serviceId);
+      return next;
+    });
+  };
 
   if (isLoading)
     return (
@@ -289,43 +304,126 @@ export default function ClientDetails() {
                       <TableCell />
                     </TableRow>
                   )}
-                  {client.services?.map((service: any) => (
-                    <TableRow key={service.id}>
-                      <TableCell className="font-semibold text-slate-700 dark:text-slate-300 pl-6">
-                        {service.serviceName}
-                      </TableCell>
-                      <TableCell className="font-medium text-slate-800 dark:text-slate-200">
-                        ${Number(service.cost).toLocaleString()}
-                      </TableCell>
-                      <TableCell className="text-slate-500">
-                        {service.notes || "-"}
-                      </TableCell>
-                      <TableCell className="text-right pr-6">
-                        <div className="flex justify-end gap-2">
-                          <button
-                            onClick={() => {
-                              setEditingService(service);
-                              setIsServiceDialogOpen(true);
-                            }}
-                            className="text-blue-500 hover:text-blue-700 transition"
-                          >
-                            <Pencil className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() =>
-                              deleteService.mutate({
-                                clientId: client.id,
-                                serviceId: service.id,
-                              })
-                            }
-                            className="text-red-500 hover:text-red-700 transition"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {client.services?.map((service: any) => {
+                    const serviceTasks = taskList.filter(
+                      (t) => (t as any).serviceId === service.id
+                    );
+                    const isExpanded = expandedServiceIds.has(service.id);
+                    const vendor = vendors?.find((v) => v.id === service.vendorId);
+                    return (
+                      <React.Fragment key={service.id}>
+                        <TableRow>
+                          <TableCell className="pl-6">
+                            <div className="flex flex-col gap-0.5">
+                              <span className="font-semibold text-slate-700 dark:text-slate-300">
+                                {service.serviceName}
+                              </span>
+                              {vendor && (
+                                <span className="text-xs text-indigo-500 dark:text-indigo-400">
+                                  {vendor.name}
+                                </span>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell className="font-medium text-slate-800 dark:text-slate-200">
+                            ${Number(service.cost).toLocaleString()}
+                          </TableCell>
+                          <TableCell className="text-slate-500">
+                            {service.notes || "-"}
+                          </TableCell>
+                          <TableCell className="text-right pr-6">
+                            <div className="flex justify-end items-center gap-2">
+                              {serviceTasks.length > 0 && (
+                                <button
+                                  onClick={() => toggleServiceExpand(service.id)}
+                                  className="flex items-center gap-1 text-xs font-medium text-indigo-500 hover:text-indigo-700 transition"
+                                  title="View AI tasks"
+                                >
+                                  <Bot className="w-3.5 h-3.5" />
+                                  <span>{serviceTasks.filter((t) => t.status === "Completed").length}/{serviceTasks.length}</span>
+                                  {isExpanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
+                                </button>
+                              )}
+                              <button
+                                onClick={() => {
+                                  setEditingService(service);
+                                  setIsServiceDialogOpen(true);
+                                }}
+                                className="text-blue-500 hover:text-blue-700 transition"
+                              >
+                                <Pencil className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() =>
+                                  deleteService.mutate({
+                                    clientId: client.id,
+                                    serviceId: service.id,
+                                  })
+                                }
+                                className="text-red-500 hover:text-red-700 transition"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                        {isExpanded && serviceTasks.length > 0 && (
+                          <TableRow key={`tasks-${service.id}`}>
+                            <TableCell colSpan={4} className="p-0 bg-indigo-50/60 dark:bg-indigo-950/20">
+                              <div className="px-6 py-3">
+                                <div className="flex items-center gap-1.5 mb-2">
+                                  <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
+                                  <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 uppercase tracking-wide">
+                                    AI-Generated Checklist — {service.serviceName}
+                                  </span>
+                                  <span className="text-xs text-slate-400 ml-1">
+                                    {serviceTasks.filter((t) => t.status === "Completed").length}/{serviceTasks.length} done
+                                  </span>
+                                </div>
+                                <ul className="space-y-1">
+                                  {serviceTasks.map((task) => (
+                                    <li key={task.id} className="flex items-center gap-2.5 py-1 group">
+                                      <button
+                                        onClick={() =>
+                                          updateTask.mutate({
+                                            id: task.id,
+                                            clientId: id,
+                                            status: task.status === "Completed" ? "Pending" : "Completed",
+                                          })
+                                        }
+                                        className="shrink-0 text-slate-400 hover:text-emerald-500 transition-colors"
+                                      >
+                                        {task.status === "Completed" ? (
+                                          <SquareCheck className="w-4 h-4 text-emerald-500" />
+                                        ) : (
+                                          <Square className="w-4 h-4" />
+                                        )}
+                                      </button>
+                                      <span
+                                        className={`text-sm flex-1 ${
+                                          task.status === "Completed"
+                                            ? "line-through text-slate-400"
+                                            : "text-slate-700 dark:text-slate-300"
+                                        }`}
+                                      >
+                                        {task.title}
+                                      </span>
+                                      <button
+                                        onClick={() => deleteTask.mutate({ id: task.id, clientId: id })}
+                                        className="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 transition-all"
+                                      >
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                      </button>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </React.Fragment>
+                    );
+                  })}
                   {totalCost > 0 && (
                     <TableRow className="bg-blue-50 dark:bg-blue-950/30 font-semibold border-t-2 dark:border-slate-600">
                       <TableCell className="pl-6">Total</TableCell>
@@ -593,9 +691,16 @@ export default function ClientDetails() {
                         )}
                       </button>
                       <div className="flex-1 min-w-0">
-                        <span className={`text-sm ${task.status === "Completed" ? "line-through text-slate-400" : "text-slate-700"}`}>
-                          {task.title}
-                        </span>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className={`text-sm ${task.status === "Completed" ? "line-through text-slate-400" : "text-slate-700 dark:text-slate-300"}`}>
+                            {task.title}
+                          </span>
+                          {(task as any).aiGenerated && (
+                            <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-indigo-100 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 shrink-0">
+                              <Sparkles className="w-2.5 h-2.5" /> AI
+                            </span>
+                          )}
+                        </div>
                         {task.dueDate && (
                           <div className="flex items-center gap-1 mt-0.5">
                             <Clock className="w-3 h-3 text-slate-400" />

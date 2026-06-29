@@ -275,8 +275,10 @@ export const vendorPaymentsRelations = relations(vendorPayments, ({ one }) => ({
 export const tasks = pgTable("tasks", {
   id: serial("id").primaryKey(),
   clientId: integer("client_id").notNull(),
+  serviceId: integer("service_id"),
   title: text("title").notNull(),
   status: text("status").notNull().default("Pending"),
+  aiGenerated: boolean("ai_generated").default(false),
   dueDate: timestamp("due_date"),
   createdAt: timestamp("created_at").defaultNow(),
 });

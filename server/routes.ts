@@ -396,6 +396,48 @@ export async function registerRoutes(
         clientId,
       });
 
+      // ── Automation: vendor payment + AI checklist ──────────────────────────
+      // Run both in parallel, non-blocking (don't fail the request if they fail)
+      const automations: Promise<void>[] = [];
+
+      // 1. Auto-create a vendor payment record if a vendor is assigned
+      if (service.vendorId) {
+        automations.push(
+          storage.createVendorPayment({
+            vendorId: service.vendorId,
+            clientId,
+            serviceId: service.id,
+            amount: String(service.cost || "0"),
+            status: "Unpaid",
+            notes: `Auto-created for service: ${service.serviceName}`,
+          }).then(() => {}).catch((e) => console.error("[Auto vendor payment] Failed:", e))
+        );
+      }
+
+      // 2. Generate AI checklist tasks for this service
+      automations.push(
+        runAI({
+          feature: "service_checklist",
+          prompt: `Generate a task checklist for a ${service.serviceName} service`,
+        })
+          .then(async (aiResult) => {
+            const taskTitles: string[] = aiResult?.tasks || [];
+            for (const title of taskTitles) {
+              await storage.createTask({
+                clientId,
+                serviceId: service.id,
+                title,
+                status: "Pending",
+                aiGenerated: true,
+              });
+            }
+          })
+          .catch((e) => console.error("[AI checklist] Failed:", e))
+      );
+
+      await Promise.allSettled(automations);
+      // ──────────────────────────────────────────────────────────────────────
+
       res.status(201).json(service);
     } catch (err) {
       if (err instanceof z.ZodError) {

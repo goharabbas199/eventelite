@@ -170,6 +170,10 @@ export function useCreatePlannedService() {
       queryClient.invalidateQueries({
         queryKey: [api.clients.get.path, Number(variables.clientId)],
       });
+      // Also refresh tasks since the backend generates AI tasks on service creation
+      queryClient.invalidateQueries({
+        queryKey: [`/api/clients/${variables.clientId}/tasks`],
+      });
     },
   });
 }

@@ -1,0 +1,24 @@
+Please implement a new automated full-stack feature that connects Clients, Services, Vendors, Payments, and AI Task Generation. 
+
+Follow these exact requirements across the database, backend, and frontend files:
+
+1. Frontend UI Update (Client Services Form):
+   - Inside the "Add Service" form or modal within a Client's profile, add a dropdown field to "Assign Vendor". This dropdown should pull its options dynamically from our existing Vendors database table.
+   - If a vendor is selected and the service is saved, it must tie that specific vendor to this client's service.
+
+2. Backend & Database Automation (Vendor Payments):
+   - When a service with an assigned vendor is successfully saved, automatically create a new corresponding record in the "Vendor Payments" (or invoices) system.
+   - This record should pre-populate the Vendor's name, the client reference, and leave the payment status as "Pending" or "Unpaid".
+
+3. AI Checklist Generation:
+   - Upon saving the service, use the app's existing AI/LLM capability to automatically generate a tailored checklist of tasks based on the name or type of the service added (e.g., if the service is "Catering", generate catering-related tasks).
+   - Display this generated checklist visually inside the Client's service view area.
+   - CRITICAL REQUIREMENT: Dates or deadlines are NOT required for these checklist items. Just focus on the task descriptions.
+
+4. Smart Task Automation:
+   - When a user clicks or completes a task inside the site related to that specific workflow, or manually toggles the status, the checklist item must automatically update its state in the database and mark itself as checked/done visually.
+
+SAFETY GUARDRAILS:
+- Do NOT delete, overwrite, or corrupt any existing client data, vendor profiles, or historical payment logs. 
+- Run necessary database migrations (using Drizzle/Prisma/SQL depending on the stack) safely.
+- Maintain our existing premium dark-mode SaaS design system (using modern Tailwind CSS, zinc/slate colors, and glassmorphism cards) for any new UI fields or checklist boxes.

@@ -1,2 +1,3 @@
 - [Auth merge strategy](auth-merge.md) — Firebase Google Sign-In (popup) coexists with email OTP + forgot/reset password; passport-google-oauth20 must NOT be imported.
 - [Schema-to-DB migration gap](schema-migration-gap.md) — New Drizzle schema columns don't auto-apply to the live DB; must run ALTER TABLE manually or via drizzle-kit push.
+- [Service automation pattern](service-automation.md) — When a planned service is created with a vendorId, the backend auto-creates a vendor_payment and AI-generated tasks; tasks carry serviceId + aiGenerated=true columns added to tasks table.
