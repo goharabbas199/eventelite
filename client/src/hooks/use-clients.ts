@@ -167,12 +167,18 @@ export function useCreatePlannedService() {
     },
 
     onSuccess: (_, variables) => {
+      const clientId = Number(variables.clientId);
+      // Refresh the full client record (includes vendorPayments, services, expenses, payments)
       queryClient.invalidateQueries({
-        queryKey: [api.clients.get.path, Number(variables.clientId)],
+        queryKey: [api.clients.get.path, clientId],
+      });
+      // Explicitly refresh vendor payments endpoint so the Vendor Payments section updates
+      queryClient.invalidateQueries({
+        queryKey: [`/api/clients/${clientId}/vendor-payments`],
       });
       // Also refresh tasks since the backend generates AI tasks on service creation
       queryClient.invalidateQueries({
-        queryKey: [`/api/clients/${variables.clientId}/tasks`],
+        queryKey: [`/api/clients/${clientId}/tasks`],
       });
     },
   });

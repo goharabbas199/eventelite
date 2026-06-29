@@ -401,15 +401,15 @@ export async function registerRoutes(
       const automations: Promise<void>[] = [];
 
       // 1. Auto-create a vendor payment record if a vendor is assigned
-      if (service.vendorId) {
+      if (service.vendorId && service.cost && Number(service.cost) > 0) {
         automations.push(
           storage.createVendorPayment({
             vendorId: service.vendorId,
             clientId,
             serviceId: service.id,
-            amount: String(service.cost || "0"),
+            amount: String(service.cost),
             status: "Unpaid",
-            notes: `Auto-created for service: ${service.serviceName}`,
+            notes: `Auto-generated from Planned Service: ${service.serviceName}`,
           }).then(() => {}).catch((e) => console.error("[Auto vendor payment] Failed:", e))
         );
       }
