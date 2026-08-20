@@ -9,7 +9,7 @@ import {
 } from "@/hooks/use-clients";
 import { useVenues } from "@/hooks/use-venues";
 import { useVendors } from "@/hooks/use-vendors";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useAI } from "@/hooks/use-ai";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -101,9 +101,11 @@ type Tab = "overview" | "services" | "expenses";
 
 export default function BudgetPlanner() {
   const { data: clients = [], isLoading } = useClients();
+  const { data: venues = [] } = useVenues();
   const [selectedClientId, setSelectedClientId] = useState<string | undefined>();
   const [previewClientId, setPreviewClientId] = useState<string | undefined>();
   const [planBuilderOpen, setPlanBuilderOpen] = useState(false);
+  const { data: previewClientDetails } = useClient(Number(previewClientId) || 0);
   const [aiBudget, setAiBudget] = useState<any>(null);
   const [aiBudgetLoading, setAiBudgetLoading] = useState(false);
   const ai = useAI();
@@ -289,7 +291,7 @@ export default function BudgetPlanner() {
             </DialogTitle>
           </DialogHeader>
           {(() => {
-            const preview = clients.find((c) => String(c.id) === previewClientId);
+            const preview = previewClientDetails || clients.find((c) => String(c.id) === previewClientId);
             if (!preview) return null;
             const venue = (preview as any).venueId
               ? (venues as any[]).find((v) => v.id === Number((preview as any).venueId))
@@ -351,9 +353,22 @@ function ClientBudgetView({
   eventType: string;
 }) {
   const { data: client, isLoading } = useClient(clientId);
+  const { data: venues = [] } = useVenues();
+  const { data: vendors = [] } = useVendors();
+  const updateClient = useUpdateClient();
   const deleteExpense = useDeleteExpense();
+  const { toast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>("overview");
+  const [selectedVenueId, setSelectedVenueId] = useState<string>("");
+  const [vendorSelections, setVendorSelections] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    if (!client) return;
+    setSelectedVenueId(client.venueId ? String(client.venueId) : "");
+    const saved = (client as any).budgetPlan?.vendorSelections;
+    if (saved) setVendorSelections(saved);
+  }, [clientId, client?.id]);
 
   if (isLoading || !client) {
     return (
@@ -369,17 +384,68 @@ function ClientBudgetView({
   const services = client.services || [];
   const payments = client.payments || [];
 
+  const selectedVenue = (venues as any[]).find((v) => String(v.id) === selectedVenueId);
+  const vendorCategories = EXPENSE_CATEGORIES.filter((category) => category !== "Venue");
+  const selectedVendors = vendorCategories.map((category) => {
+    const vendorId = vendorSelections[category];
+    const vendor = (vendors as any[]).find((v) => String(v.id) === vendorId);
+    const matchingService = services.find((service: any) =>
+      service.serviceName.toLowerCase().includes(category.toLowerCase().split(" ")[0]),
+    );
+    return {
+      category,
+      vendorId,
+      vendor,
+      cost: vendor?.standardCost != null
+        ? Number(vendor.standardCost)
+        : Number(matchingService?.vendorCost ?? matchingService?.cost ?? 0),
+    };
+  });
+
+  const venueCost = selectedVenue ? Number(selectedVenue.basePrice) : 0;
+  const vendorTotal = selectedVendors.reduce((sum, item) => sum + item.cost, 0);
+  const mappedServiceNames = vendorCategories.map((category) => category.toLowerCase().split(" ")[0]);
+  const unmappedServicesTotal = services
+    .filter((service: any) => !mappedServiceNames.some((name) => service.serviceName.toLowerCase().includes(name)))
+    .reduce((sum, service: any) => sum + Number(service.cost), 0);
   const servicesTotal = services.reduce((s, sv) => s + Number(sv.cost), 0);
   const expensesTotal = expenses.reduce((s, e) => s + Number(e.cost), 0);
   const paidExpenses = expenses.filter((e) => e.isPaid).reduce((s, e) => s + Number(e.cost), 0);
   const unpaidExpenses = expensesTotal - paidExpenses;
-  const totalCommitted = servicesTotal + expensesTotal;
+  const totalCommitted = venueCost + vendorTotal + unmappedServicesTotal + expensesTotal;
   const totalPaid = paidExpenses;
   const remaining = initialBudget - totalCommitted;
   const totalReceived = payments.reduce((s, p) => s + Number(p.amount), 0);
   const spendPercent = pct(totalCommitted, initialBudget);
   const isOverBudget = totalCommitted > initialBudget && initialBudget > 0;
   const isNearBudget = !isOverBudget && spendPercent >= 80;
+
+  function confirmPlan() {
+    const budgetPlan = {
+      venueId: selectedVenueId ? Number(selectedVenueId) : null,
+      vendorSelections,
+      venueCost,
+      vendorTotal,
+      totalCommitted,
+      confirmedAt: new Date().toISOString(),
+    };
+    updateClient.mutate(
+      {
+        id: clientId,
+        venueId: budgetPlan.venueId,
+        status: "Confirmed",
+        budgetPlan,
+      } as any,
+      {
+        onSuccess: () => {
+          toast({ title: "Plan confirmed", description: "Venue, vendors, and budget configuration were saved." });
+        },
+        onError: (error: any) => {
+          toast({ title: "Could not confirm plan", description: error.message, variant: "destructive" });
+        },
+      },
+    );
+  }
 
   // Category breakdown — merge services (infer category from name) + expenses
   const categoryMap: Record<string, number> = {};
@@ -410,6 +476,89 @@ function ClientBudgetView({
 
   return (
     <div className="space-y-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-indigo-200 dark:border-indigo-900/50 bg-indigo-50/70 dark:bg-indigo-950/20 p-4">
+        <div>
+          <p className="text-[10px] uppercase tracking-widest font-bold text-indigo-500">Interactive Plan Builder</p>
+          <p className="text-sm font-bold text-slate-900 dark:text-white mt-1">{clientName} · {eventType}</p>
+          <p className="text-xs text-slate-500 mt-0.5">Select real venue and vendor rates, then confirm the plan.</p>
+        </div>
+        <Button
+          onClick={confirmPlan}
+          disabled={updateClient.isPending}
+          className="rounded-xl bg-indigo-600 hover:bg-indigo-700"
+          data-testid="button-confirm-plan"
+        >
+          <CheckCircle2 className="w-4 h-4 mr-2" />
+          {updateClient.isPending ? "Saving…" : "Confirm Plan"}
+        </Button>
+      </div>
+
+      <Card className="border border-slate-100 dark:border-zinc-800 rounded-2xl shadow-sm bg-white dark:bg-zinc-900/60">
+        <CardHeader className="pb-3 border-b border-slate-100 dark:border-zinc-800">
+          <CardTitle className="text-sm font-bold">Plan line items</CardTitle>
+          <p className="text-xs text-slate-400">Rates update instantly from your venue and vendor records.</p>
+        </CardHeader>
+        <CardContent className="p-0 divide-y divide-slate-100 dark:divide-zinc-800">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 px-5 py-4">
+            <div className="flex-1">
+              <p className="text-sm font-semibold">Venue Selection</p>
+              <p className="text-[11px] text-slate-400">{selectedVenue?.location || "Choose a venue for this event"}</p>
+            </div>
+            <Select
+              value={selectedVenueId}
+              onValueChange={setSelectedVenueId}
+            >
+              <SelectTrigger className="w-full sm:w-64 h-9 rounded-xl text-xs" data-testid="select-plan-venue">
+                <SelectValue placeholder="Select venue…" />
+              </SelectTrigger>
+              <SelectContent>
+                {(venues as any[]).map((venue) => (
+                  <SelectItem key={venue.id} value={String(venue.id)}>
+                    {venue.name} · {fmt(Number(venue.basePrice))}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <span className="w-24 text-right text-sm font-bold text-indigo-600">{fmt(venueCost)}</span>
+          </div>
+          {selectedVendors.map(({ category, vendor, cost }) => {
+            const categoryVendors = (vendors as any[]).filter((item) =>
+              item.category?.toLowerCase() === category.toLowerCase() ||
+              item.category?.toLowerCase().includes(category.toLowerCase().split(" ")[0]),
+            );
+            return (
+              <div key={category} className="flex flex-col sm:flex-row sm:items-center gap-3 px-5 py-3.5">
+                <div className="w-1 h-8 rounded-full bg-indigo-400 shrink-0" />
+                <div className="flex-1">
+                  <p className="text-sm font-semibold">{category}</p>
+                  <p className="text-[11px] text-slate-400">{vendor?.name || "No vendor selected"}</p>
+                </div>
+                <Select
+                  value={vendorSelections[category] || ""}
+                  onValueChange={(value) => setVendorSelections((current) => ({ ...current, [category]: value }))}
+                >
+                  <SelectTrigger className="w-full sm:w-64 h-9 rounded-xl text-xs" data-testid={`select-plan-vendor-${category.toLowerCase().replace(/[^a-z]+/g, "-")}`}>
+                    <SelectValue placeholder={`Select ${category.toLowerCase()} vendor…`} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categoryVendors.length ? categoryVendors.map((item) => (
+                      <SelectItem key={item.id} value={String(item.id)}>
+                        {item.name} · {item.standardCost != null ? fmt(Number(item.standardCost)) : "Rate TBD"}
+                      </SelectItem>
+                    )) : <SelectItem value="none" disabled>No matching vendors</SelectItem>}
+                  </SelectContent>
+                </Select>
+                <span className="w-24 text-right text-sm font-bold text-indigo-600">{fmt(cost)}</span>
+              </div>
+            );
+          })}
+          <div className="flex items-center justify-between px-5 py-4 bg-slate-50/80 dark:bg-zinc-800/30">
+            <span className="text-xs font-bold text-slate-600 dark:text-zinc-300">Interactive plan total</span>
+            <span className="text-base font-bold text-indigo-600">{fmt(venueCost + vendorTotal)}</span>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <div className="stat-card">
