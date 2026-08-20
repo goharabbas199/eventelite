@@ -206,6 +206,21 @@ export const api = {
         404: errorSchemas.notFound,
       },
     },
+    confirmBudget: {
+      method: "POST" as const,
+      path: "/api/clients/:id/confirm-budget" as const,
+      input: z.object({
+        venueId: z.number().nullable().optional(),
+        budgetPlan: z.record(z.any()),
+        checklistTasks: z.array(z.object({
+          title: z.string().min(1),
+        })),
+      }),
+      responses: {
+        200: z.custom<typeof clients.$inferSelect>(),
+        404: errorSchemas.notFound,
+      },
+    },
   },
 
   plannedServices: {

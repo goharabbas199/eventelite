@@ -507,6 +507,50 @@ export class DatabaseStorage implements IStorage {
     return updated;
   }
 
+  async confirmBudget(
+    id: number,
+    updates: {
+      venueId?: number | null;
+      budgetPlan: Record<string, unknown>;
+      checklistTasks: Array<{ title: string }>;
+    },
+  ) {
+    return db.transaction(async (tx) => {
+      const [updated] = await tx
+        .update(clients)
+        .set({
+          venueId: updates.venueId ?? null,
+          status: "Confirmed",
+          budgetPlan: updates.budgetPlan,
+        })
+        .where(eq(clients.id, id))
+        .returning();
+
+      if (!updated) return undefined;
+
+      // Keep manually added and service-specific tasks intact. Only replace
+      // tasks created by a previous budget confirmation.
+      await tx
+        .delete(tasks)
+        .where(and(eq(tasks.clientId, id), eq(tasks.aiGenerated, true), isNull(tasks.serviceId)));
+
+      if (updates.checklistTasks.length > 0) {
+        await tx.insert(tasks).values(
+          updates.checklistTasks.map((task) => ({
+            clientId: id,
+            title: task.title,
+            status: "Pending",
+            aiGenerated: true,
+            serviceId: null,
+            dueDate: null,
+          })),
+        );
+      }
+
+      return updated;
+    });
+  }
+
   async deleteClient(id: number) {
     await db.delete(events).where(eq(events.clientId, id));
     await db.delete(plannedServices).where(eq(plannedServices.clientId, id));
