@@ -328,9 +328,12 @@ export default function Calendar() {
                 className="w-full gap-2"
                 variant="outline"
                 size="sm"
-                onClick={() => { setSelectedEvent(null); navigate("/events"); }}
+                onClick={() => {
+                  setSelectedEvent(null);
+                  navigate(`/clients/${selectedEvent.clientId}`);
+                }}
               >
-                <CalendarDays className="w-3.5 h-3.5" /> Manage in Events
+                <Users className="w-3.5 h-3.5" /> Open Client Workspace
               </Button>
             </div>
           </DialogContent>
