@@ -5,7 +5,7 @@ import {
   useCreateExpense,
   useUpdateExpense,
   useDeleteExpense,
-  useUpdateClient,
+  useConfirmBudget,
 } from "@/hooks/use-clients";
 import { useVenues } from "@/hooks/use-venues";
 import { useVendors } from "@/hooks/use-vendors";
@@ -87,6 +87,42 @@ const CATEGORY_COLORS: Record<string, string> = {
 const EXPENSE_CATEGORIES = Object.keys(CATEGORY_COLORS);
 
 const PALETTE = Object.values(CATEGORY_COLORS);
+
+const CHECKLIST_TASK_BY_CATEGORY: Record<string, string> = {
+  Venue: "Finalize Venue Contract",
+  Catering: "Confirm Menu & Dietary Requirements",
+  Photography: "Send Shot List to Photographer",
+  Entertainment: "Confirm Entertainment Setlist & Schedule",
+  Decoration: "Approve Decor Design & Setup Plan",
+  "Flowers & Floral": "Finalize Floral Arrangements",
+  Transportation: "Confirm Guest Transportation Details",
+  "AV / Tech": "Confirm AV Requirements & Equipment",
+  Other: "Review Other Budget Item",
+};
+
+function getBudgetChecklistTasks(
+  selectedVenueId: string,
+  selectedVendors: Array<{ category: string; vendorId?: string }>,
+  services: Array<{ serviceName: string }>,
+) {
+  const selectedCategories = new Set<string>();
+
+  if (selectedVenueId) selectedCategories.add("Venue");
+  selectedVendors.forEach(({ category, vendorId }) => {
+    if (vendorId) selectedCategories.add(category);
+  });
+  services.forEach((service) => {
+    const category = EXPENSE_CATEGORIES.find((item) =>
+      service.serviceName.toLowerCase().includes(item.toLowerCase().split(" ")[0]),
+    );
+    if (category) selectedCategories.add(category);
+  });
+
+  return Array.from(selectedCategories)
+    .map((category) => CHECKLIST_TASK_BY_CATEGORY[category])
+    .filter(Boolean)
+    .map((title) => ({ title }));
+}
 
 function fmt(n: number) {
   return `$${n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
@@ -355,7 +391,7 @@ function ClientBudgetView({
   const { data: client, isLoading } = useClient(clientId);
   const { data: venues = [] } = useVenues();
   const { data: vendors = [] } = useVendors();
-  const updateClient = useUpdateClient();
+  const confirmBudget = useConfirmBudget();
   const deleteExpense = useDeleteExpense();
   const { toast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -429,16 +465,21 @@ function ClientBudgetView({
       totalCommitted,
       confirmedAt: new Date().toISOString(),
     };
-    updateClient.mutate(
+    const checklistTasks = getBudgetChecklistTasks(selectedVenueId, selectedVendors, services);
+
+    confirmBudget.mutate(
       {
         id: clientId,
         venueId: budgetPlan.venueId,
-        status: "Confirmed",
         budgetPlan,
+        checklistTasks,
       } as any,
       {
         onSuccess: () => {
-          toast({ title: "Plan confirmed", description: "Venue, vendors, and budget configuration were saved." });
+          toast({
+            title: "Plan confirmed",
+            description: `${checklistTasks.length} checklist ${checklistTasks.length === 1 ? "task" : "tasks"} generated from the budget.`,
+          });
         },
         onError: (error: any) => {
           toast({ title: "Could not confirm plan", description: error.message, variant: "destructive" });
@@ -484,12 +525,12 @@ function ClientBudgetView({
         </div>
         <Button
           onClick={confirmPlan}
-          disabled={updateClient.isPending}
+          disabled={confirmBudget.isPending}
           className="rounded-xl bg-indigo-600 hover:bg-indigo-700"
           data-testid="button-confirm-plan"
         >
           <CheckCircle2 className="w-4 h-4 mr-2" />
-          {updateClient.isPending ? "Saving…" : "Confirm Plan"}
+          {confirmBudget.isPending ? "Saving…" : "Confirm Plan"}
         </Button>
       </div>
 

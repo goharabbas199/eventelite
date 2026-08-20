@@ -124,6 +124,42 @@ export function useUpdateClient() {
   });
 }
 
+export function useConfirmBudget() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      id,
+      venueId,
+      budgetPlan,
+      checklistTasks,
+    }: {
+      id: number;
+      venueId?: number | null;
+      budgetPlan: Record<string, unknown>;
+      checklistTasks: Array<{ title: string }>;
+    }) => {
+      const res = await fetch(`/api/clients/${id}/confirm-budget`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ venueId, budgetPlan, checklistTasks }),
+      });
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(errorText || "Failed to confirm budget");
+      }
+
+      return res.json();
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: [api.clients.list.path] });
+      queryClient.invalidateQueries({ queryKey: [api.clients.get.path, variables.id] });
+      queryClient.invalidateQueries({ queryKey: [`/api/clients/${variables.id}/tasks`] });
+    },
+  });
+}
+
 export function useCreatePlannedService() {
   const queryClient = useQueryClient();
 

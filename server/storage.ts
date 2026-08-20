@@ -77,6 +77,11 @@ export interface IStorage {
   getClient(id: number): Promise<any | undefined>;
   createClient(client: InsertClient): Promise<any>;
   updateClient(id: number, updates: Partial<InsertClient>): Promise<any>;
+  confirmBudget(id: number, updates: {
+    venueId?: number | null;
+    budgetPlan: Record<string, unknown>;
+    checklistTasks: Array<{ title: string }>;
+  }): Promise<any>;
   deleteClient(id: number): Promise<void>;
   createPlannedService(service: InsertPlannedService): Promise<any>;
   updatePlannedService(id: number, updates: Partial<InsertPlannedService>): Promise<any>;
@@ -528,8 +533,8 @@ export class DatabaseStorage implements IStorage {
 
       if (!updated) return undefined;
 
-      // Keep manually added and service-specific tasks intact. Only replace
-      // tasks created by a previous budget confirmation.
+      // Preserve manual and service-specific tasks. Only replace tasks
+      // created by a previous budget confirmation.
       await tx
         .delete(tasks)
         .where(and(eq(tasks.clientId, id), eq(tasks.aiGenerated, true), isNull(tasks.serviceId)));

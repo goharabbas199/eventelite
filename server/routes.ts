@@ -366,6 +366,21 @@ export async function registerRoutes(
     }
   });
 
+  app.post(api.clients.confirmBudget.path, async (req, res) => {
+    try {
+      const input = api.clients.confirmBudget.input.parse(req.body);
+      const client = await storage.confirmBudget(Number(req.params.id), input);
+      if (!client) return res.status(404).json({ message: "Client not found" });
+      res.json(client);
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ message: err.errors[0].message });
+      }
+      console.error("Confirm budget error:", err);
+      res.status(500).json({ message: "Failed to confirm budget" });
+    }
+  });
+
   app.delete(api.clients.delete.path, async (req, res) => {
     await storage.deleteClient(Number(req.params.id));
     res.status(204).end();
