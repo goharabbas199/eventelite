@@ -550,6 +550,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deletePlannedService(id: number) {
+    // Null out serviceId on tasks linked to this service so they become general tasks
+    await db
+      .update(tasks)
+      .set({ serviceId: null })
+      .where(eq(tasks.serviceId, id));
     await db.delete(plannedServices).where(eq(plannedServices.id, id));
   }
 
@@ -680,13 +685,15 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(tasks.createdAt));
   }
 
-  async createTask(task: InsertTask & { clientId: number }) {
+  async createTask(task: InsertTask & { clientId: number; serviceId?: number | null; aiGenerated?: boolean }) {
     const [newTask] = await db
       .insert(tasks)
       .values({
         clientId: task.clientId,
+        serviceId: task.serviceId ?? null,
         title: task.title,
         status: task.status || "Pending",
+        aiGenerated: task.aiGenerated ?? false,
         dueDate: task.dueDate ? new Date(task.dueDate as any) : null,
       })
       .returning();

@@ -10,7 +10,8 @@ export type AIFeature =
   | "vendor_recommendation"
   | "budget_planner"
   | "profit_optimizer"
-  | "assistant";
+  | "assistant"
+  | "service_checklist";
 
 interface AIContext {
   clients?: any[];
@@ -637,18 +638,160 @@ Try a quick action button above, or type a request like: *"Plan a corporate dinn
   };
 }
 
+// ─── Service Checklist templates ─────────────────────────────────────────────
+
+const SERVICE_CHECKLISTS: Record<string, string[]> = {
+  catering: [
+    "Confirm final guest count and any dietary restrictions",
+    "Schedule a tasting session with the caterer",
+    "Finalise menu selection and confirm special dishes",
+    "Arrange serving staff requirements and uniform standards",
+    "Plan food station layout and serving flow",
+    "Confirm delivery time and kitchen access schedule",
+    "Arrange cutlery, crockery, and linen requirements",
+    "Confirm cake cutting and dessert service logistics",
+    "Agree on cleanup timeline and post-event responsibilities",
+  ],
+  photography: [
+    "Brief photographer on event timeline and key moments list",
+    "Create a detailed shot list with the client",
+    "Confirm photographer arrival time and venue access",
+    "Discuss photo editing style and delivery timeline",
+    "Confirm backup equipment availability",
+    "Arrange photo booth setup location if applicable",
+    "Share venue floor plan and lighting conditions",
+    "Confirm number of final edited images to be delivered",
+  ],
+  videography: [
+    "Brief videographer on event script and key moments",
+    "Confirm filming locations and desired angles",
+    "Agree on highlight reel length and full video deliverables",
+    "Arrange drone or aerial footage approval if needed",
+    "Confirm video editing and delivery timeline",
+    "Share audio requirements and microphone placement plan",
+    "Discuss background music licensing for the final video",
+  ],
+  dj: [
+    "Confirm DJ set times and event run sheet",
+    "Share music preferences and must-play/do-not-play lists",
+    "Confirm sound system and lighting rig requirements",
+    "Arrange DJ setup and soundcheck time",
+    "Confirm MC duties and any special announcements",
+    "Share venue floor plan for speaker placement",
+    "Confirm backup audio equipment availability",
+  ],
+  entertainment: [
+    "Confirm performer arrival and setup time",
+    "Share event run sheet and performance schedule",
+    "Confirm technical requirements (sound, lighting, stage)",
+    "Arrange dressing room or backstage area access",
+    "Confirm guest interaction and performance restrictions",
+    "Arrange any props or special equipment delivery",
+    "Confirm payment terms and contract signing",
+  ],
+  floral: [
+    "Confirm floral style, colour palette and theme with client",
+    "Finalise centrepiece designs and arrangement counts",
+    "Arrange delivery time and venue access for florals",
+    "Confirm ceremony arch or backdrop floral requirements",
+    "Discuss preservation or donation of flowers post-event",
+    "Arrange bridal bouquet and buttonhole delivery schedule",
+    "Confirm any allergies or restrictions regarding flowers",
+  ],
+  venue: [
+    "Confirm venue booking and finalise contract terms",
+    "Arrange site visit with key vendors before event day",
+    "Confirm room layout, capacity and seating plan",
+    "Arrange parking, access, and security arrangements",
+    "Confirm AV equipment availability and tech support",
+    "Discuss catering kitchen access and restrictions",
+    "Confirm load-in and load-out times for all vendors",
+    "Arrange guest arrival logistics and signage placement",
+  ],
+  transport: [
+    "Confirm vehicle booking and driver assignment",
+    "Share event timeline and pickup/dropoff schedule",
+    "Confirm vehicle capacity matches guest requirements",
+    "Arrange parking or holding area for vehicles",
+    "Confirm driver contact details are shared with client",
+    "Arrange vehicle presentation and cleanliness standards",
+    "Confirm any accessibility requirements for guests",
+  ],
+  makeup: [
+    "Confirm makeup trial appointment with client",
+    "Share bridal party schedule and chair allocation",
+    "Confirm products and techniques suited to skin type",
+    "Arrange kit and setup space at venue or preparation suite",
+    "Confirm touch-up kit availability for the event day",
+    "Agree on hair and makeup start time relative to ceremony",
+    "Confirm any known allergies or skin sensitivities",
+  ],
+  coordination: [
+    "Build detailed event day run sheet with all timings",
+    "Brief all vendors on the run sheet and contact list",
+    "Conduct pre-event walkthrough with venue manager",
+    "Confirm all vendor arrival and setup windows",
+    "Prepare contingency plan for common issues",
+    "Arrange guest welcome and seating management",
+    "Coordinate ceremony or main event cue sequences",
+    "Manage vendor pack-down and venue sign-off at end",
+  ],
+};
+
+function detectServiceType(serviceName: string): string {
+  const lower = serviceName.toLowerCase();
+  if (/cater|food|meal|dining|buffet|bar service|beverage/i.test(lower)) return "catering";
+  if (/photo/i.test(lower)) return "photography";
+  if (/video|film|cinema/i.test(lower)) return "videography";
+  if (/dj|disc jockey|music|sound system/i.test(lower)) return "dj";
+  if (/entertain|perform|band|live music|magician|host|mc|emcee/i.test(lower)) return "entertainment";
+  if (/floral|flower|decor|decoration|balloon/i.test(lower)) return "floral";
+  if (/venue|hall|room|ballroom|garden|estate/i.test(lower)) return "venue";
+  if (/transport|transfer|limo|car|bus|shuttle/i.test(lower)) return "transport";
+  if (/makeup|hair|beauty|styling|groom/i.test(lower)) return "makeup";
+  if (/coordinat|planning|planner|organis|manage/i.test(lower)) return "coordination";
+  return "";
+}
+
+function handleServiceChecklist(prompt: string): any {
+  // Extract service name from prompt
+  const serviceName = prompt.replace(/generate.*checklist.*for|service checklist for|tasks for/gi, "").trim();
+  const serviceType = detectServiceType(serviceName);
+
+  let tasks: string[];
+
+  if (serviceType && SERVICE_CHECKLISTS[serviceType]) {
+    tasks = SERVICE_CHECKLISTS[serviceType];
+  } else {
+    // Generic checklist for unknown service types
+    tasks = [
+      `Confirm booking and sign contract for ${serviceName || "this service"}`,
+      "Verify deposit payment and remaining payment schedule",
+      "Schedule pre-event planning call with vendor",
+      "Share event run sheet and key timings",
+      "Confirm vendor arrival, setup, and pack-down times",
+      "Arrange any special equipment or space requirements",
+      "Confirm emergency contact details for event day",
+      "Conduct final confirmation check 1 week before event",
+    ];
+  }
+
+  return { tasks };
+}
+
 // ─── Main export ──────────────────────────────────────────────────────────────
 
 export async function runCustomAI(request: AIRequest): Promise<any> {
   const { feature, prompt, context = {} } = request;
 
   switch (feature) {
-    case "event_planner":       return handleEventPlanner(prompt, context);
-    case "quote_generator":     return handleQuoteGenerator(prompt, context);
+    case "event_planner":         return handleEventPlanner(prompt, context);
+    case "quote_generator":       return handleQuoteGenerator(prompt, context);
     case "vendor_recommendation": return handleVendorRecommendation(prompt, context);
-    case "budget_planner":      return handleBudgetPlanner(prompt, context);
-    case "profit_optimizer":    return handleProfitOptimizer(prompt, context);
-    case "assistant":           return handleAssistant(prompt, context);
-    default:                    return handleAssistant(prompt, context);
+    case "budget_planner":        return handleBudgetPlanner(prompt, context);
+    case "profit_optimizer":      return handleProfitOptimizer(prompt, context);
+    case "service_checklist":     return handleServiceChecklist(prompt);
+    case "assistant":             return handleAssistant(prompt, context);
+    default:                      return handleAssistant(prompt, context);
   }
 }

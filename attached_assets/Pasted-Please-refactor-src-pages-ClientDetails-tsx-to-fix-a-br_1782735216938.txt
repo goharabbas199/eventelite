@@ -1,0 +1,27 @@
+Please refactor `src/pages/ClientDetails.tsx` to fix a broken backend automation function and completely redesign the single-page layout to meet elite SaaS product design standards.
+
+### 1. THE AUTOMATION FIX (CRITICAL)
+Currently, adding a service with an assigned vendor and cost does NOT automatically create a line item in the Vendor Payments section for existing clients. Let's fix this synchronization issue:
+- Locate the form submission handler for adding a planned service (connected to `useCreatePlannedService`).
+- Update this handler so that upon a successful service creation, it checks if a `vendorId` and a `cost` (or price) exist. 
+- If they exist, immediately trigger the vendor payment mutation (`useCreateVendorPayment` or a direct fetch post to `/api/vendor-payments`) using the exact same Client ID, Vendor ID, and Cost amount. The status must default to "Unpaid".
+- Crucial: Ensure you run a state or cache invalidation on BOTH queries (invalidate both the client services cache and the vendor payments cache) so that both data lists instantly update and render on screen together without requiring a manual page reload.
+
+### 2. ONE-PAGE STRUCTURAL REDESIGN (NO TABS)
+Keep all sections together on a single page, but eliminate the messy, overlapping look by implementing a clean 2-column SaaS Grid structure:
+- **Global Page Setup:** Wrap the page container in a sleek neutral dark canvas (`bg-zinc-950 text-white min-h-screen p-6 md:p-8 space-y-8`).
+- **Header:** Consolidate all secondary action buttons (Create Event, New Quote, Assign Venue) into a clean, minimalist "Actions" dropdown button group on the right to remove button crowding.
+- **The Main Grid Split:**
+  * **Left Column (2/3 width):** Place the heavy interactive tables here stacked cleanly with deep breathing room (`space-y-6`). This includes:
+    1. Planned Services Table
+    2. Client Payments Ledger
+    3. Vendor Payments Ledger
+  * **Right Column (1/3 width):** Place a static summary sticky panel here that groups the profile details, budget trackers, and overall project statuses in one neat sidebar layout.
+
+### 3. FIX THE EXPANDED CHECKLIST LOOK (Based on image_bd917a.png & image_bdeef8.png)
+- Inside the Planned Services table, when a row expands to show the AI Checklist, do NOT drop raw unaligned text inside the table row. 
+- Wrap the expanded checklist block inside a dedicated micro-card: `bg-zinc-900/60 backdrop-blur-md border border-zinc-800/80 rounded-xl p-5 my-2 mx-4 shadow-inner`.
+- Align every task perfectly in a line row (`flex items-center gap-3 py-2 border-b border-zinc-800/30 last:border-0`). Use minimalist clean icons (`Circle` and `CheckCircle2` from lucide-react) for interactive checking states.
+
+### SAFETY GUARDRAIL:
+Do not alter, delete, or break any underlying database schemas, core context data providers, or existing validation methods. Preserve all dynamic wording, text variables, and structural hooks while executing this design and logic update.

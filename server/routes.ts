@@ -396,6 +396,35 @@ export async function registerRoutes(
         clientId,
       });
 
+      // ── Automation: AI checklist ────────────────────────────────────────────
+      // Vendor payments are created client-side (in ServiceForm) to ensure
+      // immediate cache invalidation and UI update.
+      const automations: Promise<void>[] = [];
+
+      // Generate AI checklist tasks for this service
+      automations.push(
+        runAI({
+          feature: "service_checklist",
+          prompt: `Generate a task checklist for a ${service.serviceName} service`,
+        })
+          .then(async (aiResult) => {
+            const taskTitles: string[] = aiResult?.tasks || [];
+            for (const title of taskTitles) {
+              await storage.createTask({
+                clientId,
+                serviceId: service.id,
+                title,
+                status: "Pending",
+                aiGenerated: true,
+              });
+            }
+          })
+          .catch((e) => console.error("[AI checklist] Failed:", e))
+      );
+
+      await Promise.allSettled(automations);
+      // ──────────────────────────────────────────────────────────────────────
+
       res.status(201).json(service);
     } catch (err) {
       if (err instanceof z.ZodError) {

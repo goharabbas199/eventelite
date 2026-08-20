@@ -1,0 +1,40 @@
+Act as an expert Senior Frontend Engineer specializing in enterprise SaaS products, React, TypeScript, and Tailwind CSS. 
+
+I need you to refactor and rebuild three specific files in my event management SaaS app to look exceptionally clean, minimalist, and highly professional. The goals are:
+1. Drastically reduce code bloat and eliminate unnecessary visual noise.
+2. Separate business/form logic from layout rendering.
+3. Improve UI hierarchy so it matches top-tier SaaS design standards (like Linear, Vercel, or Stripe).
+
+Please carefully execute the following architectural updates across my files:
+
+### Step 1: Create a Modular Folder Structure
+Extract all sub-forms and dense visual features from the main layouts into individual atomic components. Create these files:
+- `@/components/clients/service-form.tsx` (From ClientDetails)
+- `@/components/clients/payment-form.tsx` (From ClientDetails)
+- `@/components/clients/vendor-payment-form.tsx` (From ClientDetails)
+- `@/components/clients/profit-simulator.tsx` (From ClientDetails)
+- `@/components/clients/create-client-form.tsx` (From Clients)
+
+### Step 2: Refactor ClientDetails.tsx
+- Clean up the header. Wrap actions into a streamlined "Actions" dropdown menu using Shadcn UI instead of placing 4-5 loose buttons side-by-side.
+- Introduce a Tabbed Interface (`@/components/ui/tabs`). Split the content into three distinct tabs to reduce scrolling overload:
+  * Tab 1: "Overview & Checklist" (Client Profile, AI Tasks, and Main Checklist).
+  * Tab 2: "Financial Ledger" (Planned Services, Client Payments, and Vendor Payments).
+  * Tab 3: "Simulations & Insights" (The Profit Simulator component).
+- Decouple the Planned Services table. Extract the rendering of each individual row and its nested AI-generated sub-task block into a separate internal `<ServiceRow />` component to avoid multi-nested file parsing.
+
+### Step 3: Refactor Clients.tsx
+- Restructure the top filter bar. Combine the text search and the three custom filter dropdown select menus into a single, cohesive inline command-filter group.
+- Eliminate the layout duplication between the desktop table view and the mobile card view. Use a responsive, unified grid layout, or cleanly break out the mobile interface variant into an isolated `<MobileClientList />` component.
+- Enforce clean, absolute typography and spacing using consistent layout wrappers.
+
+### Step 4: Polish ClientPortal.tsx
+- Refine typography sizes and letter-spacing to look like a premium premium invoice portal.
+- Ensure the print action styles hide everything except the central invoice container during layout window printing.
+
+### Implementation Guidelines:
+- Do NOT change any underlying business hooks, mutate methods, validation schemas, or API endpoints. Keep all data connections (`useClient`, `useTasks`, `wouter` routing, React Hook Form) exactly as they are.
+- Ensure all types are strictly defined without using `any`.
+- Use clean borders (`border-slate-100` / `dark:border-slate-800`), smooth transition animations, and ample padding to give the data room to breathe.
+
+Provide the refactored, production-ready code for these files clearly labeled.
