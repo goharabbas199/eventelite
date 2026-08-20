@@ -667,7 +667,11 @@ export async function registerRoutes(
 
   app.post("/api/events", async (req, res) => {
     try {
-      const body = { ...req.body, eventDate: new Date(req.body.eventDate) };
+      const clientId = Number(req.body.clientId);
+      if (!Number.isInteger(clientId) || !(await storage.getClient(clientId))) {
+        return res.status(400).json({ message: "A valid client is required for every event" });
+      }
+      const body = { ...req.body, clientId, eventDate: new Date(req.body.eventDate) };
       const event = await storage.createEvent(body);
       res.status(201).json(event);
     } catch (err: any) {
@@ -678,7 +682,17 @@ export async function registerRoutes(
 
   app.patch("/api/events/:id", async (req, res) => {
     try {
-      const updated = await storage.updateEvent(Number(req.params.id), req.body);
+      const body = { ...req.body };
+      if (body.clientId !== undefined) {
+        const clientId = Number(body.clientId);
+        if (!Number.isInteger(clientId) || !(await storage.getClient(clientId))) {
+          return res.status(400).json({ message: "A valid client is required for every event" });
+        }
+        body.clientId = clientId;
+      }
+      if (body.eventDate) body.eventDate = new Date(body.eventDate);
+      const updated = await storage.updateEvent(Number(req.params.id), body);
+      if (!updated) return res.status(404).json({ message: "Event not found" });
       res.json(updated);
     } catch (err: any) {
       res.status(500).json({ message: err?.message || "Failed to update event" });

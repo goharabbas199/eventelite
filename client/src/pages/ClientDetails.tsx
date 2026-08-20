@@ -13,6 +13,7 @@ import {
   useDeleteTask,
   useTasks,
 } from "@/hooks/use-clients";
+import { useClientEvents } from "@/hooks/use-events";
 import { useVendors } from "@/hooks/use-vendors";
 import { useVenues } from "@/hooks/use-venues";
 import { Link, useRoute, useLocation } from "wouter";
@@ -287,6 +288,7 @@ export default function ClientDetails() {
   const deleteVendorPayment = useDeleteVendorPayment();
 
   const { data: taskList = [] } = useTasks(id);
+  const { data: clientEvents = [], isLoading: isEventsLoading } = useClientEvents(id);
   const createTask = useCreateTask();
   const updateTask = useUpdateTask();
   const deleteTask = useDeleteTask();
@@ -495,6 +497,72 @@ export default function ClientDetails() {
             </div>
           ))}
         </div>
+
+        {/* ── Linked events ── */}
+        <Card className="border border-slate-100 dark:border-zinc-700 shadow-sm">
+          <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-zinc-700 pb-3">
+            <div>
+              <CardTitle className="text-base flex items-center gap-2">
+                <CalendarDays className="w-4 h-4 text-indigo-500" />
+                Events for {client.name}
+              </CardTitle>
+              <p className="text-xs text-slate-500 mt-1">
+                Event details stay linked to this client and appear on the shared calendar.
+              </p>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-8 rounded-xl text-xs"
+                onClick={() => navigate("/calendar")}
+              >
+                View Calendar
+              </Button>
+              <Button
+                size="sm"
+                className="h-8 rounded-xl text-xs"
+                onClick={() => navigate(`/events?clientId=${client.id}`)}
+                data-testid="button-add-client-event"
+              >
+                <Plus className="w-3.5 h-3.5 mr-1.5" /> Add Event
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="p-0">
+            {isEventsLoading ? (
+              <div className="p-5 space-y-3">
+                <Skeleton className="h-10 w-full rounded-xl" />
+                <Skeleton className="h-10 w-4/5 rounded-xl" />
+              </div>
+            ) : clientEvents.length === 0 ? (
+              <div className="px-5 py-8 text-center">
+                <CalendarDays className="w-8 h-8 text-slate-300 dark:text-zinc-600 mx-auto mb-2" />
+                <p className="text-sm font-medium text-slate-500">No events linked yet</p>
+                <p className="text-xs text-slate-400 mt-1">Add the first event to populate the shared calendar.</p>
+              </div>
+            ) : (
+              <div className="divide-y divide-slate-100 dark:divide-zinc-800">
+                {clientEvents.map((event: any) => (
+                  <div key={event.id} className="flex flex-col sm:flex-row sm:items-center gap-3 px-5 py-3">
+                    <div className="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 flex items-center justify-center shrink-0">
+                      <CalendarDays className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-slate-700 dark:text-zinc-200 truncate">{event.eventName}</p>
+                      <p className="text-xs text-slate-400 mt-0.5">
+                        {event.eventDate ? format(new Date(event.eventDate), "EEE, MMM d, yyyy") : "Date not set"}
+                        {" · "}{event.eventType}
+                        {event.guestCount ? ` · ${event.guestCount} guests` : ""}
+                      </p>
+                    </div>
+                    <Badge className="self-start sm:self-auto text-[10px] capitalize">{event.status}</Badge>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* ── Main 2-column grid ── */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

@@ -49,7 +49,10 @@ export function useCreateEvent() {
       if (!res.ok) throw new Error("Failed to create event");
       return res.json();
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: [QK] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: [QK] });
+      qc.invalidateQueries({ queryKey: ["/api/clients"] });
+    },
   });
 }
 
@@ -68,6 +71,7 @@ export function useUpdateEvent() {
     onSuccess: (_, v) => {
       qc.invalidateQueries({ queryKey: [QK] });
       qc.invalidateQueries({ queryKey: [QK, v.id] });
+      qc.invalidateQueries({ queryKey: ["/api/clients"] });
     },
   });
 }
@@ -75,10 +79,14 @@ export function useUpdateEvent() {
 export function useDeleteEvent() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (id: number) => {
-      const res = await fetch(`${QK}/${id}`, { method: "DELETE" });
+    mutationFn: async (id: number | { id: number; clientId?: number }) => {
+      const eventId = typeof id === "number" ? id : id.id;
+      const res = await fetch(`${QK}/${eventId}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Failed to delete event");
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: [QK] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: [QK] });
+      qc.invalidateQueries({ queryKey: ["/api/clients"] });
+    },
   });
 }

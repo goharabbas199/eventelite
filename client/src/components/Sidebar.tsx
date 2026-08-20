@@ -22,7 +22,6 @@ import { useSettings } from "@/context/SettingsContext";
 const links = [
   { href: "/",           label: "Dashboard",    icon: LayoutDashboard },
   { href: "/clients",    label: "Clients",      icon: Users },
-  { href: "/events",     label: "Events",       icon: CalendarDays },
   { href: "/calendar",   label: "Calendar",     icon: Calendar },
   { href: "/vendors",    label: "Vendors",      icon: Store },
   { href: "/venues",     label: "Venues",       icon: MapPin },
@@ -146,7 +145,7 @@ export function MobileNav() {
   const primaryLinks = [
     { href: "/",         label: "Home",     icon: LayoutDashboard },
     { href: "/clients",  label: "Clients",  icon: Users },
-    { href: "/events",   label: "Events",   icon: CalendarDays },
+    { href: "/calendar", label: "Calendar", icon: Calendar },
     { href: "/invoices", label: "Invoices", icon: FileText },
   ];
 
@@ -155,7 +154,7 @@ export function MobileNav() {
     { href: "/venues",     label: "Venues",       icon: MapPin },
     { href: "/quotations", label: "Quotes",       icon: ReceiptText },
     { href: "/budget",     label: "Budget",       icon: PieChart },
-    { href: "/calendar",   label: "Calendar",     icon: Calendar },
+    { href: "/events",     label: "Event editor", icon: CalendarDays },
     { href: "/analytics",  label: "Analytics",    icon: BarChart2 },
     { href: "/ai",         label: "AI Assistant", icon: Sparkles },
     { href: "/settings",   label: "Settings",     icon: Settings },

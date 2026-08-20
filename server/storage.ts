@@ -477,12 +477,19 @@ export class DatabaseStorage implements IStorage {
       .where(eq(vendorPayments.clientId, id))
       .orderBy(desc(vendorPayments.createdAt));
 
+    const clientEvents = await db
+      .select()
+      .from(events)
+      .where(eq(events.clientId, id))
+      .orderBy(desc(events.eventDate));
+
     return {
       ...client[0],
       services: services ?? [],
       expenses: clientExpenses ?? [],
       payments: clientPayments ?? [],
       vendorPayments: clientVendorPayments ?? [],
+      events: clientEvents ?? [],
     };
   }
 
@@ -501,6 +508,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteClient(id: number) {
+    await db.delete(events).where(eq(events.clientId, id));
     await db.delete(plannedServices).where(eq(plannedServices.clientId, id));
     await db.delete(expenses).where(eq(expenses.clientId, id));
     await db.delete(clients).where(eq(clients.id, id));
