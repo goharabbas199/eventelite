@@ -6,6 +6,7 @@ import {
   boolean,
   timestamp,
   numeric,
+  jsonb,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -65,6 +66,7 @@ export const vendors = pgTable("vendors", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   category: text("category").notNull(),
+  standardCost: numeric("standard_cost"),
   contact: text("contact").notNull(),
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow(),
@@ -153,6 +155,7 @@ export const clients = pgTable("clients", {
 
   // Optional
   budget: numeric("budget"),
+  budgetPlan: jsonb("budget_plan"),
 
   status: text("status").notNull(),
 

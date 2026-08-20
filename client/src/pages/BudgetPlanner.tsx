@@ -5,7 +5,10 @@ import {
   useCreateExpense,
   useUpdateExpense,
   useDeleteExpense,
+  useUpdateClient,
 } from "@/hooks/use-clients";
+import { useVenues } from "@/hooks/use-venues";
+import { useVendors } from "@/hooks/use-vendors";
 import { useState, useMemo } from "react";
 import { useAI } from "@/hooks/use-ai";
 import { useToast } from "@/hooks/use-toast";
@@ -99,6 +102,8 @@ type Tab = "overview" | "services" | "expenses";
 export default function BudgetPlanner() {
   const { data: clients = [], isLoading } = useClients();
   const [selectedClientId, setSelectedClientId] = useState<string | undefined>();
+  const [previewClientId, setPreviewClientId] = useState<string | undefined>();
+  const [planBuilderOpen, setPlanBuilderOpen] = useState(false);
   const [aiBudget, setAiBudget] = useState<any>(null);
   const [aiBudgetLoading, setAiBudgetLoading] = useState(false);
   const ai = useAI();
@@ -161,7 +166,7 @@ export default function BudgetPlanner() {
             {aiBudgetLoading ? "Analyzing…" : "AI Budget Allocation"}
           </Button>
           <div className="min-w-[240px]">
-            <Select value={selectedClientId} onValueChange={(v) => { setSelectedClientId(v); setAiBudget(null); }}>
+            <Select value={selectedClientId} onValueChange={(v) => { setPreviewClientId(v); setAiBudget(null); }}>
               <SelectTrigger className="h-9 rounded-xl text-sm border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900" data-testid="select-budget-client">
                 <SelectValue placeholder="Select a client…" />
               </SelectTrigger>
@@ -232,7 +237,7 @@ export default function BudgetPlanner() {
           {healthSummary.map((c) => (
             <button
               key={c.id}
-              onClick={() => setSelectedClientId(String(c.id))}
+              onClick={() => setPreviewClientId(String(c.id))}
               data-testid={`client-health-${c.id}`}
               className={`flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-xl border text-left transition-all ${
                 String(c.id) === selectedClientId
@@ -256,7 +261,7 @@ export default function BudgetPlanner() {
         </div>
       )}
 
-      {selectedClient && selectedClientId ? (
+      {selectedClient && selectedClientId && planBuilderOpen ? (
         <ClientBudgetView
           clientId={Number(selectedClientId)}
           initialBudget={Number(selectedClient.budget)}
@@ -272,6 +277,64 @@ export default function BudgetPlanner() {
           <p className="text-xs text-slate-400">All spending, services and expenses in one view</p>
         </div>
       )}
+
+      <Dialog
+        open={!!previewClientId}
+        onOpenChange={(open) => !open && setPreviewClientId(undefined)}
+      >
+        <DialogContent className="max-w-lg rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Layers className="w-4 h-4 text-indigo-500" /> Preview & Generate Plan
+            </DialogTitle>
+          </DialogHeader>
+          {(() => {
+            const preview = clients.find((c) => String(c.id) === previewClientId);
+            if (!preview) return null;
+            const venue = (preview as any).venueId
+              ? (venues as any[]).find((v) => v.id === Number((preview as any).venueId))
+              : null;
+            return (
+              <div className="space-y-4">
+                <div className="rounded-xl bg-slate-50 dark:bg-zinc-800/60 p-4 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <p className="font-bold text-slate-900 dark:text-white">{preview.name}</p>
+                    <Badge variant="secondary">{preview.status}</Badge>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 text-xs">
+                    <div><p className="text-slate-400">Event</p><p className="font-semibold">{preview.eventType}</p></div>
+                    <div><p className="text-slate-400">Guests</p><p className="font-semibold">{preview.guestCount || "TBD"}</p></div>
+                    <div><p className="text-slate-400">Event date</p><p className="font-semibold">{new Date(preview.eventDate).toLocaleDateString()}</p></div>
+                    <div><p className="text-slate-400">Budget</p><p className="font-semibold">{fmt(Number(preview.budget) || 0)}</p></div>
+                  </div>
+                </div>
+                <div className="space-y-2 text-sm">
+                  <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Requested details</p>
+                  <p className="text-slate-600 dark:text-zinc-300">{(preview as any).clientNotes || "No additional client notes provided."}</p>
+                  <div className="flex items-center justify-between rounded-xl border border-slate-200 dark:border-zinc-800 p-3">
+                    <span className="text-slate-500">Preferred venue</span>
+                    <span className="font-semibold">{venue?.name || "Not selected"}</span>
+                  </div>
+                  <div className="rounded-xl border border-slate-200 dark:border-zinc-800 p-3">
+                    <p className="text-slate-500 mb-1">Requested services</p>
+                    <p className="font-semibold">{(preview as any).services?.length ? (preview as any).services.map((s: any) => s.serviceName).join(", ") : "No services requested yet"}</p>
+                  </div>
+                </div>
+                <Button
+                  className="w-full rounded-xl bg-indigo-600 hover:bg-indigo-700"
+                  onClick={() => {
+                    setSelectedClientId(previewClientId);
+                    setPlanBuilderOpen(true);
+                    setPreviewClientId(undefined);
+                  }}
+                >
+                  <Sparkles className="w-4 h-4 mr-2" /> Generate Interactive Budget
+                </Button>
+              </div>
+            );
+          })()}
+        </DialogContent>
+      </Dialog>
     </Layout>
   );
 }
