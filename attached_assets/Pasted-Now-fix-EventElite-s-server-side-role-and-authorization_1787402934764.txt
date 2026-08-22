@@ -1,0 +1,85 @@
+Now fix EventElite's server-side role and authorization security.
+
+IMPORTANT:
+This is AUTHORIZATION FOUNDATION ONLY.
+
+Do not:
+- Build CRM
+- Build Procurement
+- Build Inventory
+- Build HR
+- Build Logistics
+- Change Client/Event architecture
+- Redesign UI
+- Remove existing functionality
+
+The existing application has a users.role field, but role enforcement is incomplete.
+
+Most importantly, users must NOT be able to change their own role through normal profile/settings APIs.
+
+Implement a reusable server-side authorization system.
+
+First inspect the existing roles in the database and application.
+
+Do not invent a completely new role system if existing roles are already defined.
+
+Create/reuse middleware/helpers such as:
+
+requireRole(...)
+requirePermission(...)
+
+where appropriate.
+
+At minimum, protect sensitive actions such as:
+
+- Changing user roles
+- User administration
+- Deleting business records
+- Financial changes
+- Approving documents
+- System settings
+
+A normal user must never be able to escalate their own privileges.
+
+The server must determine the authenticated user's role from the trusted server-side user/session record.
+
+Do NOT trust role values sent by the frontend.
+
+If the profile update endpoint currently accepts "role" from the client:
+- Ignore/reject unauthorized role changes.
+- Only an authorized administrator may modify another user's role.
+- A user may update permitted profile fields without changing their role.
+
+Do not expose authorization decisions based only on frontend state.
+
+Requirements:
+
+1. Server-side role verification.
+2. Prevent self-role escalation.
+3. Preserve existing login/session behavior.
+4. Return HTTP 403 for authenticated users who lack permission.
+5. Return HTTP 401 when unauthenticated.
+6. Do not break normal profile editing.
+7. Do not redesign the UI.
+
+Before implementing new permissions, inspect the current user roles and report them.
+
+After implementation:
+- Run TypeScript checks.
+- Run build.
+- Test normal profile update.
+- Test attempted self-role escalation.
+- Test authorized role update.
+- Test unauthorized role update.
+- Test authenticated access.
+- Test unauthenticated access.
+
+At the end report:
+- Existing roles discovered
+- Authorization middleware created
+- Protected actions
+- Files changed
+- Tests performed
+- Remaining authorization gaps
+
+Do not modify unrelated modules.

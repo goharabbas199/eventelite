@@ -7,6 +7,7 @@ import cloudinary, { cloudinaryConfigured } from "./cloudinary";
 import multer from "multer";
 import { runAI } from "./services/aiService";
 import rateLimit from "express-rate-limit";
+import { requireAuth, requirePermission } from "./authorization";
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -55,7 +56,7 @@ export async function registerRoutes(
     res.json(vendors);
   });
 
-  app.post(api.vendors.create.path, async (req, res) => {
+  app.post(api.vendors.create.path, requirePermission("business:write"), async (req, res) => {
     try {
       const input = api.vendors.create.input.parse(req.body);
       const vendor = await storage.createVendor(input);
@@ -74,13 +75,13 @@ export async function registerRoutes(
     res.json(vendor);
   });
 
-  app.delete(api.vendors.delete.path, async (req, res) => {
+  app.delete(api.vendors.delete.path, requirePermission("business:delete"), async (req, res) => {
     await storage.deleteVendor(Number(req.params.id));
     res.status(204).end();
   });
 
   // UPDATE VENDOR
-  app.put("/api/vendors/:id", async (req, res) => {
+  app.put("/api/vendors/:id", requirePermission("business:write"), async (req, res) => {
     try {
       const vendorId = Number(req.params.id);
 
@@ -95,7 +96,7 @@ export async function registerRoutes(
 
   // ================= VENDOR PRODUCTS =================
 
-  app.post("/api/vendors/:vendorId/products", async (req, res) => {
+  app.post("/api/vendors/:vendorId/products", requirePermission("business:write"), async (req, res) => {
     try {
       const vendorId = Number(req.params.vendorId);
 
@@ -113,7 +114,7 @@ export async function registerRoutes(
     }
   });
 
-  app.delete("/api/vendor-products/:id", async (req, res) => {
+  app.delete("/api/vendor-products/:id", requirePermission("business:delete"), async (req, res) => {
     try {
       await storage.deleteVendorProduct(Number(req.params.id));
       res.status(204).end();
@@ -130,7 +131,7 @@ export async function registerRoutes(
     res.json(venues);
   });
 
-  app.post(api.venues.create.path, async (req, res) => {
+  app.post(api.venues.create.path, requirePermission("business:write"), async (req, res) => {
     try {
       const { images = [], ...venueData } = req.body;
 
@@ -158,7 +159,7 @@ export async function registerRoutes(
 
   // UPDATE VENUE
   // UPDATE VENUE
-  app.patch("/api/venues/:id", async (req, res) => {
+  app.patch("/api/venues/:id", requirePermission("business:write"), async (req, res) => {
     try {
       const venueId = Number(req.params.id);
 
@@ -172,7 +173,7 @@ export async function registerRoutes(
   });
 
   // ✅ NEW: UPDATE MAIN IMAGE
-  app.patch("/api/venues/:id/main-image", async (req, res) => {
+  app.patch("/api/venues/:id/main-image", requirePermission("business:write"), async (req, res) => {
     try {
       const venueId = Number(req.params.id);
       const { mainImage } = req.body;
@@ -190,12 +191,12 @@ export async function registerRoutes(
     }
   });
 
-  app.delete(api.venues.delete.path, async (req, res) => {
+  app.delete(api.venues.delete.path, requirePermission("business:delete"), async (req, res) => {
     await storage.deleteVenue(Number(req.params.id));
     res.status(204).end();
   });
   // ✅ ADD GALLERY IMAGE
-  app.post("/api/venues/:id/images", async (req, res) => {
+  app.post("/api/venues/:id/images", requirePermission("business:write"), async (req, res) => {
     try {
       const venueId = Number(req.params.id);
       const { imageUrl } = req.body;
@@ -213,7 +214,7 @@ export async function registerRoutes(
     }
   });
   // DELETE GALLERY IMAGE
-  app.delete("/api/venue-images/:id", async (req, res) => {
+  app.delete("/api/venue-images/:id", requirePermission("business:delete"), async (req, res) => {
     try {
       await storage.deleteVenueImage(Number(req.params.id));
       res.status(204).end();
@@ -231,7 +232,7 @@ export async function registerRoutes(
     res.json(result);
   });
 
-  app.post("/api/clients/:clientId/payments", async (req, res) => {
+  app.post("/api/clients/:clientId/payments", requirePermission("financial:write"), async (req, res) => {
     try {
       const clientId = Number(req.params.clientId);
       const payment = await storage.createPayment({ ...req.body, clientId });
@@ -242,7 +243,7 @@ export async function registerRoutes(
     }
   });
 
-  app.delete("/api/payments/:id", async (req, res) => {
+  app.delete("/api/payments/:id", requirePermission("financial:write"), async (req, res) => {
     await storage.deletePayment(Number(req.params.id));
     res.status(204).end();
   });
@@ -255,7 +256,7 @@ export async function registerRoutes(
     res.json(result);
   });
 
-  app.post("/api/clients/:clientId/vendor-payments", async (req, res) => {
+  app.post("/api/clients/:clientId/vendor-payments", requirePermission("financial:write"), async (req, res) => {
     try {
       const clientId = Number(req.params.clientId);
       const payment = await storage.createVendorPayment({ ...req.body, clientId });
@@ -266,7 +267,7 @@ export async function registerRoutes(
     }
   });
 
-  app.patch("/api/vendor-payments/:id", async (req, res) => {
+  app.patch("/api/vendor-payments/:id", requirePermission("financial:write"), async (req, res) => {
     try {
       const id = Number(req.params.id);
       const updated = await storage.updateVendorPayment(id, req.body);
@@ -277,14 +278,14 @@ export async function registerRoutes(
     }
   });
 
-  app.delete("/api/vendor-payments/:id", async (req, res) => {
+  app.delete("/api/vendor-payments/:id", requirePermission("financial:write"), async (req, res) => {
     await storage.deleteVendorPayment(Number(req.params.id));
     res.status(204).end();
   });
 
   // ================= BOOKING OPTIONS ====================
 
-  app.post(api.bookingOptions.create.path, async (req, res) => {
+  app.post(api.bookingOptions.create.path, requirePermission("business:write"), async (req, res) => {
     try {
       const venueId = Number(req.params.venueId);
 
@@ -307,7 +308,7 @@ export async function registerRoutes(
     }
   });
 
-  app.delete(api.bookingOptions.delete.path, async (req, res) => {
+  app.delete(api.bookingOptions.delete.path, requirePermission("business:delete"), async (req, res) => {
     await storage.deleteBookingOption(Number(req.params.id));
     res.status(204).end();
   });
@@ -319,7 +320,7 @@ export async function registerRoutes(
     res.json(clients);
   });
 
-  app.post(api.clients.create.path, async (req, res) => {
+  app.post(api.clients.create.path, requirePermission("business:write"), async (req, res) => {
     try {
       const body = {
         ...req.body,
@@ -346,7 +347,7 @@ export async function registerRoutes(
     res.json(client);
   });
 
-  app.patch(api.clients.update.path, async (req, res) => {
+  app.patch(api.clients.update.path, requirePermission("business:write"), async (req, res) => {
     try {
       const body: any = { ...req.body };
 
@@ -366,7 +367,7 @@ export async function registerRoutes(
     }
   });
 
-  app.post(api.clients.confirmBudget.path, async (req, res) => {
+  app.post(api.clients.confirmBudget.path, requirePermission("financial:write"), async (req, res) => {
     try {
       const input = api.clients.confirmBudget.input.parse(req.body);
       const client = await storage.confirmBudget(Number(req.params.id), input);
@@ -381,7 +382,7 @@ export async function registerRoutes(
     }
   });
 
-  app.delete(api.clients.delete.path, async (req, res) => {
+  app.delete(api.clients.delete.path, requirePermission("business:delete"), async (req, res) => {
     await storage.deleteClient(Number(req.params.id));
     res.status(204).end();
   });
@@ -389,7 +390,7 @@ export async function registerRoutes(
   // ================= PLANNED SERVICES ====================
 
   // CREATE PLANNED SERVICE
-  app.post(api.plannedServices.create.path, async (req, res) => {
+  app.post(api.plannedServices.create.path, requirePermission("business:write"), async (req, res) => {
     try {
       const clientId = Number(req.params.clientId);
 
@@ -456,7 +457,7 @@ export async function registerRoutes(
   });
 
   // UPDATE PLANNED SERVICE
-  app.patch("/api/services/:id", async (req, res) => {
+  app.patch("/api/services/:id", requirePermission("business:write"), async (req, res) => {
     try {
       const id = Number(req.params.id);
       const updates = req.body;
@@ -472,7 +473,7 @@ export async function registerRoutes(
   });
 
   // DELETE PLANNED SERVICE (both paths for compatibility)
-  app.delete("/api/services/:id", async (req, res) => {
+  app.delete("/api/services/:id", requirePermission("business:delete"), async (req, res) => {
     try {
       const serviceId = Number(req.params.id);
       if (isNaN(serviceId)) return res.status(400).json({ message: "Invalid service id" });
@@ -484,7 +485,7 @@ export async function registerRoutes(
     }
   });
 
-  app.delete("/api/planned-services/:id", async (req, res) => {
+  app.delete("/api/planned-services/:id", requirePermission("business:delete"), async (req, res) => {
     try {
       const serviceId = Number(req.params.id);
       if (isNaN(serviceId)) return res.status(400).json({ message: "Invalid service id" });
@@ -511,7 +512,7 @@ export async function registerRoutes(
     return res.json(expenses);
   });
 
-  app.post(api.expenses.create.path, async (req, res) => {
+  app.post(api.expenses.create.path, requirePermission("financial:write"), async (req, res) => {
     try {
       const clientId = Number(req.params.clientId);
 
@@ -543,7 +544,7 @@ export async function registerRoutes(
     }
   });
 
-  app.patch(api.expenses.update.path, async (req, res) => {
+  app.patch(api.expenses.update.path, requirePermission("financial:write"), async (req, res) => {
     try {
       const input = api.expenses.update.input.parse(req.body);
       const expense = await storage.updateExpense(Number(req.params.id), input);
@@ -559,7 +560,7 @@ export async function registerRoutes(
     }
   });
 
-  app.delete(api.expenses.delete.path, async (req, res) => {
+  app.delete(api.expenses.delete.path, requirePermission("financial:write"), async (req, res) => {
     await storage.deleteExpense(Number(req.params.id));
     return res.status(204).end();
   });
@@ -572,7 +573,7 @@ export async function registerRoutes(
     res.json(list);
   });
 
-  app.post("/api/clients/:clientId/tasks", async (req, res) => {
+  app.post("/api/clients/:clientId/tasks", requirePermission("business:write"), async (req, res) => {
     try {
       const clientId = Number(req.params.clientId);
       const task = await storage.createTask({ ...req.body, clientId });
@@ -583,7 +584,7 @@ export async function registerRoutes(
     }
   });
 
-  app.patch("/api/tasks/:id", async (req, res) => {
+  app.patch("/api/tasks/:id", requirePermission("business:write"), async (req, res) => {
     try {
       const task = await storage.updateTask(Number(req.params.id), req.body);
       res.json(task);
@@ -592,14 +593,14 @@ export async function registerRoutes(
     }
   });
 
-  app.delete("/api/tasks/:id", async (req, res) => {
+  app.delete("/api/tasks/:id", requirePermission("business:delete"), async (req, res) => {
     await storage.deleteTask(Number(req.params.id));
     res.status(204).end();
   });
 
   // ================= CLOUDINARY UPLOAD ==================
 
-  app.post("/api/upload", upload.single("image"), async (req, res) => {
+  app.post("/api/upload", requirePermission("business:write"), upload.single("image"), async (req, res) => {
     if (!cloudinaryConfigured) {
       return res.status(503).json({ message: "Image upload is not configured. Please set Cloudinary environment variables." });
     }
@@ -637,7 +638,7 @@ export async function registerRoutes(
     res.json(q);
   });
 
-  app.post("/api/quotations", async (req, res) => {
+  app.post("/api/quotations", requirePermission("financial:write"), async (req, res) => {
     try {
       const { items = [], ...quotationData } = req.body;
       const q = await storage.createQuotation(quotationData, items);
@@ -647,7 +648,7 @@ export async function registerRoutes(
     }
   });
 
-  app.patch("/api/quotations/:id", async (req, res) => {
+  app.patch("/api/quotations/:id", requirePermission("financial:write"), async (req, res) => {
     try {
       const updated = await storage.updateQuotation(Number(req.params.id), req.body);
       res.json(updated);
@@ -656,7 +657,7 @@ export async function registerRoutes(
     }
   });
 
-  app.delete("/api/quotations/:id", async (req, res) => {
+  app.delete("/api/quotations/:id", requirePermission("business:delete"), async (req, res) => {
     await storage.deleteQuotation(Number(req.params.id));
     res.status(204).end();
   });
@@ -680,7 +681,7 @@ export async function registerRoutes(
     res.json(all);
   });
 
-  app.post("/api/events", async (req, res) => {
+  app.post("/api/events", requirePermission("business:write"), async (req, res) => {
     try {
       const clientId = Number(req.body.clientId);
       if (!Number.isInteger(clientId) || !(await storage.getClient(clientId))) {
@@ -695,7 +696,7 @@ export async function registerRoutes(
     }
   });
 
-  app.patch("/api/events/:id", async (req, res) => {
+  app.patch("/api/events/:id", requirePermission("business:write"), async (req, res) => {
     try {
       const body = { ...req.body };
       if (body.clientId !== undefined) {
@@ -714,7 +715,7 @@ export async function registerRoutes(
     }
   });
 
-  app.delete("/api/events/:id", async (req, res) => {
+  app.delete("/api/events/:id", requirePermission("business:delete"), async (req, res) => {
     await storage.deleteEvent(Number(req.params.id));
     res.status(204).end();
   });
@@ -738,7 +739,7 @@ export async function registerRoutes(
     res.json(all);
   });
 
-  app.post("/api/invoices", async (req, res) => {
+  app.post("/api/invoices", requirePermission("financial:write"), async (req, res) => {
     try {
       const invoice = await storage.createInvoice(req.body);
       res.status(201).json(invoice);
@@ -748,7 +749,7 @@ export async function registerRoutes(
     }
   });
 
-  app.patch("/api/invoices/:id", async (req, res) => {
+  app.patch("/api/invoices/:id", requirePermission("financial:write"), async (req, res) => {
     try {
       const updated = await storage.updateInvoice(Number(req.params.id), req.body);
       res.json(updated);
@@ -757,7 +758,7 @@ export async function registerRoutes(
     }
   });
 
-  app.delete("/api/invoices/:id", async (req, res) => {
+  app.delete("/api/invoices/:id", requirePermission("business:delete"), async (req, res) => {
     await storage.deleteInvoice(Number(req.params.id));
     res.status(204).end();
   });
@@ -791,7 +792,7 @@ export async function registerRoutes(
     });
   });
 
-  app.post("/api/ai", async (req, res) => {
+  app.post("/api/ai", requireAuth, async (req, res) => {
     try {
       const { feature, prompt, context } = req.body;
       if (!feature || !prompt) {
@@ -882,10 +883,7 @@ export async function registerRoutes(
     });
   });
 
-  app.patch("/api/user/profile", async (req, res) => {
-    if (!req.isAuthenticated() || !req.user) {
-      return res.status(401).json({ message: "Not authenticated" });
-    }
+  app.patch("/api/user/profile", requireAuth, async (req, res) => {
     try {
       const userId = (req.user as any).id as number;
       const schema = z.object({
@@ -894,7 +892,6 @@ export async function registerRoutes(
         phone:     z.string().nullable().optional(),
         bio:       z.string().nullable().optional(),
         avatarUrl: z.string().nullable().optional(),
-        role:      z.string().optional(),
       });
       const data = schema.parse(req.body);
 
@@ -906,7 +903,7 @@ export async function registerRoutes(
         }
       }
 
-      const updated = await storage.updateUserProfile(userId, data);
+       const updated = await storage.updateUserProfile(userId, data);
       // Refresh passport session so req.user reflects new data
       req.login(updated, (err) => {
         if (err) return res.status(500).json({ message: "Profile update failed" });
@@ -924,6 +921,29 @@ export async function registerRoutes(
       }
       console.error("Profile update error:", err);
       res.status(500).json({ message: "Failed to update profile" });
+    }
+  });
+
+  app.patch("/api/admin/users/:id/role", requirePermission("users:manage"), async (req, res) => {
+    try {
+      const role = z.enum(["owner", "admin", "manager", "staff", "user"]).parse(req.body?.role);
+      const targetUserId = Number(req.params.id);
+      if (!Number.isInteger(targetUserId)) {
+        return res.status(400).json({ message: "Invalid user id" });
+      }
+      const actorUserId = Number((req.user as any).id);
+      if (targetUserId === actorUserId) {
+        return res.status(403).json({ message: "You cannot change your own role" });
+      }
+      const target = await storage.getUserById(targetUserId);
+      if (!target) return res.status(404).json({ message: "User not found" });
+      const updated = await storage.updateUserRole(targetUserId, role);
+      res.json(safeUser(updated));
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ message: "A valid role is required" });
+      }
+      res.status(500).json({ message: "Failed to update user role" });
     }
   });
 
@@ -969,7 +989,7 @@ export async function registerRoutes(
     },
   };
 
-  app.get("/api/settings", async (req, res) => {
+  app.get("/api/settings", requireAuth, async (req, res) => {
     try {
       const stored = await storage.getAllSettings();
       const merged: Record<string, any> = {};
@@ -978,7 +998,7 @@ export async function registerRoutes(
       }
 
       // Profile always comes from the authenticated user, not from appSettings
-      const u = req.isAuthenticated() ? (req.user as any) : null;
+       const u = req.user as any;
       merged.profile = {
         name:      u?.fullName  ?? "",
         email:     u?.email     ?? "",
@@ -994,24 +1014,20 @@ export async function registerRoutes(
     }
   });
 
-  app.put("/api/settings/:section", async (req, res) => {
+  app.put("/api/settings/:section", requireAuth, async (req, res) => {
     try {
       const { section } = req.params;
 
       // Profile changes are saved to the users table, not appSettings
       if (section === "profile") {
-        if (!req.isAuthenticated() || !req.user) {
-          return res.status(401).json({ message: "Not authenticated" });
-        }
         const userId = (req.user as any).id as number;
-        const { name, email, phone, role, avatarUrl, bio } = req.body;
+        const { name, email, phone, avatarUrl, bio } = req.body;
         const updated = await storage.updateUserProfile(userId, {
           fullName:  name,
           email:     email,
           phone:     phone     ?? null,
           bio:       bio       ?? null,
           avatarUrl: avatarUrl ?? null,
-          role:      role,
         });
         // Refresh session
         req.login(updated, (err) => {
@@ -1031,6 +1047,11 @@ export async function registerRoutes(
       const allowed = Object.keys(DEFAULT_SETTINGS);
       if (!allowed.includes(section)) {
         return res.status(400).json({ message: "Unknown settings section" });
+      }
+      const canManageSettings =
+        (req.user as any).role === "owner" || (req.user as any).role === "admin";
+      if (!canManageSettings) {
+        return res.status(403).json({ message: "You do not have permission to perform this action" });
       }
       await storage.setSetting(section, req.body);
       const value = await storage.getSetting(section);

@@ -42,7 +42,8 @@ export interface IStorage {
   getUserById(id: number): Promise<User | undefined>;
   getUserByGoogleId(googleId: string): Promise<User | undefined>;
   createUser(data: { fullName: string; email: string; passwordHash?: string | null; googleId?: string; emailVerified?: boolean }): Promise<User>;
-  updateUserProfile(id: number, data: { fullName?: string; email?: string; phone?: string | null; bio?: string | null; avatarUrl?: string | null; role?: string }): Promise<User>;
+  updateUserProfile(id: number, data: { fullName?: string; email?: string; phone?: string | null; bio?: string | null; avatarUrl?: string | null }): Promise<User>;
+  updateUserRole(id: number, role: string): Promise<User>;
   findUserByFirebaseUid(firebaseUid: string): Promise<User | undefined>;
   findOrCreateFirebaseUser(data: { firebaseUid: string; email: string; fullName: string; avatarUrl?: string; phone?: string; emailVerified?: boolean }): Promise<User>;
   updateUserEmailVerified(id: number): Promise<User>;
@@ -297,7 +298,6 @@ export class DatabaseStorage implements IStorage {
     phone?: string | null;
     bio?: string | null;
     avatarUrl?: string | null;
-    role?: string;
   }): Promise<User> {
     const updates: Partial<typeof users.$inferInsert> = {};
     if (data.fullName !== undefined) updates.fullName = data.fullName;
@@ -305,8 +305,12 @@ export class DatabaseStorage implements IStorage {
     if (data.phone    !== undefined) updates.phone    = data.phone;
     if (data.bio      !== undefined) updates.bio      = data.bio;
     if (data.avatarUrl !== undefined) updates.avatarUrl = data.avatarUrl;
-    if (data.role     !== undefined) updates.role     = data.role;
     const [user] = await db.update(users).set(updates).where(eq(users.id, id)).returning();
+    return user;
+  }
+
+  async updateUserRole(id: number, role: string): Promise<User> {
+    const [user] = await db.update(users).set({ role }).where(eq(users.id, id)).returning();
     return user;
   }
 
