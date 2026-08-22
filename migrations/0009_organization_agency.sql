@@ -5,7 +5,34 @@ CREATE TABLE "organizations" (
   "updated_at" timestamp DEFAULT now()
 );
 --> statement-breakpoint
-INSERT INTO "organizations" ("name") VALUES ('Event Management Agency');
+CREATE TABLE "users" (
+  "id" serial PRIMARY KEY NOT NULL,
+  "full_name" text NOT NULL,
+  "email" text NOT NULL UNIQUE,
+  "password_hash" text,
+  "firebase_uid" text UNIQUE,
+  "role" text NOT NULL DEFAULT 'owner',
+  "phone" text,
+  "bio" text,
+  "avatar_url" text,
+  "email_verified" boolean NOT NULL DEFAULT false,
+  "google_id" text,
+  "created_at" timestamp DEFAULT now()
+);
+--> statement-breakpoint
+CREATE TABLE "email_verifications" (
+  "id" serial PRIMARY KEY NOT NULL,
+  "email" text NOT NULL,
+  "code" text NOT NULL,
+  "type" text NOT NULL,
+  "expires_at" timestamp NOT NULL,
+  "used_at" timestamp,
+  "created_at" timestamp DEFAULT now()
+);
+--> statement-breakpoint
+INSERT INTO "organizations" ("name") VALUES ('EventElite Agency');
+--> statement-breakpoint
+ALTER TABLE "vendors" ADD COLUMN "standard_cost" numeric;
 --> statement-breakpoint
 ALTER TABLE "users" ADD COLUMN "organization_id" integer;
 --> statement-breakpoint
