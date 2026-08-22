@@ -1,0 +1,218 @@
+We are NOT ready to migrate Client → Event yet.
+
+The organization/security foundation is now verified:
+- Organization isolation passes focused tests.
+- Production build passes.
+- Organization-related security changes have no TypeScript errors.
+- 112 TypeScript errors remain.
+- There is known schema drift, including clients.budget_plan existing in the ORM schema but missing from the live database.
+
+The next task is a READ-ONLY CODEBASE / DATABASE CONSISTENCY AUDIT.
+
+Do NOT:
+- Fix the 112 errors yet
+- Change the database
+- Create migrations
+- Modify Client/Event relationships
+- Build CRM
+- Build Procurement
+- Build Inventory
+- Build Staff
+- Build Logistics
+- Redesign UI
+- Delete data
+- Reset the database
+
+I want to understand exactly why the codebase has 112 TypeScript errors and how much schema drift exists.
+
+==================================================
+PART 1 — TYPESCRIPT ERROR INVENTORY
+==================================================
+
+Run:
+
+npm run check
+
+Capture all 112 errors.
+
+Group them by ROOT CAUSE rather than simply listing every line.
+
+For each category report:
+
+- Error count
+- File(s)
+- Root cause
+- Whether it is frontend/backend/shared/schema
+- Whether it affects runtime
+- Whether it is related to database schema
+- Recommended fix
+
+Create categories such as:
+
+A. Database/schema mismatch
+B. API contract mismatch
+C. Missing type definitions
+D. Incorrect inferred types
+E. `any` / unsafe casts
+F. Nullability issues
+G. Seed issues
+H. Other
+
+Do not assume all 112 errors are independent.
+
+==================================================
+PART 2 — DATABASE SCHEMA DRIFT AUDIT
+==================================================
+
+Compare the current Drizzle schema against the actual development PostgreSQL database.
+
+For EVERY current table identify:
+
+- Table exists in ORM? YES/NO
+- Table exists in database? YES/NO
+- ORM columns missing from database
+- Database columns missing from ORM
+- Type differences
+- Nullable differences
+- Default differences
+- Enum/status differences
+- Primary key differences
+- Unique constraints differences
+- Foreign key differences
+- Index differences
+
+Pay particular attention to:
+
+users
+email_verifications
+organizations
+clients
+events
+planned_services
+vendors
+vendor_products
+venues
+venue_images
+booking_options
+expenses
+payments
+vendor_payments
+tasks
+quotations
+quotation_items
+invoices
+app_settings
+
+Also identify tables that exist in the database but are absent from migration history.
+
+==================================================
+PART 3 — MIGRATION HISTORY AUDIT
+==================================================
+
+Compare:
+
+1. Current Drizzle schema
+2. Actual database
+3. migrations/ directory
+4. Migration bookkeeping/table
+
+Determine whether the migration directory can actually recreate the current database from an empty database.
+
+Do NOT modify migrations.
+
+Report:
+
+- Missing migrations
+- Out-of-order migrations
+- Manual database changes not represented in migrations
+- Tables created outside migrations
+- Columns created outside migrations
+- Constraints created outside migrations
+- Indexes created outside migrations
+
+==================================================
+PART 4 — DATA SAFETY CHECK
+==================================================
+
+Do NOT modify any data.
+
+Check whether current production/development data would be affected by reconciling the schema.
+
+Identify:
+
+- Columns that contain existing data
+- Columns that could safely be NOT NULL
+- Columns requiring defaults
+- Existing orphan records
+- Existing invalid enum/status values
+- Duplicate values violating unique constraints
+- Records that would fail future foreign-key constraints
+
+Do not automatically repair anything.
+
+==================================================
+PART 5 — API CONTRACT DRIFT
+==================================================
+
+Compare:
+
+shared/routes.ts
+
+against:
+
+server/routes.ts
+server/storage.ts
+frontend hooks
+frontend API calls
+
+Identify endpoints that:
+
+- Exist on server but not shared contract
+- Exist in shared contract but not server
+- Have different request shapes
+- Have different response shapes
+- Have inconsistent naming
+- Have inconsistent status/error behavior
+
+Do not rewrite them yet.
+
+==================================================
+PART 6 — RECOMMENDED ORDER
+==================================================
+
+After the audit, produce a recommended remediation order.
+
+Prioritize:
+
+1. Schema drift that can cause data loss or runtime failures
+2. Migration reproducibility problems
+3. Organization/security-related inconsistencies
+4. API contract problems
+5. TypeScript errors
+6. Non-critical type cleanup
+
+Do not recommend fixing all 112 errors individually if several have one common root cause.
+
+==================================================
+FINAL OUTPUT
+==================================================
+
+Give me a concise but detailed report:
+
+1. TypeScript errors by root cause
+2. Current ORM vs database schema differences
+3. Migration inconsistencies
+4. Data integrity risks
+5. API contract drift
+6. Critical issues
+7. High priority issues
+8. Medium/low priority issues
+9. Recommended fix order
+
+IMPORTANT:
+
+This task is READ-ONLY.
+
+Do not change files, database schema, migrations, data, UI, or application behavior.
+
+STOP after the audit and wait for approval.
