@@ -1,0 +1,152 @@
+IMPORTANT: We have two reports that appear to describe different database states.
+
+Earlier completion reports state that:
+- organization migration 0009 was applied successfully
+- organizations, users, and email_verifications were created
+- organization_id was backfilled
+- organization foreign keys and indexes were added
+- vendors.standard_cost was added
+- seed now succeeds
+
+But the later read-only audit reports:
+- organizations, users, and email_verifications are missing
+- organization_id columns are missing
+- migration 0009 is not applied
+- the database is still pre-organization schema
+
+Before any other work, perform a CURRENT-STATE RECONCILIATION AUDIT.
+
+This is READ-ONLY.
+
+DO NOT:
+- modify files
+- modify migrations
+- modify schema
+- modify data
+- run schema push
+- run migrations
+- reset/truncate the database
+- fix TypeScript errors
+- start Client → Event migration
+
+==================================================
+STEP 1 — IDENTIFY THE ACTUAL DATABASE
+==================================================
+
+Report the exact current database connection target/environment being inspected.
+
+Determine whether:
+- the previous migration work was applied to a different database
+- the database was reset/recreated afterward
+- the earlier completion report was based on temporary state
+- migration 0009 was applied manually but is not recorded
+- the current development environment points to a different DATABASE_URL
+- another explanation accounts for the contradiction
+
+Do not guess.
+
+==================================================
+STEP 2 — CURRENT LIVE DATABASE INVENTORY
+==================================================
+
+Read-only inspect the CURRENT database and report whether these tables exist:
+
+organizations
+users
+email_verifications
+clients
+events
+vendors
+venues
+quotations
+invoices
+app_settings
+
+For every organization-related business table, report whether organization_id exists:
+
+users
+clients
+events
+vendors
+venues
+quotations
+invoices
+app_settings
+
+Also report:
+- vendors.standard_cost existence
+- clients.budget_plan existence
+- tasks.service_id existence
+- tasks.ai_generated existence
+
+==================================================
+STEP 3 — MIGRATION BOOKKEEPING
+==================================================
+
+Identify the actual migration bookkeeping mechanism/table used by this project.
+
+Report:
+- which migrations are recorded as applied
+- whether 0009_organization_agency.sql is recorded as applied
+- whether the migration journal and live bookkeeping agree
+- whether the checked-in migration can reproduce the current database state
+
+Do not modify anything.
+
+==================================================
+STEP 4 — ORM VS CURRENT DATABASE
+==================================================
+
+Repeat only the schema comparison needed to establish CURRENT truth.
+
+Classify every mismatch as:
+
+A. ORM ahead of database
+B. Database ahead of ORM
+C. Migration history ahead of database
+D. Database changed manually outside migration history
+E. No mismatch
+
+==================================================
+STEP 5 — RECONCILE PREVIOUS REPORTS
+==================================================
+
+Explicitly explain which of these is true:
+
+1. The organization migration is currently applied.
+2. The organization migration was previously applied but this database was later reset/replaced.
+3. The previous migration was applied to another database/environment.
+4. The earlier completion report was inaccurate.
+5. Another specific explanation.
+
+Provide evidence for the conclusion.
+
+==================================================
+STEP 6 — TYPESCRIPT BASELINE
+==================================================
+
+Do NOT fix errors.
+
+Only confirm whether the current codebase still reports 112 TypeScript errors.
+
+If the count differs, report the new count and explain which changes likely caused the difference.
+
+==================================================
+FINAL REPORT
+==================================================
+
+Provide a concise report with:
+
+1. Actual current database identity/environment
+2. Whether organization migration is currently applied
+3. Tables currently present
+4. Organization columns currently present
+5. Current migration bookkeeping status
+6. Current ORM/database mismatches
+7. Explanation reconciling the contradictory reports
+8. Current TypeScript error count
+9. Whether the database is safe to proceed to remediation
+
+STOP after the report.
+
+Do not repair anything yet.
