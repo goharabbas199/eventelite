@@ -1,0 +1,154 @@
+The organization/agency database migration is complete.
+
+DO NOT start Client → Event migration yet.
+DO NOT build CRM.
+DO NOT build Procurement.
+DO NOT build Inventory.
+DO NOT redesign the UI.
+
+We now need to verify the organization security implementation and establish a TypeScript/build baseline.
+
+There are currently 112 TypeScript errors reported by `npm run check`.
+
+Handle this in TWO separate stages.
+
+==================================================
+STAGE 1 — VERIFY ORGANIZATION ISOLATION
+==================================================
+
+First inspect the organization implementation that was just completed.
+
+Verify that organization context is actually enforced at the SERVER/API/STORAGE level.
+
+Do NOT assume that adding organizationId columns and foreign keys is sufficient.
+
+For every major aggregate root:
+
+- Clients
+- Events
+- Vendors
+- Venues
+- Quotations
+- Invoices
+
+verify that authenticated queries are scoped to the authenticated user's organization.
+
+Also verify child resources such as:
+
+- Planned Services
+- Tasks
+- Expenses
+- Payments
+- Vendor Payments
+- Vendor Products
+- Venue Images
+- Booking Options
+- Quotation Items
+
+cannot be used to access records belonging to another organization.
+
+IMPORTANT:
+
+Never trust organizationId supplied by the browser.
+
+The organization must come from the authenticated server-side user/session.
+
+Test these scenarios:
+
+1. User in Organization A can read Organization A clients.
+2. User in Organization A cannot read Organization B clients.
+3. User in Organization A cannot update Organization B clients.
+4. User in Organization A cannot delete Organization B clients.
+5. User in Organization A cannot create an event referencing an Organization B client.
+6. User in Organization A cannot assign an Organization B vendor to an Organization A service.
+7. User in Organization A cannot use an Organization B venue.
+8. User in Organization A cannot access an Organization B invoice.
+9. User cannot switch organizations by sending organizationId in the request body.
+10. New records automatically receive the authenticated user's organization.
+
+If the application currently only has one organization, create isolated automated/integration test fixtures where necessary rather than modifying production data.
+
+Do not create fake production records.
+
+Report:
+
+- Which routes are organization-scoped
+- Which storage methods enforce organization scope
+- Which child resources inherit scope
+- Any route/storage method that is still unsafe
+- Tests performed
+- Test results
+
+==================================================
+STAGE 2 — TYPESCRIPT BASELINE
+==================================================
+
+After Stage 1 is verified, inspect the 112 TypeScript errors.
+
+DO NOT blindly fix all 112 errors.
+
+First categorize them.
+
+Create a report with:
+
+Category A:
+Errors directly caused by the organization migration.
+
+Category B:
+Errors caused by existing API/schema/type mismatches.
+
+Category C:
+Errors caused by existing use of `any`, missing types, or unsafe casts.
+
+Category D:
+Errors in unrelated modules.
+
+Category E:
+Duplicate/repeated errors caused by one root problem.
+
+Identify the top-level root causes.
+
+For example, if 30 errors are caused by one missing type definition, treat that as ONE root cause rather than 30 separate problems.
+
+Then fix ONLY errors that are:
+
+1. caused by the organization migration, OR
+2. required to make the organization security implementation type-safe.
+
+Do not refactor unrelated modules.
+
+Do not rewrite existing pages.
+
+Do not change business behavior unnecessarily.
+
+After those fixes:
+
+- Run `npm run check`
+- Run the production build
+- Report the remaining TypeScript errors
+- Group remaining errors by root cause
+- State whether any remaining errors affect runtime functionality
+
+IMPORTANT:
+
+Do NOT claim the TypeScript codebase is clean unless `npm run check` actually passes.
+
+==================================================
+FINAL REPORT
+==================================================
+
+Provide:
+
+1. Organization isolation verification
+2. Unsafe endpoints/storage methods found
+3. Fixes made
+4. Security tests performed
+5. Organization-related TypeScript errors
+6. Existing unrelated TypeScript errors
+7. Remaining error count
+8. Build result
+9. Whether it is safe to proceed to the next architecture phase
+
+Do not start any new ERP module.
+
+STOP after this report.

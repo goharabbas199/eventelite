@@ -174,6 +174,11 @@ export class DatabaseStorage implements IStorage {
     return Boolean(row);
   }
 
+  private async invoiceInOrganization(id: number): Promise<boolean> {
+    const [row] = await db.select({ id: invoices.id }).from(invoices).where(and(eq(invoices.id, id), eq(invoices.organizationId, this.organizationId())));
+    return Boolean(row);
+  }
+
   // ── Users / Auth ──────────────────────────────────────────────────────────
   async getUserByEmail(email: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.email, email.toLowerCase().trim()));
@@ -636,6 +641,7 @@ export class DatabaseStorage implements IStorage {
       service.vendorId !== undefined && service.vendorId !== null
         ? Number(service.vendorId)
         : null;
+    if (vendorId !== null && !(await this.vendorInOrganization(vendorId))) return undefined;
 
     const costValue =
       service.cost !== undefined && service.cost !== null
@@ -662,9 +668,12 @@ export class DatabaseStorage implements IStorage {
   async updatePlannedService(id: number, updates: Partial<InsertPlannedService>) {
     const [service] = await db.select({ clientId: plannedServices.clientId }).from(plannedServices).where(eq(plannedServices.id, id));
     if (!service || !(await this.clientInOrganization(service.clientId))) return undefined;
+    if (updates.clientId !== undefined && !(await this.clientInOrganization(Number(updates.clientId)))) return undefined;
+    if (updates.vendorId !== undefined && updates.vendorId !== null && !(await this.vendorInOrganization(Number(updates.vendorId)))) return undefined;
+    const { clientId: _clientId, vendorId: _vendorId, ...safeUpdates } = updates;
     const [updated] = await db
       .update(plannedServices)
-      .set(updates)
+      .set({ ...safeUpdates, ...(updates.clientId !== undefined ? { clientId: Number(updates.clientId) } : {}), ...(updates.vendorId !== undefined ? { vendorId: updates.vendorId === null ? null : Number(updates.vendorId) } : {}) })
       .where(eq(plannedServices.id, id))
       .returning();
     return updated;
@@ -718,8 +727,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateExpense(id: number, updates: Partial<InsertExpense>) {
+    const scopedUpdates = updates as Partial<InsertExpense> & { clientId?: number };
     const [expense] = await db.select({ clientId: expenses.clientId }).from(expenses).where(eq(expenses.id, id));
     if (!expense || !(await this.clientInOrganization(expense.clientId))) return undefined;
+    if (scopedUpdates.clientId !== undefined && !(await this.clientInOrganization(Number(scopedUpdates.clientId)))) return undefined;
     const [updated] = await db
       .update(expenses)
       .set(updates)
@@ -845,8 +856,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateTask(id: number, updates: Partial<InsertTask>) {
+    const scopedUpdates = updates as Partial<InsertTask> & { clientId?: number };
     const [task] = await db.select({ clientId: tasks.clientId }).from(tasks).where(eq(tasks.id, id));
     if (!task || !(await this.clientInOrganization(task.clientId))) return undefined;
+    if (scopedUpdates.clientId !== undefined && !(await this.clientInOrganization(Number(scopedUpdates.clientId)))) return undefined;
+    if (updates.serviceId !== undefined && updates.serviceId !== null) {
+      const [service] = await db
+        .select({ clientId: plannedServices.clientId })
+        .from(plannedServices)
+        .where(eq(plannedServices.id, Number(updates.serviceId)));
+      const targetClientId = scopedUpdates.clientId !== undefined ? Number(scopedUpdates.clientId) : task.clientId;
+      if (!service || service.clientId !== targetClientId || !(await this.clientInOrganization(service.clientId))) return undefined;
+    }
     const updateData: any = { ...updates };
     if (updates.dueDate) updateData.dueDate = new Date(updates.dueDate as any);
     const [updated] = await db
@@ -1005,6 +1026,7 @@ export class DatabaseStorage implements IStorage {
   async createInvoice(insertInvoice: InsertInvoice) {
     const organizationId = this.organizationId();
     if (!(await this.clientInOrganization(insertInvoice.clientId))) return undefined;
+    if (insertInvoice.quotationId != null && !(await this.quotationInOrganization(insertInvoice.quotationId))) return undefined;
     const [invoice] = await db.insert(invoices).values({
       organizationId,
       clientId: insertInvoice.clientId,
@@ -1019,8 +1041,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateInvoice(id: number, updates: Partial<InsertInvoice>) {
-    if (!(await this.quotationInOrganization(id))) return undefined;
+    if (!(await this.invoiceInOrganization(id))) return undefined;
     if (updates.clientId != null && !(await this.clientInOrganization(updates.clientId))) return undefined;
+    if (updates.quotationId != null && !(await this.quotationInOrganization(updates.quotationId))) return undefined;
     const { organizationId: _organizationId, ...data } = updates as Partial<InsertInvoice> & { organizationId?: number };
     if (data.amount !== undefined) data.amount = String(data.amount);
     if (data.dueDate) data.dueDate = new Date(data.dueDate);
