@@ -1,0 +1,102 @@
+We are improving EventElite ERP/CRM incrementally.
+
+IMPORTANT:
+This is SECURITY FOUNDATION WORK ONLY.
+
+Do NOT:
+- Build CRM
+- Build Procurement
+- Build Inventory
+- Build HR
+- Build Logistics
+- Redesign the UI
+- Change the database business model
+- Move Client/Event relationships yet
+- Remove existing functionality
+- Rewrite the application
+
+The architecture audit found that many business API endpoints are currently accessible without consistently checking authentication.
+
+I want you to fix ONLY server-side authentication protection.
+
+First inspect the existing authentication implementation:
+- Firebase authentication
+- Firebase Admin SDK
+- Express sessions
+- Passport
+- AuthContext
+- /api/auth/me
+- Existing authentication middleware if present
+
+Create or standardize a reusable server-side authentication middleware.
+
+The middleware should verify that the current request has an authenticated user/session.
+
+Apply authentication protection to ALL PRIVATE business APIs, including but not limited to:
+
+Clients
+Events
+Services
+Tasks
+Vendors
+Vendor Products
+Vendor Payments
+Venues
+Venue Images
+Booking Options
+Expenses
+Payments
+Quotations
+Quotation Items
+Invoices
+Budget
+Analytics
+AI
+Uploads
+User Profile
+Settings
+Any other business/data API
+
+DO NOT protect endpoints that must intentionally remain public, such as:
+- Login/authentication endpoints
+- Firebase authentication callbacks if applicable
+- Public invoice portal endpoints, which will be secured separately
+- Other genuinely public endpoints
+
+Do not rely on the frontend AuthGuard for security.
+
+Every private API must enforce authentication on the server.
+
+Requirements:
+
+1. Create/reuse a single authentication middleware.
+2. Do not duplicate authentication logic in every route.
+3. Preserve the current Firebase + Express session login flow.
+4. Existing logged-in users must continue to work.
+5. Unauthenticated requests to private APIs should receive HTTP 401.
+6. Do not return sensitive authentication information.
+7. Do not expose stack traces in production responses.
+8. Do not change the UI.
+
+After implementation:
+
+- Run the application build.
+- Run TypeScript checks.
+- Test authenticated requests.
+- Test unauthenticated requests.
+- Confirm existing login still works.
+- Confirm /api/auth/me still works.
+- Confirm Client/Event/Vendor/Invoice APIs reject unauthenticated requests.
+
+IMPORTANT:
+Do not make any other architectural changes in this task.
+
+At the end provide:
+1. Files changed
+2. Middleware created/modified
+3. Routes protected
+4. Public routes intentionally left unprotected
+5. Tests performed
+6. Any remaining security concerns
+
+If you discover that the existing session/Firebase flow is different from what this prompt assumes, STOP and explain the actual flow before making destructive changes.
