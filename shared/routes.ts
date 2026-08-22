@@ -254,7 +254,7 @@ export const api = {
     create: {
       method: "POST" as const,
       path: "/api/clients/:clientId/expenses" as const,
-      input: insertExpenseSchema.omit({ clientId: true }),
+      input: insertExpenseSchema,
       responses: {
         201: z.custom<typeof expenses.$inferSelect>(),
         400: errorSchemas.validation,
@@ -263,7 +263,7 @@ export const api = {
     update: {
       method: "PATCH" as const,
       path: "/api/expenses/:id" as const,
-      input: insertExpenseSchema.partial().omit({ clientId: true }),
+      input: insertExpenseSchema.partial(),
       responses: {
         200: z.custom<typeof expenses.$inferSelect>(),
         404: errorSchemas.notFound,

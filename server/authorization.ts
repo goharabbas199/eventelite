@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import { storage } from "./storage";
+import { runWithOrganization } from "./organization-context";
 
 export const ROLES = ["owner", "admin", "manager", "staff", "user"] as const;
 export type Role = (typeof ROLES)[number];
@@ -53,8 +54,9 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
   void loadCurrentUser(req)
     .then((user) => {
       if (!user) return res.status(401).json({ message: "Not authenticated" });
-      req.user = user;
-      next();
+       req.user = user;
+       if (!user.organizationId) return res.status(403).json({ message: "User is not assigned to an organization" });
+       runWithOrganization(user.organizationId, next);
     })
     .catch(next);
 }

@@ -1,0 +1,221 @@
+APPROVED — proceed with the organization/agency migration, but with the following additional safety requirements.
+
+The proposed architecture is approved:
+
+Organization
+├── Users
+├── Clients
+├── Events
+├── Vendors
+├── Venues
+├── Quotations
+├── Invoices
+└── Organization-scoped Settings
+
+Child records may inherit organization ownership through their parent rather than receiving organizationId directly.
+
+Before applying NOT NULL constraints or foreign keys, perform explicit data verification.
+
+STEP 1 — PRE-MIGRATION COUNTS
+
+Before modifying existing tables, report counts for:
+
+users
+clients
+events
+vendors
+venues
+quotations
+invoices
+app_settings
+
+Also check for:
+- NULL/invalid client references
+- NULL/invalid event client references
+- NULL/invalid quotation client references
+- NULL/invalid quotation venue references
+- NULL/invalid invoice client references
+- NULL/invalid vendor product vendor references
+- NULL/invalid vendor payment client/vendor references
+- NULL/invalid task client references
+- NULL/invalid expense client references
+- NULL/invalid payment client references
+- NULL/invalid planned service client references
+- NULL/invalid venue image references
+- NULL/invalid booking option venue references
+- NULL/invalid quotation item quotation references
+
+IMPORTANT:
+Do not delete or automatically repair orphaned records.
+
+If orphaned records exist, report them and preserve them.
+
+STEP 2 — CREATE ORGANIZATION
+
+Create the organizations table using the approved structure:
+
+id
+name
+createdAt
+updatedAt
+
+Create exactly ONE default organization for the current existing dataset.
+
+Use a clear name based on the application's existing company/application identity if that is already available.
+
+Do not invent sensitive or inaccurate company information.
+
+STEP 3 — BACKFILL
+
+Add nullable organization_id fields first to:
+
+users
+clients
+events
+vendors
+venues
+quotations
+invoices
+app_settings
+
+Backfill every existing record to the default organization.
+
+Verify counts before and after backfill.
+
+Do not lose any records.
+
+STEP 4 — SETTINGS
+
+Change app_settings from:
+
+PRIMARY KEY (key)
+
+to:
+
+PRIMARY KEY (organization_id, key)
+
+Preserve the existing settings values.
+
+Do not create duplicate settings rows.
+
+STEP 5 — FOREIGN KEYS
+
+After successful backfill and verification:
+
+Add foreign keys:
+
+users.organization_id → organizations.id
+clients.organization_id → organizations.id
+events.organization_id → organizations.id
+vendors.organization_id → organizations.id
+venues.organization_id → organizations.id
+quotations.organization_id → organizations.id
+invoices.organization_id → organizations.id
+app_settings.organization_id → organizations.id
+
+Use appropriate ON DELETE behavior.
+
+Do NOT cascade-delete entire business datasets when an organization is accidentally deleted.
+
+Prefer RESTRICT/NO ACTION for organization deletion unless the application already has an explicit safe organization-deletion workflow.
+
+STEP 6 — NOT NULL
+
+Only after verifying:
+
+- zero NULL organization IDs
+- every organization ID references the default organization
+- all existing records remain present
+
+change organization_id to NOT NULL.
+
+STEP 7 — INDEXES
+
+Add indexes to organization_id fields.
+
+Also consider composite indexes where they materially improve common organization-scoped queries.
+
+Do not create excessive indexes.
+
+STEP 8 — ORM
+
+Update Drizzle schema and relations to represent:
+
+Organization
+→ Users
+→ Clients
+→ Events
+→ Vendors
+→ Venues
+→ Quotations
+→ Invoices
+→ App Settings
+
+Do not remove existing relationships.
+
+STEP 9 — REQUEST CONTEXT
+
+Use the authenticated server-side user's organizationId.
+
+NEVER trust organizationId supplied by the browser.
+
+For every aggregate-root query:
+
+SELECT/UPDATE/DELETE must be scoped to the authenticated organization.
+
+For child records:
+- verify parent belongs to current organization
+- prevent cross-organization relationships
+- return normal not-found behavior for inaccessible records
+
+Especially verify:
+
+vendor payments:
+client.organizationId === vendor.organizationId === currentUser.organizationId
+
+quotations:
+quotation.organizationId === currentUser.organizationId
+and optional client/venue must belong to same organization
+
+events:
+event.organizationId === currentUser.organizationId
+and client/venue must belong to same organization
+
+STEP 10 — TESTING
+
+Test:
+
+1. Existing user can log in.
+2. Existing records are still visible.
+3. Existing CRUD still works.
+4. New records receive the authenticated user's organization automatically.
+5. Browser cannot choose another organization by sending organizationId.
+6. Cross-organization reads fail.
+7. Cross-organization updates fail.
+8. Cross-organization deletes fail.
+9. Cross-organization parent/child relationships fail.
+10. Settings remain functional.
+11. App builds successfully.
+12. TypeScript checks pass.
+
+IMPORTANT:
+Do not modify CRM, Event architecture, financial relationships, procurement, inventory, HR, logistics, or UI in this task.
+
+After completing the migration, provide a final report containing:
+
+- Organization table created
+- Tables modified
+- Records before migration
+- Records after migration
+- Orphan records found
+- Orphan records changed (should be ZERO unless explicitly approved)
+- Foreign keys added
+- Indexes added
+- NOT NULL constraints added
+- Storage/query functions modified
+- Authentication/session changes
+- Cross-organization security tests
+- Build/type-check results
+- Any remaining security gaps
+
+Do not hide migration warnings or silently repair data.

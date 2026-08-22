@@ -4,6 +4,7 @@ import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
 import { passport } from "./auth";
+import { runWithOrganization } from "./organization-context";
 
 const app = express();
 const httpServer = createServer(app);
@@ -96,7 +97,7 @@ app.use((req, res, next) => {
     if (process.env.NODE_ENV !== "production") {
       try {
         const seedModule = await import("./seed");
-        await seedModule.seedDatabase();
+        await runWithOrganization(1, () => seedModule.seedDatabase());
         log("Database seeded (development only)");
       } catch (err) {
         console.warn("Seed skipped:", err);

@@ -31,6 +31,13 @@ export async function registerRoutes(
     return rest;
   }
 
+  // All business APIs are organization-scoped. Authentication endpoints are
+  // intentionally excluded so users can sign in before a session exists.
+  app.use("/api", (req, res, next) => {
+    if (req.path.startsWith("/auth/")) return next();
+    return requireAuth(req, res, next);
+  });
+
   // POST /api/auth/logout
   app.post("/api/auth/logout", (req, res) => {
     req.logout(() => {
@@ -411,6 +418,9 @@ export async function registerRoutes(
         ...input,
         clientId,
       });
+      if (!service) {
+        return res.status(404).json({ message: "Client not found" });
+      }
 
       // ── Automation: AI checklist ────────────────────────────────────────────
       // Vendor payments are created client-side (in ServiceForm) to ensure

@@ -7,6 +7,8 @@ import {
   timestamp,
   numeric,
   jsonb,
+  index,
+  primaryKey,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -16,8 +18,16 @@ import { relations } from "drizzle-orm";
 // ======================= USERS ========================
 // ======================================================
 
+export const organizations = pgTable("organizations", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
+  organizationId: integer("organization_id").notNull().references(() => organizations.id),
   fullName: text("full_name").notNull(),
   email: text("email").notNull().unique(),
   passwordHash: text("password_hash"),
@@ -29,7 +39,16 @@ export const users = pgTable("users", {
   emailVerified: boolean("email_verified").notNull().default(false),
   googleId: text("google_id"),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  organizationIdIdx: index("users_organization_id_idx").on(table.organizationId),
+}));
+
+export const usersRelations = relations(users, ({ one }) => ({
+  organization: one(organizations, {
+    fields: [users.organizationId],
+    references: [organizations.id],
+  }),
+}));
 
 export const emailVerifications = pgTable("email_verifications", {
   id: serial("id").primaryKey(),
@@ -64,13 +83,16 @@ export const loginSchema = z.object({
 
 export const vendors = pgTable("vendors", {
   id: serial("id").primaryKey(),
+  organizationId: integer("organization_id").notNull().references(() => organizations.id),
   name: text("name").notNull(),
   category: text("category").notNull(),
   standardCost: numeric("standard_cost"),
   contact: text("contact").notNull(),
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  organizationIdIdx: index("vendors_organization_id_idx").on(table.organizationId),
+}));
 
 export const vendorProducts = pgTable("vendor_products", {
   id: serial("id").primaryKey(),
@@ -97,6 +119,7 @@ export const vendorProductsRelations = relations(vendorProducts, ({ one }) => ({
 
 export const venues = pgTable("venues", {
   id: serial("id").primaryKey(),
+  organizationId: integer("organization_id").notNull().references(() => organizations.id),
   name: text("name").notNull(),
   location: text("location").notNull(),
   capacity: integer("capacity").notNull(),
@@ -112,7 +135,9 @@ export const venues = pgTable("venues", {
   contactPhone: text("contact_phone"),
   contactEmail: text("contact_email"),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  organizationIdIdx: index("venues_organization_id_idx").on(table.organizationId),
+}));
 
 export const venueImages = pgTable("venue_images", {
   id: serial("id").primaryKey(),
@@ -140,6 +165,7 @@ export const venuesRelations = relations(venues, ({ many }) => ({
 
 export const clients = pgTable("clients", {
   id: serial("id").primaryKey(),
+  organizationId: integer("organization_id").notNull().references(() => organizations.id),
 
   name: text("name").notNull(),
   email: text("email").notNull(),
@@ -164,7 +190,9 @@ export const clients = pgTable("clients", {
   internalNotes: text("internal_notes"),
 
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  organizationIdIdx: index("clients_organization_id_idx").on(table.organizationId),
+}));
 
 export const plannedServices = pgTable("planned_services", {
   id: serial("id").primaryKey(),
@@ -299,6 +327,7 @@ export const tasksRelations = relations(tasks, ({ one }) => ({
 
 export const quotations = pgTable("quotations", {
   id: serial("id").primaryKey(),
+  organizationId: integer("organization_id").notNull().references(() => organizations.id),
   clientId: integer("client_id"),
   eventType: text("event_type").notNull().default(""),
   guestCount: integer("guest_count"),
@@ -311,7 +340,9 @@ export const quotations = pgTable("quotations", {
   status: text("status").notNull().default("Draft"),
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  organizationIdIdx: index("quotations_organization_id_idx").on(table.organizationId),
+}));
 
 export const quotationItems = pgTable("quotation_items", {
   id: serial("id").primaryKey(),
@@ -334,6 +365,7 @@ export const quotationItemsRelations = relations(quotationItems, ({ one }) => ({
 export const insertQuotationSchema = createInsertSchema(quotations).omit({
   id: true,
   createdAt: true,
+  organizationId: true,
 });
 export const insertQuotationItemSchema = createInsertSchema(quotationItems).omit({ id: true });
 export type Quotation = typeof quotations.$inferSelect;
@@ -349,6 +381,7 @@ export const insertClientSchema = createInsertSchema(clients)
   .omit({
     id: true,
     createdAt: true,
+    organizationId: true,
   })
   .extend({
     budget: z
@@ -407,24 +440,31 @@ export type InsertVendorPayment = z.infer<typeof insertVendorPaymentSchema>;
 export const insertVendorSchema = createInsertSchema(vendors).omit({
   id: true,
   createdAt: true,
+  organizationId: true,
 });
+export type InsertVendor = z.infer<typeof insertVendorSchema>;
 
 export const insertVendorProductSchema = createInsertSchema(
   vendorProducts,
 ).omit({ id: true });
+export type InsertVendorProduct = z.infer<typeof insertVendorProductSchema>;
 
 export const insertVenueSchema = createInsertSchema(venues).omit({
   id: true,
   createdAt: true,
+  organizationId: true,
 });
+export type InsertVenue = z.infer<typeof insertVenueSchema>;
 
 export const insertVenueImageSchema = createInsertSchema(venueImages).omit({
   id: true,
 });
+export type InsertVenueImage = z.infer<typeof insertVenueImageSchema>;
 
 export const insertBookingOptionSchema = createInsertSchema(
   bookingOptions,
 ).omit({ id: true });
+export type InsertBookingOption = z.infer<typeof insertBookingOptionSchema>;
 
 export const insertTaskSchema = createInsertSchema(tasks).omit({
   id: true,
@@ -440,6 +480,7 @@ export type InsertTask = z.infer<typeof insertTaskSchema>;
 
 export const events = pgTable("events", {
   id: serial("id").primaryKey(),
+  organizationId: integer("organization_id").notNull().references(() => organizations.id),
   clientId: integer("client_id").notNull(),
   eventName: text("event_name").notNull(),
   eventType: text("event_type").notNull(),
@@ -449,7 +490,9 @@ export const events = pgTable("events", {
   budget: numeric("budget"),
   status: text("status").notNull().default("lead"),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  organizationIdIdx: index("events_organization_id_idx").on(table.organizationId),
+}));
 
 export const eventsRelations = relations(events, ({ one }) => ({
   client: one(clients, {
@@ -465,6 +508,7 @@ export const eventsRelations = relations(events, ({ one }) => ({
 export const insertEventSchema = createInsertSchema(events).omit({
   id: true,
   createdAt: true,
+  organizationId: true,
 }).extend({
   budget: z.union([z.string(), z.number()]).optional().transform((val) => {
     if (val === "" || val === undefined) return null;
@@ -484,6 +528,7 @@ export type InsertEvent = z.infer<typeof insertEventSchema>;
 
 export const invoices = pgTable("invoices", {
   id: serial("id").primaryKey(),
+  organizationId: integer("organization_id").notNull().references(() => organizations.id),
   clientId: integer("client_id").notNull(),
   quotationId: integer("quotation_id"),
   invoiceNumber: text("invoice_number").notNull(),
@@ -492,7 +537,9 @@ export const invoices = pgTable("invoices", {
   dueDate: timestamp("due_date"),
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  organizationIdIdx: index("invoices_organization_id_idx").on(table.organizationId),
+}));
 
 export const invoicesRelations = relations(invoices, ({ one }) => ({
   client: one(clients, {
@@ -504,6 +551,7 @@ export const invoicesRelations = relations(invoices, ({ one }) => ({
 export const insertInvoiceSchema = createInsertSchema(invoices).omit({
   id: true,
   createdAt: true,
+  organizationId: true,
 }).extend({
   amount: z.union([z.string(), z.number()]).transform((val) => String(val)),
 });
@@ -515,6 +563,28 @@ export type InsertInvoice = z.infer<typeof insertInvoiceSchema>;
 // ======================================================
 
 export const appSettings = pgTable("app_settings", {
-  key: text("key").primaryKey(),
+  organizationId: integer("organization_id").notNull().references(() => organizations.id),
+  key: text("key").notNull(),
   value: text("value").notNull(),
-});
+}, (table) => ({
+  primaryKey: primaryKey({ columns: [table.organizationId, table.key] }),
+  organizationIdIdx: index("app_settings_organization_id_idx").on(table.organizationId),
+}));
+
+export const appSettingsRelations = relations(appSettings, ({ one }) => ({
+  organization: one(organizations, {
+    fields: [appSettings.organizationId],
+    references: [organizations.id],
+  }),
+}));
+
+export const organizationsRelations = relations(organizations, ({ many }) => ({
+  users: many(users),
+  clients: many(clients),
+  events: many(events),
+  vendors: many(vendors),
+  venues: many(venues),
+  quotations: many(quotations),
+  invoices: many(invoices),
+  settings: many(appSettings),
+}));

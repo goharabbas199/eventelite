@@ -18,6 +18,7 @@ import {
   events,
   invoices,
   appSettings,
+  organizations,
   type User,
   type InsertVendor,
   type InsertVendorProduct,
@@ -35,6 +36,7 @@ import {
   type InsertInvoice,
 } from "@shared/schema";
 import { eq, desc, and, gt, isNull } from "drizzle-orm";
+import { getOrganizationId } from "./organization-context";
 
 export interface IStorage {
   // Users / Auth
@@ -140,6 +142,38 @@ export interface IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
+  private organizationId(): number {
+    const organizationId = getOrganizationId();
+    if (!organizationId) throw new Error("Organization context is required");
+    return organizationId;
+  }
+
+  private async defaultOrganizationId(): Promise<number> {
+    const [organization] = await db.select({ id: organizations.id }).from(organizations).orderBy(organizations.id).limit(1);
+    if (!organization) throw new Error("No organization is configured");
+    return organization.id;
+  }
+
+  private async clientInOrganization(id: number): Promise<boolean> {
+    const [row] = await db.select({ id: clients.id }).from(clients).where(and(eq(clients.id, id), eq(clients.organizationId, this.organizationId())));
+    return Boolean(row);
+  }
+
+  private async vendorInOrganization(id: number): Promise<boolean> {
+    const [row] = await db.select({ id: vendors.id }).from(vendors).where(and(eq(vendors.id, id), eq(vendors.organizationId, this.organizationId())));
+    return Boolean(row);
+  }
+
+  private async venueInOrganization(id: number): Promise<boolean> {
+    const [row] = await db.select({ id: venues.id }).from(venues).where(and(eq(venues.id, id), eq(venues.organizationId, this.organizationId())));
+    return Boolean(row);
+  }
+
+  private async quotationInOrganization(id: number): Promise<boolean> {
+    const [row] = await db.select({ id: quotations.id }).from(quotations).where(and(eq(quotations.id, id), eq(quotations.organizationId, this.organizationId())));
+    return Boolean(row);
+  }
+
   // ── Users / Auth ──────────────────────────────────────────────────────────
   async getUserByEmail(email: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.email, email.toLowerCase().trim()));
@@ -152,9 +186,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createUser(data: { fullName: string; email: string; passwordHash?: string | null; googleId?: string; emailVerified?: boolean }): Promise<User> {
+    const organizationId = await this.defaultOrganizationId();
     const [user] = await db
       .insert(users)
       .values({
+        organizationId,
         fullName: data.fullName,
         email: data.email.toLowerCase().trim(),
         passwordHash: data.passwordHash ?? null,
@@ -210,6 +246,7 @@ export class DatabaseStorage implements IStorage {
     const [created] = await db
       .insert(users)
       .values({
+        organizationId: await this.defaultOrganizationId(),
         firebaseUid: data.firebaseUid,
         fullName: data.fullName,
         email: data.email.toLowerCase().trim(),
@@ -315,11 +352,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getVendors() {
-    return db.select().from(vendors).orderBy(desc(vendors.createdAt));
+    return db.select().from(vendors).where(eq(vendors.organizationId, this.organizationId())).orderBy(desc(vendors.createdAt));
   }
 
   async getVendor(id: number) {
-    const vendor = await db.select().from(vendors).where(eq(vendors.id, id));
+    const vendor = await db.select().from(vendors).where(and(eq(vendors.id, id), eq(vendors.organizationId, this.organizationId())));
     if (!vendor.length) return undefined;
 
     const products = await db
@@ -334,26 +371,29 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createVendor(insertVendor: InsertVendor) {
-    const [vendor] = await db.insert(vendors).values(insertVendor).returning();
+    const [vendor] = await db.insert(vendors).values({ ...insertVendor, organizationId: this.organizationId() }).returning();
     return vendor;
   }
 
   async updateVendor(id: number, updates: Partial<InsertVendor>) {
+    const { organizationId: _organizationId, ...safeUpdates } = updates as Partial<InsertVendor> & { organizationId?: number };
     const [updated] = await db
       .update(vendors)
-      .set(updates)
-      .where(eq(vendors.id, id))
+      .set(safeUpdates)
+      .where(and(eq(vendors.id, id), eq(vendors.organizationId, this.organizationId())))
       .returning();
 
     return updated;
   }
 
   async deleteVendor(id: number) {
+    if (!(await this.vendorInOrganization(id))) return;
     await db.delete(vendorProducts).where(eq(vendorProducts.vendorId, id));
-    await db.delete(vendors).where(eq(vendors.id, id));
+    await db.delete(vendors).where(and(eq(vendors.id, id), eq(vendors.organizationId, this.organizationId())));
   }
 
   async createVendorProduct(product: InsertVendorProduct) {
+    if (!(await this.vendorInOrganization(product.vendorId))) return undefined;
     const [newProduct] = await db
       .insert(vendorProducts)
       .values(product)
@@ -362,15 +402,17 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteVendorProduct(id: number) {
+    const [product] = await db.select({ vendorId: vendorProducts.vendorId }).from(vendorProducts).where(eq(vendorProducts.id, id));
+    if (!product || !(await this.vendorInOrganization(product.vendorId))) return;
     await db.delete(vendorProducts).where(eq(vendorProducts.id, id));
   }
 
   async getVenues() {
-    return db.select().from(venues).orderBy(desc(venues.createdAt));
+    return db.select().from(venues).where(eq(venues.organizationId, this.organizationId())).orderBy(desc(venues.createdAt));
   }
 
   async getVenue(id: number) {
-    const venue = await db.select().from(venues).where(eq(venues.id, id));
+    const venue = await db.select().from(venues).where(and(eq(venues.id, id), eq(venues.organizationId, this.organizationId())));
     if (!venue.length) return undefined;
 
     const options = await db
@@ -393,36 +435,39 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createVenue(insertVenue: InsertVenue) {
-    const [venue] = await db.insert(venues).values(insertVenue).returning();
+    const [venue] = await db.insert(venues).values({ ...insertVenue, organizationId: this.organizationId() }).returning();
     return venue;
   }
 
   async updateVenue(id: number, updates: Partial<InsertVenue>) {
+    const { organizationId: _organizationId, ...safeUpdates } = updates as Partial<InsertVenue> & { organizationId?: number };
     const [updated] = await db
       .update(venues)
-      .set(updates)
-      .where(eq(venues.id, id))
+      .set(safeUpdates)
+      .where(and(eq(venues.id, id), eq(venues.organizationId, this.organizationId())))
       .returning();
 
     return updated;
   }
 
   async deleteVenue(id: number) {
+    if (!(await this.venueInOrganization(id))) return;
     await db.delete(venueImages).where(eq(venueImages.venueId, id));
     await db.delete(bookingOptions).where(eq(bookingOptions.venueId, id));
-    await db.delete(venues).where(eq(venues.id, id));
+    await db.delete(venues).where(and(eq(venues.id, id), eq(venues.organizationId, this.organizationId())));
   }
 
   async updateVenueMainImage(id: number, mainImage: string) {
     const [updated] = await db
       .update(venues)
       .set({ mainImage })
-      .where(eq(venues.id, id))
+      .where(and(eq(venues.id, id), eq(venues.organizationId, this.organizationId())))
       .returning();
     return updated;
   }
 
   async createBookingOption(option: InsertBookingOption) {
+    if (!(await this.venueInOrganization(option.venueId))) return undefined;
     const [newOption] = await db
       .insert(bookingOptions)
       .values({
@@ -438,11 +483,14 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteBookingOption(id: number) {
+    const [option] = await db.select({ venueId: bookingOptions.venueId }).from(bookingOptions).where(eq(bookingOptions.id, id));
+    if (!option || !(await this.venueInOrganization(option.venueId))) return;
     await db.delete(bookingOptions).where(eq(bookingOptions.id, id));
   }
 
   async addVenueImages(venueId: number, images: string[]) {
     if (!images?.length) return;
+    if (!(await this.venueInOrganization(venueId))) return;
 
     await db.insert(venueImages).values(
       images.map((url) => ({
@@ -453,15 +501,17 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteVenueImage(id: number) {
+    const [image] = await db.select({ venueId: venueImages.venueId }).from(venueImages).where(eq(venueImages.id, id));
+    if (!image || !(await this.venueInOrganization(image.venueId))) return;
     await db.delete(venueImages).where(eq(venueImages.id, id));
   }
 
   async getClients() {
-    return db.select().from(clients).orderBy(desc(clients.createdAt));
+    return db.select().from(clients).where(eq(clients.organizationId, this.organizationId())).orderBy(desc(clients.createdAt));
   }
 
   async getClient(id: number) {
-    const client = await db.select().from(clients).where(eq(clients.id, id));
+    const client = await db.select().from(clients).where(and(eq(clients.id, id), eq(clients.organizationId, this.organizationId())));
     if (!client.length) return undefined;
 
     const services = await db
@@ -503,15 +553,19 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createClient(insertClient: InsertClient) {
-    const [client] = await db.insert(clients).values(insertClient).returning();
+    if (insertClient.venueId != null && !(await this.venueInOrganization(insertClient.venueId))) return undefined;
+    const [client] = await db.insert(clients).values({ ...insertClient, organizationId: this.organizationId() }).returning();
     return client;
   }
 
   async updateClient(id: number, updates: Partial<InsertClient>) {
+    if (!(await this.clientInOrganization(id))) return undefined;
+    if (updates.venueId != null && !(await this.venueInOrganization(updates.venueId))) return undefined;
+    const { organizationId: _organizationId, ...safeUpdates } = updates as Partial<InsertClient> & { organizationId?: number };
     const [updated] = await db
       .update(clients)
-      .set(updates)
-      .where(eq(clients.id, id))
+      .set(safeUpdates)
+      .where(and(eq(clients.id, id), eq(clients.organizationId, this.organizationId())))
       .returning();
     return updated;
   }
@@ -524,6 +578,8 @@ export class DatabaseStorage implements IStorage {
       checklistTasks: Array<{ title: string }>;
     },
   ) {
+    if (!(await this.clientInOrganization(id))) return undefined;
+    if (updates.venueId != null && !(await this.venueInOrganization(updates.venueId))) return undefined;
     return db.transaction(async (tx) => {
       const [updated] = await tx
         .update(clients)
@@ -532,7 +588,7 @@ export class DatabaseStorage implements IStorage {
           status: "Confirmed",
           budgetPlan: updates.budgetPlan,
         })
-        .where(eq(clients.id, id))
+        .where(and(eq(clients.id, id), eq(clients.organizationId, this.organizationId())))
         .returning();
 
       if (!updated) return undefined;
@@ -561,18 +617,20 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteClient(id: number) {
+    if (!(await this.clientInOrganization(id))) return;
     await db.delete(events).where(eq(events.clientId, id));
     await db.delete(plannedServices).where(eq(plannedServices.clientId, id));
     await db.delete(expenses).where(eq(expenses.clientId, id));
-    await db.delete(clients).where(eq(clients.id, id));
+    await db.delete(clients).where(and(eq(clients.id, id), eq(clients.organizationId, this.organizationId())));
   }
 
   async createPlannedService(service: InsertPlannedService) {
-    const clientId = Number(service.clientId);
+    const clientId = Number((service as InsertPlannedService & { clientId?: number }).clientId);
 
     if (isNaN(clientId)) {
       throw new Error("Invalid clientId received in createPlannedService");
     }
+    if (!(await this.clientInOrganization(clientId))) return undefined;
 
     const vendorId =
       service.vendorId !== undefined && service.vendorId !== null
@@ -602,6 +660,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updatePlannedService(id: number, updates: Partial<InsertPlannedService>) {
+    const [service] = await db.select({ clientId: plannedServices.clientId }).from(plannedServices).where(eq(plannedServices.id, id));
+    if (!service || !(await this.clientInOrganization(service.clientId))) return undefined;
     const [updated] = await db
       .update(plannedServices)
       .set(updates)
@@ -611,6 +671,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deletePlannedService(id: number) {
+    const [service] = await db.select({ clientId: plannedServices.clientId }).from(plannedServices).where(eq(plannedServices.id, id));
+    if (!service || !(await this.clientInOrganization(service.clientId))) return;
     // Null out serviceId on tasks linked to this service so they become general tasks
     await db
       .update(tasks)
@@ -620,6 +682,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getExpenses(clientId: number) {
+    if (!(await this.clientInOrganization(clientId))) return [];
     return db
       .select()
       .from(expenses)
@@ -633,6 +696,7 @@ export class DatabaseStorage implements IStorage {
     if (isNaN(clientId)) {
       throw new Error("Invalid clientId in createExpense");
     }
+    if (!(await this.clientInOrganization(clientId))) return undefined;
 
     const costValue =
       insertExpense.cost !== undefined && insertExpense.cost !== null
@@ -645,7 +709,7 @@ export class DatabaseStorage implements IStorage {
         clientId,
         category: insertExpense.category,
         item: insertExpense.item,
-        cost: costValue,
+        cost: String(costValue),
         isPaid: insertExpense.isPaid ?? false,
       })
       .returning();
@@ -654,6 +718,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateExpense(id: number, updates: Partial<InsertExpense>) {
+    const [expense] = await db.select({ clientId: expenses.clientId }).from(expenses).where(eq(expenses.id, id));
+    if (!expense || !(await this.clientInOrganization(expense.clientId))) return undefined;
     const [updated] = await db
       .update(expenses)
       .set(updates)
@@ -663,12 +729,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteExpense(id: number) {
+    const [expense] = await db.select({ clientId: expenses.clientId }).from(expenses).where(eq(expenses.id, id));
+    if (!expense || !(await this.clientInOrganization(expense.clientId))) return;
     await db.delete(expenses).where(eq(expenses.id, id));
   }
 
   // ================= PAYMENTS =================
 
   async getPayments(clientId: number) {
+    if (!(await this.clientInOrganization(clientId))) return [];
     return db
       .select()
       .from(payments)
@@ -677,6 +746,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createPayment(payment: InsertPayment & { clientId: number }) {
+    if (!(await this.clientInOrganization(payment.clientId))) return undefined;
     const [newPayment] = await db
       .insert(payments)
       .values({
@@ -691,12 +761,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deletePayment(id: number) {
+    const [payment] = await db.select({ clientId: payments.clientId }).from(payments).where(eq(payments.id, id));
+    if (!payment || !(await this.clientInOrganization(payment.clientId))) return;
     await db.delete(payments).where(eq(payments.id, id));
   }
 
   // ================= VENDOR PAYMENTS =================
 
   async getVendorPayments(clientId: number) {
+    if (!(await this.clientInOrganization(clientId))) return [];
     return db
       .select()
       .from(vendorPayments)
@@ -705,6 +778,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createVendorPayment(payment: InsertVendorPayment) {
+    if (!(await this.clientInOrganization(payment.clientId))) return undefined;
+    if (!(await this.vendorInOrganization(payment.vendorId))) return undefined;
     const [newPayment] = await db
       .insert(vendorPayments)
       .values({
@@ -721,6 +796,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateVendorPayment(id: number, updates: Partial<InsertVendorPayment>) {
+    const [payment] = await db.select({ clientId: vendorPayments.clientId, vendorId: vendorPayments.vendorId }).from(vendorPayments).where(eq(vendorPayments.id, id));
+    if (!payment || !(await this.clientInOrganization(payment.clientId)) || !(await this.vendorInOrganization(payment.vendorId))) return undefined;
+    if (updates.clientId !== undefined && !(await this.clientInOrganization(Number(updates.clientId)))) return undefined;
+    if (updates.vendorId !== undefined && !(await this.vendorInOrganization(Number(updates.vendorId)))) return undefined;
     const updateData: any = { ...updates };
     if (updates.amount !== undefined) updateData.amount = String(updates.amount);
     if (updates.paymentDate) updateData.paymentDate = new Date(updates.paymentDate as any);
@@ -733,12 +812,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteVendorPayment(id: number) {
+    const [payment] = await db.select({ clientId: vendorPayments.clientId }).from(vendorPayments).where(eq(vendorPayments.id, id));
+    if (!payment || !(await this.clientInOrganization(payment.clientId))) return;
     await db.delete(vendorPayments).where(eq(vendorPayments.id, id));
   }
 
   // ================= TASKS =================
 
   async getTasks(clientId: number) {
+    if (!(await this.clientInOrganization(clientId))) return [];
     return db
       .select()
       .from(tasks)
@@ -747,6 +829,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createTask(task: InsertTask & { clientId: number; serviceId?: number | null; aiGenerated?: boolean }) {
+    if (!(await this.clientInOrganization(task.clientId))) return undefined;
     const [newTask] = await db
       .insert(tasks)
       .values({
@@ -762,6 +845,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateTask(id: number, updates: Partial<InsertTask>) {
+    const [task] = await db.select({ clientId: tasks.clientId }).from(tasks).where(eq(tasks.id, id));
+    if (!task || !(await this.clientInOrganization(task.clientId))) return undefined;
     const updateData: any = { ...updates };
     if (updates.dueDate) updateData.dueDate = new Date(updates.dueDate as any);
     const [updated] = await db
@@ -773,31 +858,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteTask(id: number) {
+    const [task] = await db.select({ clientId: tasks.clientId }).from(tasks).where(eq(tasks.id, id));
+    if (!task || !(await this.clientInOrganization(task.clientId))) return;
     await db.delete(tasks).where(eq(tasks.id, id));
-  }
-
-  async updateVenue(id: number, updates: Partial<InsertVenue>) {
-    const [updated] = await db
-      .update(venues)
-      .set(updates)
-      .where(eq(venues.id, id))
-      .returning();
-    return updated;
-  }
-
-  async updateVendor(id: number, updates: Partial<InsertVendor>) {
-    const [updated] = await db
-      .update(vendors)
-      .set(updates)
-      .where(eq(vendors.id, id))
-      .returning();
-    return updated;
   }
 
   // ================= QUOTATIONS =================
 
   async getQuotations() {
-    const rows = await db.select().from(quotations).orderBy(desc(quotations.createdAt));
+    const rows = await db.select().from(quotations).where(eq(quotations.organizationId, this.organizationId())).orderBy(desc(quotations.createdAt));
     return Promise.all(
       rows.map(async (q) => {
         const items = await db.select().from(quotationItems).where(eq(quotationItems.quotationId, q.id));
@@ -807,14 +876,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getQuotation(id: number) {
-    const [q] = await db.select().from(quotations).where(eq(quotations.id, id));
+    const [q] = await db.select().from(quotations).where(and(eq(quotations.id, id), eq(quotations.organizationId, this.organizationId())));
     if (!q) return undefined;
     const items = await db.select().from(quotationItems).where(eq(quotationItems.quotationId, id));
     return { ...q, items };
   }
 
   async createQuotation(quotation: InsertQuotation, items: Omit<InsertQuotationItem, "quotationId">[]) {
+    const organizationId = this.organizationId();
+    if (quotation.clientId != null && !(await this.clientInOrganization(quotation.clientId))) return undefined;
+    if (quotation.venueId != null && !(await this.venueInOrganization(quotation.venueId))) return undefined;
     const [newQ] = await db.insert(quotations).values({
+      organizationId,
       clientId: quotation.clientId ?? null,
       eventType: quotation.eventType || "",
       guestCount: quotation.guestCount ?? null,
@@ -842,18 +915,23 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateQuotation(id: number, updates: Partial<InsertQuotation>) {
-    const data: any = { ...updates };
+    const [existing] = await db.select({ organizationId: quotations.organizationId }).from(quotations).where(and(eq(quotations.id, id), eq(quotations.organizationId, this.organizationId())));
+    if (!existing) return undefined;
+    if (updates.clientId != null && !(await this.clientInOrganization(updates.clientId))) return undefined;
+    if (updates.venueId != null && !(await this.venueInOrganization(updates.venueId))) return undefined;
+    const { organizationId: _organizationId, ...data } = updates as Partial<InsertQuotation> & { organizationId?: number };
     if (data.totalCost !== undefined) data.totalCost = String(data.totalCost);
     if (data.markupPercentage !== undefined) data.markupPercentage = String(data.markupPercentage);
     if (data.discount !== undefined) data.discount = String(data.discount);
     if (data.tax !== undefined) data.tax = String(data.tax);
     if (data.finalPrice !== undefined) data.finalPrice = String(data.finalPrice);
-    const [updated] = await db.update(quotations).set(data).where(eq(quotations.id, id)).returning();
+    const [updated] = await db.update(quotations).set(data).where(and(eq(quotations.id, id), eq(quotations.organizationId, this.organizationId()))).returning();
     const items = await db.select().from(quotationItems).where(eq(quotationItems.quotationId, id));
     return { ...updated, items };
   }
 
   async deleteQuotation(id: number) {
+    if (!(await this.quotationInOrganization(id))) return;
     await db.delete(quotationItems).where(eq(quotationItems.quotationId, id));
     await db.delete(quotations).where(eq(quotations.id, id));
   }
@@ -861,20 +939,25 @@ export class DatabaseStorage implements IStorage {
   // ================= EVENTS =================
 
   async getEvents() {
-    return db.select().from(events).orderBy(desc(events.eventDate));
+    return db.select().from(events).where(eq(events.organizationId, this.organizationId())).orderBy(desc(events.eventDate));
   }
 
   async getEvent(id: number) {
-    const [event] = await db.select().from(events).where(eq(events.id, id));
+    const [event] = await db.select().from(events).where(and(eq(events.id, id), eq(events.organizationId, this.organizationId())));
     return event;
   }
 
   async getEventsByClient(clientId: number) {
+    if (!(await this.clientInOrganization(clientId))) return [];
     return db.select().from(events).where(eq(events.clientId, clientId)).orderBy(desc(events.eventDate));
   }
 
   async createEvent(insertEvent: InsertEvent) {
+    const organizationId = this.organizationId();
+    if (!(await this.clientInOrganization(insertEvent.clientId))) return undefined;
+    if (insertEvent.venueId != null && !(await this.venueInOrganization(insertEvent.venueId))) return undefined;
     const [event] = await db.insert(events).values({
+      organizationId,
       clientId: insertEvent.clientId,
       eventName: insertEvent.eventName,
       eventType: insertEvent.eventType,
@@ -888,34 +971,42 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateEvent(id: number, updates: Partial<InsertEvent>) {
-    const data: any = { ...updates };
+    const [existing] = await db.select({ organizationId: events.organizationId }).from(events).where(and(eq(events.id, id), eq(events.organizationId, this.organizationId())));
+    if (!existing) return undefined;
+    if (updates.clientId != null && !(await this.clientInOrganization(updates.clientId))) return undefined;
+    if (updates.venueId != null && !(await this.venueInOrganization(updates.venueId))) return undefined;
+    const { organizationId: _organizationId, ...data } = updates as Partial<InsertEvent> & { organizationId?: number };
     if (data.eventDate) data.eventDate = new Date(data.eventDate);
     if (data.budget !== undefined) data.budget = data.budget != null ? String(data.budget) : null;
-    const [updated] = await db.update(events).set(data).where(eq(events.id, id)).returning();
+    const [updated] = await db.update(events).set(data).where(and(eq(events.id, id), eq(events.organizationId, this.organizationId()))).returning();
     return updated;
   }
 
   async deleteEvent(id: number) {
-    await db.delete(events).where(eq(events.id, id));
+    await db.delete(events).where(and(eq(events.id, id), eq(events.organizationId, this.organizationId())));
   }
 
   // ================= INVOICES =================
 
   async getInvoices() {
-    return db.select().from(invoices).orderBy(desc(invoices.createdAt));
+    return db.select().from(invoices).where(eq(invoices.organizationId, this.organizationId())).orderBy(desc(invoices.createdAt));
   }
 
   async getInvoice(id: number) {
-    const [invoice] = await db.select().from(invoices).where(eq(invoices.id, id));
+    const [invoice] = await db.select().from(invoices).where(and(eq(invoices.id, id), eq(invoices.organizationId, this.organizationId())));
     return invoice;
   }
 
   async getInvoicesByClient(clientId: number) {
+    if (!(await this.clientInOrganization(clientId))) return [];
     return db.select().from(invoices).where(eq(invoices.clientId, clientId)).orderBy(desc(invoices.createdAt));
   }
 
   async createInvoice(insertInvoice: InsertInvoice) {
+    const organizationId = this.organizationId();
+    if (!(await this.clientInOrganization(insertInvoice.clientId))) return undefined;
     const [invoice] = await db.insert(invoices).values({
+      organizationId,
       clientId: insertInvoice.clientId,
       quotationId: insertInvoice.quotationId ?? null,
       invoiceNumber: insertInvoice.invoiceNumber,
@@ -928,19 +1019,21 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateInvoice(id: number, updates: Partial<InsertInvoice>) {
-    const data: any = { ...updates };
+    if (!(await this.quotationInOrganization(id))) return undefined;
+    if (updates.clientId != null && !(await this.clientInOrganization(updates.clientId))) return undefined;
+    const { organizationId: _organizationId, ...data } = updates as Partial<InsertInvoice> & { organizationId?: number };
     if (data.amount !== undefined) data.amount = String(data.amount);
     if (data.dueDate) data.dueDate = new Date(data.dueDate);
-    const [updated] = await db.update(invoices).set(data).where(eq(invoices.id, id)).returning();
+    const [updated] = await db.update(invoices).set(data).where(and(eq(invoices.id, id), eq(invoices.organizationId, this.organizationId()))).returning();
     return updated;
   }
 
   async deleteInvoice(id: number) {
-    await db.delete(invoices).where(eq(invoices.id, id));
+    await db.delete(invoices).where(and(eq(invoices.id, id), eq(invoices.organizationId, this.organizationId())));
   }
 
   async getAllSettings(): Promise<Record<string, any>> {
-    const rows = await db.select().from(appSettings);
+    const rows = await db.select().from(appSettings).where(eq(appSettings.organizationId, this.organizationId()));
     const result: Record<string, any> = {};
     for (const row of rows) {
       try { result[row.key] = JSON.parse(row.value); } catch { result[row.key] = row.value; }
@@ -949,17 +1042,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getSetting(key: string): Promise<any | undefined> {
-    const [row] = await db.select().from(appSettings).where(eq(appSettings.key, key));
+    const [row] = await db.select().from(appSettings).where(and(eq(appSettings.key, key), eq(appSettings.organizationId, this.organizationId())));
     if (!row) return undefined;
     try { return JSON.parse(row.value); } catch { return row.value; }
   }
 
   async setSetting(key: string, value: any): Promise<void> {
+    const organizationId = this.organizationId();
     const serialized = JSON.stringify(value);
     await db
       .insert(appSettings)
-      .values({ key, value: serialized })
-      .onConflictDoUpdate({ target: appSettings.key, set: { value: serialized } });
+      .values({ organizationId, key, value: serialized })
+      .onConflictDoUpdate({ target: [appSettings.organizationId, appSettings.key], set: { value: serialized } });
   }
 }
 
