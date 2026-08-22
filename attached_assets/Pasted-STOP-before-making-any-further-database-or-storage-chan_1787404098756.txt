@@ -1,0 +1,91 @@
+STOP before making any further database or storage changes.
+
+The schema patch previously failed because of a context mismatch. Do NOT work around this by forcing the patch, replacing the schema file, or rewriting large portions of the schema.
+
+Before continuing, inspect the exact current schema and migration state again.
+
+I want you to proceed in small, verifiable steps:
+
+STEP 1 — Schema only
+- Show me the exact current definitions of:
+  users
+  clients
+  events
+  vendors
+  venues
+  quotations
+  invoices
+  app_settings
+- Show the exact relationships currently defined for these tables.
+- Show the current migration state relevant to these tables.
+
+Do not modify anything in this step.
+
+STEP 2 — Proposed organization schema
+Before applying it, explain exactly what you intend to add:
+
+organizations:
+- id
+- name
+- createdAt
+- updatedAt
+- any other field genuinely required
+
+users:
+- organizationId
+
+aggregate roots:
+- clients.organizationId
+- events.organizationId
+- vendors.organizationId
+- venues.organizationId
+- quotations.organizationId
+- invoices.organizationId
+
+settings:
+- organizationId where appropriate
+
+Also explain whether child tables will inherit organization ownership through their parent records.
+
+Do NOT add organizationId blindly to every child table.
+
+STEP 3 — Migration safety
+Explain exactly how existing data will be migrated.
+
+Expected strategy:
+
+1. Create one default organization.
+2. Assign all existing users to that organization.
+3. Assign all existing aggregate records to that organization.
+4. Verify there are no NULL organization references.
+5. Only then add NOT NULL constraints where appropriate.
+6. Add foreign keys.
+7. Add indexes for organization-scoped queries.
+
+Do not delete or recreate existing tables.
+
+Do not reset the database.
+
+Do not use DROP TABLE.
+
+Do not use destructive migration shortcuts.
+
+STEP 4 — STOP FOR REVIEW
+
+After completing the inspection and proposed migration plan, STOP.
+
+Do not apply the migration yet.
+
+Give me:
+- Current schema findings
+- Exact proposed schema changes
+- Exact migration steps
+- Tables affected
+- How existing data will be backfilled
+- How child records inherit organization ownership
+- How cross-organization access will be prevented
+- Any risks
+
+Wait for approval before applying database changes.
+
+This is important because this is the foundation for the entire ERP.
