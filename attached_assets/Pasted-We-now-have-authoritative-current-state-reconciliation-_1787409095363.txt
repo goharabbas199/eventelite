@@ -1,0 +1,238 @@
+We now have authoritative current-state reconciliation.
+
+Current truth:
+
+- Active database is the Replit development PostgreSQL database:
+  database = heliumdb
+  schema = public
+- The live database is pre-organization legacy state.
+- organizations table is missing.
+- users table is missing.
+- email_verifications table is missing.
+- organization_id columns are missing.
+- vendors.standard_cost is missing.
+- clients.budget_plan is missing.
+- tasks.service_id is missing.
+- tasks.ai_generated is missing.
+- The ORM/schema expects these structures.
+- migrations/meta/_journal.json includes 0009, but there is no live database migration bookkeeping table proving it was applied.
+- Current database contains legacy business data.
+- No relevant orphan or duplicate records were found.
+- npm run check still has 112 errors.
+- We must NOT fix TypeScript errors yet.
+
+The next task is a READ-ONLY MIGRATION READINESS REVIEW for the CURRENT heliumdb database.
+
+DO NOT:
+
+- Apply migrations
+- Run drizzle push
+- Run schema push
+- Modify the database
+- Modify migration files
+- Modify schema files
+- Modify application code
+- Fix TypeScript errors
+- Reset/truncate the database
+- Delete or repair data
+- Start Client → Event migration
+
+We need to determine the exact safe procedure for bringing the CURRENT legacy database into alignment with the CURRENT ORM/schema.
+
+==================================================
+PART 1 — BUILD THE REQUIRED SCHEMA DELTA
+==================================================
+
+Starting from the ACTUAL current database state, identify every schema change required to reach the current ORM schema.
+
+Separate changes into:
+
+A. New tables
+B. New columns
+C. Column type changes
+D. Nullability changes
+E. Default changes
+F. Primary-key changes
+G. Unique constraints
+H. Foreign keys
+I. Indexes
+
+For each change report:
+
+- Current database state
+- Target ORM state
+- Exact dependency/order requirement
+- Whether existing data must be backfilled
+- Whether the operation can be additive/non-destructive
+- Risk level: LOW / MEDIUM / HIGH
+
+Do not execute anything.
+
+==================================================
+PART 2 — ANALYZE 0009 AGAINST THE ACTUAL DATABASE
+==================================================
+
+Read migrations/0009_organization_agency.sql exactly as it currently exists.
+
+Compare every statement against the ACTUAL current heliumdb schema.
+
+For each statement classify:
+
+- SAFE TO APPLY AS-IS
+- REQUIRES PRECONDITION
+- WOULD FAIL
+- DUPLICATE/REDUNDANT
+- DATA-RISKING
+- ORDERING PROBLEM
+
+Specifically verify:
+
+- creation of organizations
+- creation of users
+- creation of email_verifications
+- creation of default organization
+- addition of organization_id columns
+- backfill behavior
+- NOT NULL enforcement
+- foreign keys
+- indexes
+- app_settings primary-key conversion
+- vendors.standard_cost
+- any dependency on tables/columns that do not yet exist
+
+Do not change 0009.
+
+==================================================
+PART 3 — FIND ALL OTHER REQUIRED DRIFT REPAIRS
+==================================================
+
+The goal is not only organization migration.
+
+Identify every ORM/database mismatch that must be resolved for the current application schema to become internally consistent.
+
+Pay particular attention to:
+
+- clients.budget_plan
+- tasks.service_id
+- tasks.ai_generated
+- vendors.standard_cost
+- organizations
+- users
+- email_verifications
+- app_settings composite primary key
+- organization foreign keys/indexes
+
+Determine whether these are:
+
+1. Already represented by existing migrations
+2. Missing from migration history
+3. Accidentally included in 0009
+4. Required as separate additive migrations
+5. Already present in another checked-in migration but not reproducible
+
+==================================================
+PART 4 — MIGRATION STRATEGY OPTIONS
+==================================================
+
+Provide exactly three possible strategies:
+
+OPTION A — Repair and apply existing migration history
+
+OPTION B — Create a new reconciliation/baseline migration for the current legacy database
+
+OPTION C — Rebuild the development database from scratch and reseed
+
+For each option provide:
+
+- Steps
+- Data safety
+- Reproducibility
+- Risk
+- Effect on existing development data
+- Whether it preserves migration history
+- Whether it is appropriate for the current state
+
+Then recommend ONE option only.
+
+Do not execute it.
+
+==================================================
+PART 5 — BACKUP / CHECKPOINT PLAN
+==================================================
+
+Before any future schema change, identify the safest backup/checkpoint available in this Replit environment.
+
+Do not perform destructive actions.
+
+Report what can be captured before migration, such as:
+
+- SQL dump
+- Replit database snapshot/checkpoint if available
+- Export of current row counts
+- Export of affected tables
+- Schema catalog snapshot
+- Migration file hash/checksum
+
+Recommend the minimum acceptable recovery checkpoint.
+
+==================================================
+PART 6 — DATA PREFLIGHT QUERIES
+==================================================
+
+Write the exact READ-ONLY SQL checks that must pass before applying the recommended strategy.
+
+Include checks for:
+
+- row counts
+- nulls before NOT NULL constraints
+- organization backfill eligibility
+- app_settings key uniqueness
+- foreign-key orphan risks
+- duplicate values
+- invalid references
+- data affected by primary-key changes
+
+Run those queries only if they are read-only.
+
+Do not modify data.
+
+==================================================
+PART 7 — POST-MIGRATION ACCEPTANCE CRITERIA
+==================================================
+
+Define the exact verification checklist that must pass AFTER the future migration.
+
+Include:
+
+- expected tables
+- expected columns
+- row counts unchanged
+- organization count
+- null organization IDs
+- foreign keys
+- indexes
+- app_settings primary key
+- seed behavior
+- application startup
+- production build
+- npm run check baseline comparison
+
+Do not perform the migration.
+
+==================================================
+FINAL OUTPUT
+==================================================
+
+Give me:
+
+1. Full current → target schema delta
+2. 0009 compatibility analysis
+3. Other schema drift not safely handled by 0009
+4. Three migration strategies
+5. One recommended strategy
+6. Backup/checkpoint plan
+7. Required read-only preflight checks
+8. Required post-migration acceptance criteria
+9. Exact reason we should or should not proceed
+
+STOP after the report and wait for approval.

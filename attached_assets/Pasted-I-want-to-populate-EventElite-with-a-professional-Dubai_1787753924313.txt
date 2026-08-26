@@ -1,0 +1,409 @@
+I want to populate EventElite with a professional Dubai Event Vendor & Venue Directory using REAL businesses.
+
+IMPORTANT:
+This is DATA POPULATION + DIRECTORY IMPROVEMENT ONLY.
+
+Do NOT modify:
+- Authentication
+- Organization architecture
+- Client/Event architecture
+- Financial modules
+- Database relationships
+- Security model
+- Existing UI architecture
+
+Do not create fake vendors or fake venues.
+
+==================================================
+OBJECTIVE
+==================================================
+
+Populate the existing Vendors and Venues modules with a useful initial Dubai database that I can use when presenting EventElite to clients.
+
+The data should look like a professional event-management company's supplier database.
+
+Target initial dataset:
+
+VENUES:
+At least 40 real Dubai event venues.
+
+VENDORS:
+At least 80 real Dubai event suppliers/vendors.
+
+If the existing database schema cannot support all required fields, DO NOT redesign the schema automatically. First report what is missing.
+
+==================================================
+VENUE CATEGORIES
+==================================================
+
+Include a balanced selection across:
+
+- Luxury hotels / ballrooms
+- Wedding venues
+- Corporate event venues
+- Conference venues
+- Banquet halls
+- Outdoor venues
+- Beach venues
+- Rooftop venues
+- Private event spaces
+- Party venues
+- Villa/event spaces
+- Exhibition/event halls
+- Kids/birthday venues
+- Unique/experience venues
+
+Try to cover different Dubai areas:
+
+- Downtown Dubai
+- Business Bay
+- DIFC
+- Jumeirah
+- Palm Jumeirah
+- Dubai Marina
+- JBR
+- Dubai Media City
+- Dubai Internet City
+- Al Quoz
+- Deira
+- Bur Dubai
+- Al Barsha
+- Dubai Investment Park
+- Festival City
+- Meydan
+- Umm Suqeim
+- Nad Al Sheba
+- Dubai Creek
+- other relevant Dubai areas
+
+==================================================
+VENDOR CATEGORIES
+==================================================
+
+Populate vendors across these categories:
+
+1. Event Planning
+2. Event Management
+3. Event Decoration
+4. Wedding Decoration
+5. Floral Decoration
+6. Balloon Decoration
+7. Catering
+8. Photography
+9. Videography
+10. DJ / Music
+11. Live Entertainment
+12. Performers
+13. AV / Audio Visual
+14. Lighting
+15. LED Screens
+16. Stage Production
+17. Event Furniture Rental
+18. Tent / Marquee Rental
+19. Sound Systems
+20. Event Equipment Rental
+21. Exhibition / Booth Production
+22. Branding / Printing
+23. Event Staffing / Hostesses
+24. Security
+25. Transportation
+26. Luxury Cars / Chauffeur
+27. Kids Entertainment
+28. Party Rentals
+29. Cakes / Desserts
+30. Special Effects
+
+Do not artificially create records just to reach the number.
+
+==================================================
+DATA QUALITY
+==================================================
+
+Every vendor/venue should be a REAL business that can be independently verified.
+
+For every record collect as many of these fields as the EXISTING schema supports:
+
+- Business name
+- Category
+- Subcategory
+- Description
+- Address
+- Area
+- Dubai / UAE location
+- Phone
+- Email if publicly available
+- Website if publicly available
+- Google Maps URL if publicly available
+- Instagram/social URL if publicly available
+- Main image URL if legally/publicly usable
+- Price range if publicly available
+- Capacity for venues
+- Venue type
+- Amenities
+- Event types supported
+- Notes
+- Active status
+
+DO NOT invent:
+- Phone numbers
+- Email addresses
+- Prices
+- Capacities
+- Ratings
+- Reviews
+- Websites
+- Social accounts
+- Certifications
+
+If a field cannot be verified, leave it NULL/empty instead of guessing.
+
+==================================================
+RESEARCH REQUIREMENT
+==================================================
+
+Use reliable public sources to research the businesses.
+
+Prefer:
+
+1. Official business website
+2. Official Google/business listing
+3. Official social media
+4. Reputable business directories
+
+Do not copy huge amounts of text from third-party websites.
+
+Use publicly available factual information only.
+
+For every record, keep a source/reference URL where possible so the data can later be verified.
+
+If the current database schema has no source/reference field, DO NOT modify the schema automatically.
+
+Instead report that limitation.
+
+==================================================
+IMPORTANT: DO NOT USE FAKE DEMO DATA
+==================================================
+
+Do NOT generate entries such as:
+
+"Dubai Royal Events"
+"Luxury Dubai Catering"
+"Dubai Elite Decor"
+unless they are actual verifiable businesses.
+
+The database should contain real businesses.
+
+==================================================
+EXISTING DATA
+==================================================
+
+Before inserting anything:
+
+1. Inspect the current vendors table.
+2. Inspect the current venues table.
+3. Identify existing records.
+4. Detect duplicates.
+5. Do not delete existing records.
+6. Do not overwrite existing records with researched data unless they are clearly the same business and the update is safe.
+
+Create a duplicate detection strategy based on:
+- normalized business name
+- phone
+- website
+- address
+
+==================================================
+IMAGES
+==================================================
+
+Do NOT download copyrighted images and store them locally unless the source explicitly permits it.
+
+Prefer:
+- official image URLs
+- existing image infrastructure
+- Cloudinary only if the image can legally be uploaded/used
+
+If the current venue/vendor image model requires uploaded files, report the limitation instead of bypassing it.
+
+==================================================
+DATABASE INSERTION
+==================================================
+
+Use the existing Drizzle/storage layer.
+
+Do NOT insert directly into PostgreSQL with uncontrolled raw SQL unless absolutely necessary.
+
+All newly created records must automatically receive the current EventElite organization context:
+
+organizationId = authenticated/default EventElite Agency
+
+Never accept organizationId from imported data.
+
+==================================================
+VENDOR PRODUCTS
+
+Do NOT create vendor products yet unless the existing vendor data explicitly provides them.
+
+We will populate the Vendor Product catalog in a separate phase.
+
+==================================================
+VENUE BOOKING OPTIONS
+
+Do not invent booking options or prices.
+
+Only add them when publicly verifiable and supported by the current schema.
+
+==================================================
+SEEDING STRATEGY
+
+Do not hard-code 120+ records directly into the main application startup seed if that makes startup slow or unreliable.
+
+Instead create a clean reusable data-import/seed mechanism, for example:
+
+scripts/seed-dubai-directory.ts
+
+or an equivalent project-appropriate mechanism.
+
+It should be:
+
+- Idempotent
+- Safe to run multiple times
+- Duplicate-aware
+- Organization-aware
+- Non-destructive
+
+Running it twice must NOT create duplicate vendors/venues.
+
+==================================================
+RECOMMENDED INITIAL DATASET
+==================================================
+
+Aim for approximately:
+
+40–60 venues
+
+80–120 vendors
+
+But prioritize QUALITY and VERIFIABILITY over the exact number.
+
+At minimum, ensure the database has representation from:
+
+VENUES:
+- Luxury
+- Corporate
+- Wedding
+- Outdoor
+- Beach
+- Rooftop
+- Conference
+- Banquet
+- Party/Kids
+- Unique venues
+
+VENDORS:
+- Decor
+- Catering
+- Photography
+- Videography
+- AV
+- Lighting
+- Entertainment
+- DJs
+- Furniture
+- Staging
+- Printing/branding
+- Staffing
+- Transportation
+- Event planning
+
+==================================================
+CLIENT-FACING PRESENTATION
+==================================================
+
+After the data is imported, inspect the existing Vendors and Venues pages.
+
+Do NOT redesign the entire UI.
+
+Only make small improvements if necessary so that clients can easily understand:
+
+- Vendor name
+- Category
+- Location
+- Services
+- Contact
+- Website
+- Price range (only if verified)
+- Venue capacity (only if verified)
+- Venue type
+- Image
+- Active/verified status
+
+If the current UI already supports these fields, leave it alone.
+
+==================================================
+VERIFICATION
+==================================================
+
+After importing:
+
+1. Count existing vendors before import.
+2. Count existing venues before import.
+3. Count new vendors.
+4. Count new venues.
+5. Check duplicate names.
+6. Check duplicate phone numbers.
+7. Check duplicate websites.
+8. Check records with missing critical information.
+9. Verify every record has organizationId.
+10. Verify no existing records were deleted.
+11. Run npm run check.
+12. Run npm run build.
+13. Start the application.
+14. Verify Vendors page.
+15. Verify Venues page.
+16. Verify search/filter functionality.
+17. Verify vendor/venue details pages.
+
+==================================================
+FINAL REPORT
+==================================================
+
+Return:
+
+VENUES
+- Existing before
+- New added
+- Total after
+- Categories represented
+- Areas represented
+- Records requiring verification
+
+VENDORS
+- Existing before
+- New added
+- Total after
+- Categories represented
+- Areas represented
+- Records requiring verification
+
+DATA QUALITY
+- Duplicate records
+- Missing fields
+- Unverified fields
+- Source coverage
+
+TECHNICAL
+- Files created/modified
+- Database changes
+- Seed/import mechanism
+- Build result
+- TypeScript result
+- Any problems
+
+IMPORTANT:
+Do not silently invent data.
+Do not delete existing data.
+Do not modify the ERP architecture.
+Do not create fake vendors or venues.
+
+STOP after the directory population and report.
