@@ -6,7 +6,6 @@ import { z } from "zod";
 import cloudinary, { cloudinaryConfigured } from "./cloudinary";
 import multer from "multer";
 import { runAI } from "./services/aiService";
-import rateLimit from "express-rate-limit";
 import { requireAuth, requirePermission } from "./authorization";
 
 const upload = multer({ storage: multer.memoryStorage() });
@@ -18,42 +17,10 @@ export async function registerRoutes(
 
   // ===================== AUTH ===========================
 
-  const authLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 30,
-    message: { message: "Too many requests. Please try again later." },
-    standardHeaders: true,
-    legacyHeaders: false,
-  });
-
-  function safeUser(user: any) {
-    const { passwordHash: _ph, ...rest } = user;
-    return rest;
-  }
-
-  // All business APIs are organization-scoped. Authentication endpoints are
-  // intentionally excluded so users can sign in before a session exists.
+  // Anonymous access is scoped to the configured default organization.
   app.use("/api", (req, res, next) => {
     if (req.path.startsWith("/auth/")) return next();
     return requireAuth(req, res, next);
-  });
-
-  // POST /api/auth/logout
-  app.post("/api/auth/logout", (req, res) => {
-    req.logout(() => {
-      req.session.destroy(() => {
-        res.clearCookie("connect.sid");
-        res.json({ success: true });
-      });
-    });
-  });
-
-  // GET /api/auth/me
-  app.get("/api/auth/me", (req, res) => {
-    if (!req.isAuthenticated() || !req.user) {
-      return res.status(401).json({ message: "Not authenticated" });
-    }
-    res.json(safeUser(req.user));
   });
 
   // ===================== VENDORS ========================
@@ -802,7 +769,7 @@ export async function registerRoutes(
     });
   });
 
-  app.post("/api/ai", requireAuth, async (req, res) => {
+  app.post("/api/ai", async (req, res) => {
     try {
       const { feature, prompt, context } = req.body;
       if (!feature || !prompt) {
@@ -816,151 +783,18 @@ export async function registerRoutes(
     }
   });
 
-  // =================== FIREBASE AUTH ========================
-  // Verifies a Firebase ID token (from Google or Phone OTP) and
-  // creates/finds the corresponding user, then opens an Express session.
-
-  app.post("/api/auth/firebase", async (req, res, next) => {
-    try {
-      const { verifyFirebaseToken } = await import("./firebase");
-      const { idToken, fullName: providedName, email: providedEmail } = z.object({
-        idToken:       z.string().min(1),
-        fullName:      z.string().optional(),
-        email:         z.string().email().optional(),
-      }).parse(req.body);
-
-      const decoded = await verifyFirebaseToken(idToken);
-      if (!decoded) {
-        return res.status(401).json({ message: "Invalid or expired Firebase token" });
-      }
-
-      const uid        = decoded.uid;
-      const tokenEmail = decoded.email || null;
-      const tokenName  = decoded.name  || null;
-      const tokenPhone = decoded.phone_number || null;
-      const tokenPhoto = decoded.picture || null;
-
-      // Phone-only users may not have an email in the token yet.
-      // The client must supply one in that case.
-      const email = tokenEmail || providedEmail;
-      if (!email) {
-        // Return a signal so the frontend shows a "complete profile" step
-        return res.status(202).json({ status: "profile_required", uid, phone: tokenPhone });
-      }
-
-      const fullName = tokenName || providedName || email.split("@")[0];
-
-      const emailVerified = decoded.email_verified === true;
-
-      const user = await storage.findOrCreateFirebaseUser({
-        firebaseUid: uid,
-        email,
-        fullName,
-        avatarUrl: tokenPhoto || undefined,
-        phone: tokenPhone || undefined,
-        emailVerified,
-      });
-
-      req.login(user, (err) => {
-        if (err) return next(err);
-        const { passwordHash: _ph, ...safeUser } = user;
-        res.json(safeUser);
-      });
-    } catch (err) {
-      if (err instanceof z.ZodError) {
-        return res.status(400).json({ message: err.errors[0].message });
-      }
-      console.error("Firebase auth error:", err);
-      res.status(500).json({ message: "Firebase authentication failed" });
-    }
-  });
-
-  // ===================== USER PROFILE ========================
-
-  app.get("/api/user/profile", (req, res) => {
-    if (!req.isAuthenticated() || !req.user) {
-      return res.status(401).json({ message: "Not authenticated" });
-    }
-    const u = req.user as any;
-    res.json({
-      id:        u.id,
-      fullName:  u.fullName,
-      email:     u.email,
-      role:      u.role,
-      phone:     u.phone     ?? "",
-      bio:       u.bio       ?? "",
-      avatarUrl: u.avatarUrl ?? "",
-    });
-  });
-
-  app.patch("/api/user/profile", requireAuth, async (req, res) => {
-    try {
-      const userId = (req.user as any).id as number;
-      const schema = z.object({
-        fullName:  z.string().min(2).optional(),
-        email:     z.string().email().optional(),
-        phone:     z.string().nullable().optional(),
-        bio:       z.string().nullable().optional(),
-        avatarUrl: z.string().nullable().optional(),
-      });
-      const data = schema.parse(req.body);
-
-      // If email is changing, check it's not already taken
-      if (data.email) {
-        const existing = await storage.getUserByEmail(data.email);
-        if (existing && existing.id !== userId) {
-          return res.status(409).json({ message: "Email already in use by another account" });
-        }
-      }
-
-       const updated = await storage.updateUserProfile(userId, data);
-      // Refresh passport session so req.user reflects new data
-      req.login(updated, (err) => {
-        if (err) return res.status(500).json({ message: "Profile update failed" });
-        const { passwordHash: _ph, ...safe } = updated;
-        res.json({
-          ...safe,
-          phone:     safe.phone     ?? "",
-          bio:       safe.bio       ?? "",
-          avatarUrl: safe.avatarUrl ?? "",
-        });
-      });
-    } catch (err) {
-      if (err instanceof z.ZodError) {
-        return res.status(400).json({ message: err.errors[0].message });
-      }
-      console.error("Profile update error:", err);
-      res.status(500).json({ message: "Failed to update profile" });
-    }
-  });
-
-  app.patch("/api/admin/users/:id/role", requirePermission("users:manage"), async (req, res) => {
-    try {
-      const role = z.enum(["owner", "admin", "manager", "staff", "user"]).parse(req.body?.role);
-      const targetUserId = Number(req.params.id);
-      if (!Number.isInteger(targetUserId)) {
-        return res.status(400).json({ message: "Invalid user id" });
-      }
-      const actorUserId = Number((req.user as any).id);
-      if (targetUserId === actorUserId) {
-        return res.status(403).json({ message: "You cannot change your own role" });
-      }
-      const target = await storage.getUserById(targetUserId);
-      if (!target) return res.status(404).json({ message: "User not found" });
-      const updated = await storage.updateUserRole(targetUserId, role);
-      res.json(safeUser(updated));
-    } catch (err) {
-      if (err instanceof z.ZodError) {
-        return res.status(400).json({ message: "A valid role is required" });
-      }
-      res.status(500).json({ message: "Failed to update user role" });
-    }
-  });
-
   // ===================== APP SETTINGS ========================
 
   // Non-profile sections defaults (appearance, notifications, etc.)
   const DEFAULT_SETTINGS: Record<string, any> = {
+    profile: {
+      name: "Guest User",
+      email: "",
+      phone: "",
+      role: "owner",
+      avatarUrl: "",
+      bio: "",
+    },
     business: {
       companyName: "",
       email: "",
@@ -1007,17 +841,6 @@ export async function registerRoutes(
         merged[key] = stored[key] ?? DEFAULT_SETTINGS[key];
       }
 
-      // Profile always comes from the authenticated user, not from appSettings
-       const u = req.user as any;
-      merged.profile = {
-        name:      u?.fullName  ?? "",
-        email:     u?.email     ?? "",
-        phone:     u?.phone     ?? "",
-        role:      u?.role      ?? "owner",
-        avatarUrl: u?.avatarUrl ?? "",
-        bio:       u?.bio       ?? "",
-      };
-
       res.json(merged);
     } catch (err) {
       res.status(500).json({ message: "Failed to load settings" });
@@ -1028,38 +851,12 @@ export async function registerRoutes(
     try {
       const { section } = req.params;
 
-      // Profile changes are saved to the users table, not appSettings
-      if (section === "profile") {
-        const userId = (req.user as any).id as number;
-        const { name, email, phone, avatarUrl, bio } = req.body;
-        const updated = await storage.updateUserProfile(userId, {
-          fullName:  name,
-          email:     email,
-          phone:     phone     ?? null,
-          bio:       bio       ?? null,
-          avatarUrl: avatarUrl ?? null,
-        });
-        // Refresh session
-        req.login(updated, (err) => {
-          if (err) return res.status(500).json({ message: "Session refresh failed" });
-          res.json({
-            name:      updated.fullName,
-            email:     updated.email,
-            phone:     updated.phone     ?? "",
-            role:      updated.role,
-            avatarUrl: updated.avatarUrl ?? "",
-            bio:       updated.bio       ?? "",
-          });
-        });
-        return;
-      }
-
       const allowed = Object.keys(DEFAULT_SETTINGS);
       if (!allowed.includes(section)) {
         return res.status(400).json({ message: "Unknown settings section" });
       }
       const canManageSettings =
-        (req.user as any).role === "owner" || (req.user as any).role === "admin";
+        (req as any).user?.role === "owner" || (req as any).user?.role === "admin";
       if (!canManageSettings) {
         return res.status(403).json({ message: "You do not have permission to perform this action" });
       }

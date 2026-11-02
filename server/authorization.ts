@@ -40,21 +40,31 @@ function isKnownRole(role: string): role is Role {
 }
 
 /**
- * Authentication and authorization always use the database user, not a role
- * supplied by the browser or a potentially stale session object.
+ * No-login mode keeps all data in the first configured organization, but the
+ * application is fully public while this mode is enabled.
  */
-export async function loadCurrentUser(req: Request) {
-  if (!req.isAuthenticated() || !req.user) return undefined;
-  const userId = Number((req.user as { id?: unknown }).id);
-  if (!Number.isInteger(userId)) return undefined;
-  return storage.getUserById(userId);
+export async function loadCurrentUser(_req: Request) {
+  const organizationId = await storage.getDefaultOrganizationId();
+  return {
+    id: 0,
+    organizationId,
+    fullName: "Guest User",
+    email: "guest@local.invalid",
+    role: "owner",
+    phone: null,
+    bio: null,
+    avatarUrl: null,
+    emailVerified: false,
+    passwordHash: null,
+    createdAt: null,
+  } as any;
 }
 
 export function requireAuth(req: Request, res: Response, next: NextFunction) {
   void loadCurrentUser(req)
     .then((user) => {
       if (!user) return res.status(401).json({ message: "Not authenticated" });
-       req.user = user;
+       (req as any).user = user;
        if (!user.organizationId) return res.status(403).json({ message: "User is not assigned to an organization" });
        runWithOrganization(user.organizationId, next);
     })
@@ -66,7 +76,7 @@ export function requireRole(...allowedRoles: Role[]) {
     void loadCurrentUser(req)
       .then((user) => {
         if (!user) return res.status(401).json({ message: "Not authenticated" });
-        req.user = user;
+        (req as any).user = user;
         if (!isKnownRole(user.role) || !allowedRoles.includes(user.role)) {
           return res.status(403).json({ message: "You do not have permission to perform this action" });
         }
@@ -81,7 +91,7 @@ export function requirePermission(permission: Permission) {
     void loadCurrentUser(req)
       .then((user) => {
         if (!user) return res.status(401).json({ message: "Not authenticated" });
-        req.user = user;
+        (req as any).user = user;
         if (!isKnownRole(user.role) || !ROLE_PERMISSIONS[user.role].includes(permission)) {
           return res.status(403).json({ message: "You do not have permission to perform this action" });
         }

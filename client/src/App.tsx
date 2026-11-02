@@ -4,9 +4,8 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SettingsProvider } from "@/context/SettingsContext";
-import { AuthProvider, useAuth } from "@/context/AuthContext";
+import { AuthProvider } from "@/context/AuthContext";
 import NotFound from "@/pages/not-found";
-import Login from "@/pages/Login";
 
 import Dashboard from "@/pages/Dashboard";
 import Vendors from "@/pages/Vendors";
@@ -31,27 +30,15 @@ import AIAssistant from "@/pages/AIAssistant";
 import ClientPortal from "@/pages/ClientPortal";
 
 function AuthGuard({ children }: { children: React.ReactNode }) {
-  const { user, isLoading } = useAuth();
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-[#0d1117] flex items-center justify-center">
-        <div className="w-9 h-9 border-2 border-indigo-600/20 border-t-indigo-500 rounded-full animate-spin" />
-      </div>
-    );
-  }
-
-  if (!user) {
-    return <Redirect to="/login" />;
-  }
-
   return <>{children}</>;
 }
 
 function Router() {
   return (
     <Switch>
-      <Route path="/login" component={Login} />
+      <Route path="/login">
+        <Redirect to="/" />
+      </Route>
       <Route path="/">
         <AuthGuard><Dashboard /></AuthGuard>
       </Route>

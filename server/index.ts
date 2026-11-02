@@ -1,9 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
-import session from "express-session";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
-import { passport } from "./auth";
 import { runWithOrganization } from "./organization-context";
 
 const app = express();
@@ -18,12 +16,6 @@ declare module "http" {
   }
 }
 
-declare module "express-session" {
-  interface SessionData {
-    passport: { user: number };
-  }
-}
-
 app.use(
   express.json({
     limit: "15mb",
@@ -34,24 +26,6 @@ app.use(
 );
 
 app.use(express.urlencoded({ extended: false, limit: "15mb" }));
-
-const isProduction = process.env.NODE_ENV === "production";
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET || "eventelite-dev-secret",
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      httpOnly: true,
-      secure: isProduction,
-      sameSite: isProduction ? "none" : "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    },
-  }),
-);
-
-app.use(passport.initialize());
-app.use(passport.session());
 
 export function log(message: string, source = "express") {
   const formattedTime = new Date().toLocaleTimeString("en-US", {

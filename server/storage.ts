@@ -1,7 +1,5 @@
 import { db } from "./db";
 import {
-  users,
-  emailVerifications,
   vendors,
   vendorProducts,
   venues,
@@ -19,7 +17,6 @@ import {
   invoices,
   appSettings,
   organizations,
-  type User,
   type InsertVendor,
   type InsertVendorProduct,
   type InsertVenue,
@@ -35,27 +32,10 @@ import {
   type InsertEvent,
   type InsertInvoice,
 } from "@shared/schema";
-import { eq, desc, and, gt, isNull } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
 import { getOrganizationId } from "./organization-context";
 
 export interface IStorage {
-  // Users / Auth
-  getUserByEmail(email: string): Promise<User | undefined>;
-  getUserById(id: number): Promise<User | undefined>;
-  getUserByGoogleId(googleId: string): Promise<User | undefined>;
-  createUser(data: { fullName: string; email: string; passwordHash?: string | null; googleId?: string; emailVerified?: boolean }): Promise<User>;
-  updateUserProfile(id: number, data: { fullName?: string; email?: string; phone?: string | null; bio?: string | null; avatarUrl?: string | null }): Promise<User>;
-  updateUserRole(id: number, role: string): Promise<User>;
-  findUserByFirebaseUid(firebaseUid: string): Promise<User | undefined>;
-  findOrCreateFirebaseUser(data: { firebaseUid: string; email: string; fullName: string; avatarUrl?: string; phone?: string; emailVerified?: boolean }): Promise<User>;
-  updateUserEmailVerified(id: number): Promise<User>;
-  updateUserPassword(id: number, passwordHash: string): Promise<User>;
-  linkGoogleId(userId: number, googleId: string): Promise<User>;
-  // OTP
-  createOtp(data: { email: string; code: string; type: string; expiresAt: Date }): Promise<any>;
-  getValidOtp(email: string, code: string, type: string): Promise<any>;
-  markOtpUsed(id: number): Promise<void>;
-
   getVendors(): Promise<any[]>;
   getVendor(id: number): Promise<any | undefined>;
   createVendor(vendor: InsertVendor): Promise<any>;
@@ -154,6 +134,10 @@ export class DatabaseStorage implements IStorage {
     return organization.id;
   }
 
+  async getDefaultOrganizationId(): Promise<number> {
+    return this.defaultOrganizationId();
+  }
+
   private async clientInOrganization(id: number): Promise<boolean> {
     const [row] = await db.select({ id: clients.id }).from(clients).where(and(eq(clients.id, id), eq(clients.organizationId, this.organizationId())));
     return Boolean(row);
@@ -177,183 +161,6 @@ export class DatabaseStorage implements IStorage {
   private async invoiceInOrganization(id: number): Promise<boolean> {
     const [row] = await db.select({ id: invoices.id }).from(invoices).where(and(eq(invoices.id, id), eq(invoices.organizationId, this.organizationId())));
     return Boolean(row);
-  }
-
-  // ── Users / Auth ──────────────────────────────────────────────────────────
-  async getUserByEmail(email: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.email, email.toLowerCase().trim()));
-    return user;
-  }
-
-  async getUserById(id: number): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user;
-  }
-
-  async createUser(data: { fullName: string; email: string; passwordHash?: string | null; googleId?: string; emailVerified?: boolean }): Promise<User> {
-    const organizationId = await this.defaultOrganizationId();
-    const [user] = await db
-      .insert(users)
-      .values({
-        organizationId,
-        fullName: data.fullName,
-        email: data.email.toLowerCase().trim(),
-        passwordHash: data.passwordHash ?? null,
-        googleId: data.googleId ?? null,
-        emailVerified: data.emailVerified ?? false,
-      })
-      .returning();
-    return user;
-  }
-
-  async findUserByFirebaseUid(firebaseUid: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.firebaseUid, firebaseUid));
-    return user;
-  }
-
-  async findOrCreateFirebaseUser(data: {
-    firebaseUid: string;
-    email: string;
-    fullName: string;
-    avatarUrl?: string;
-    phone?: string;
-    emailVerified?: boolean;
-  }): Promise<User> {
-    const byUid = await this.findUserByFirebaseUid(data.firebaseUid);
-    if (byUid) {
-      // Always sync emailVerified from Firebase token
-      if (data.emailVerified && !byUid.emailVerified) {
-        const [updated] = await db
-          .update(users)
-          .set({ emailVerified: true })
-          .where(eq(users.id, byUid.id))
-          .returning();
-        return updated;
-      }
-      return byUid;
-    }
-
-    const byEmail = await this.getUserByEmail(data.email);
-    if (byEmail) {
-      const [updated] = await db
-        .update(users)
-        .set({
-          firebaseUid: data.firebaseUid,
-          avatarUrl: byEmail.avatarUrl || data.avatarUrl || null,
-          phone: byEmail.phone || data.phone || null,
-          emailVerified: data.emailVerified ?? byEmail.emailVerified,
-        })
-        .where(eq(users.id, byEmail.id))
-        .returning();
-      return updated;
-    }
-
-    const [created] = await db
-      .insert(users)
-      .values({
-        organizationId: await this.defaultOrganizationId(),
-        firebaseUid: data.firebaseUid,
-        fullName: data.fullName,
-        email: data.email.toLowerCase().trim(),
-        passwordHash: null,
-        avatarUrl: data.avatarUrl || null,
-        phone: data.phone || null,
-        emailVerified: data.emailVerified ?? false,
-      })
-      .returning();
-    return created;
-  }
-
-  async getUserByGoogleId(googleId: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.googleId, googleId));
-    return user;
-  }
-
-  async updateUserEmailVerified(id: number): Promise<User> {
-    const [user] = await db
-      .update(users)
-      .set({ emailVerified: true })
-      .where(eq(users.id, id))
-      .returning();
-    return user;
-  }
-
-  async updateUserPassword(id: number, passwordHash: string): Promise<User> {
-    const [user] = await db
-      .update(users)
-      .set({ passwordHash })
-      .where(eq(users.id, id))
-      .returning();
-    return user;
-  }
-
-  async linkGoogleId(userId: number, googleId: string): Promise<User> {
-    const [user] = await db
-      .update(users)
-      .set({ googleId, emailVerified: true })
-      .where(eq(users.id, userId))
-      .returning();
-    return user;
-  }
-
-  async createOtp(data: { email: string; code: string; type: string; expiresAt: Date }): Promise<any> {
-    const [otp] = await db
-      .insert(emailVerifications)
-      .values({
-        email: data.email.toLowerCase().trim(),
-        code: data.code,
-        type: data.type,
-        expiresAt: data.expiresAt,
-      })
-      .returning();
-    return otp;
-  }
-
-  async getValidOtp(email: string, code: string, type: string): Promise<any> {
-    const [otp] = await db
-      .select()
-      .from(emailVerifications)
-      .where(
-        and(
-          eq(emailVerifications.email, email.toLowerCase().trim()),
-          eq(emailVerifications.code, code),
-          eq(emailVerifications.type, type),
-          gt(emailVerifications.expiresAt, new Date()),
-          isNull(emailVerifications.usedAt)
-        )
-      )
-      .orderBy(desc(emailVerifications.createdAt))
-      .limit(1);
-    return otp;
-  }
-
-  async markOtpUsed(id: number): Promise<void> {
-    await db
-      .update(emailVerifications)
-      .set({ usedAt: new Date() })
-      .where(eq(emailVerifications.id, id));
-  }
-
-  async updateUserProfile(id: number, data: {
-    fullName?: string;
-    email?: string;
-    phone?: string | null;
-    bio?: string | null;
-    avatarUrl?: string | null;
-  }): Promise<User> {
-    const updates: Partial<typeof users.$inferInsert> = {};
-    if (data.fullName !== undefined) updates.fullName = data.fullName;
-    if (data.email    !== undefined) updates.email    = data.email.toLowerCase().trim();
-    if (data.phone    !== undefined) updates.phone    = data.phone;
-    if (data.bio      !== undefined) updates.bio      = data.bio;
-    if (data.avatarUrl !== undefined) updates.avatarUrl = data.avatarUrl;
-    const [user] = await db.update(users).set(updates).where(eq(users.id, id)).returning();
-    return user;
-  }
-
-  async updateUserRole(id: number, role: string): Promise<User> {
-    const [user] = await db.update(users).set({ role }).where(eq(users.id, id)).returning();
-    return user;
   }
 
   async getVendors() {

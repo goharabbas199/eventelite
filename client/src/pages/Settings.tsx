@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/context/AuthContext";
 import { useSettings, applyTheme, applyAccentColor } from "@/context/SettingsContext";
 import type {
   ProfileSettings,
@@ -18,9 +17,8 @@ import {
   Building2, Globe, Phone, Mail, MapPin, Clock,
   Check, Zap, Star, ChevronRight,
   Sun, Moon, Monitor, Lock,
-  HelpCircle, MessageSquare, ExternalLink, LogOut,
+  HelpCircle, MessageSquare, ExternalLink,
 } from "lucide-react";
-import { useLocation } from "wouter";
 
 /* ─── Toggle switch ─── */
 function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void }) {
@@ -64,14 +62,7 @@ type TabId = "profile" | "business" | "security" | "notifications" | "appearance
 export default function Settings() {
   const { toast } = useToast();
   const { profile } = useSettings();
-  const { logout, user: authUser } = useAuth();
   const [tab, setTab] = useState<TabId | null>(null);
-  const [, navigate] = useLocation();
-
-  const handleLogout = async () => {
-    await logout();
-    navigate("/login");
-  };
 
   const activeItem = NAV_SECTIONS.flatMap((s) => s.items).find((i) => i.id === tab);
 
@@ -91,8 +82,8 @@ export default function Settings() {
             <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white dark:border-zinc-800/60" />
           </div>
           <div className="min-w-0">
-            <p className="text-sm font-bold text-slate-900 dark:text-white truncate">{authUser?.fullName || profile.name || "User"}</p>
-            <p className="text-xs text-slate-400 truncate capitalize">{authUser?.role || profile.role || "owner"}</p>
+            <p className="text-sm font-bold text-slate-900 dark:text-white truncate">{profile.name || "Guest User"}</p>
+            <p className="text-xs text-slate-400 truncate capitalize">{profile.role || "owner"}</p>
           </div>
         </div>
       </div>
@@ -132,19 +123,6 @@ export default function Settings() {
         ))}
       </nav>
 
-      {/* Sign out */}
-      <div className="p-3 border-t border-slate-100 dark:border-zinc-800">
-        <button
-          onClick={handleLogout}
-          data-testid="button-logout"
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 hover:text-red-600 transition-all text-left"
-        >
-          <div className="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-950/40 flex items-center justify-center shrink-0">
-            <LogOut className="w-4 h-4 text-red-500" />
-          </div>
-          <span>Sign Out</span>
-        </button>
-      </div>
     </div>
   );
 
@@ -238,48 +216,19 @@ export default function Settings() {
 /* ─── Profile tab ─── */
 function ProfileTab({ toast }: { toast: any }) {
   const { profile, updateProfile, isLoaded } = useSettings();
-  const { user: authUser, refetchUser } = useAuth();
   const [form, setForm] = useState<ProfileSettings>({ ...profile });
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (authUser) {
-      setForm({
-        name: authUser.fullName || "",
-        email: authUser.email || "",
-        phone: authUser.phone || "",
-        role: authUser.role || "owner",
-        avatarUrl: authUser.avatarUrl || "",
-        bio: authUser.bio || "",
-      });
-    } else if (isLoaded) {
-      setForm({ ...profile });
-    }
-  }, [authUser, isLoaded]);
+    if (isLoaded) setForm({ ...profile });
+  }, [isLoaded, profile]);
 
   const F = (k: keyof ProfileSettings) => (e: any) => setForm((p) => ({ ...p, [k]: e.target.value }));
 
   const save_ = async () => {
     setSaving(true);
     try {
-      const res = await fetch("/api/user/profile", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fullName: form.name,
-          email: form.email,
-          phone: form.phone || null,
-          bio: form.bio || null,
-          avatarUrl: form.avatarUrl || null,
-          role: form.role,
-        }),
-      });
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.message || "Save failed");
-      }
       await updateProfile(form);
-      refetchUser();
       toast({ title: "Profile saved", description: "Your profile has been updated." });
     } catch (err: any) {
       toast({ title: "Save failed", description: err.message, variant: "destructive" });
