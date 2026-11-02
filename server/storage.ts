@@ -96,7 +96,10 @@ export interface IStorage {
   getQuotations(): Promise<any[]>;
   getQuotation(id: number): Promise<any | undefined>;
   createQuotation(quotation: InsertQuotation, items: Omit<InsertQuotationItem, "quotationId">[]): Promise<any>;
-  updateQuotation(id: number, updates: Partial<InsertQuotation>): Promise<any>;
+  updateQuotation(
+    id: number,
+    updates: Partial<InsertQuotation> & { items?: Omit<InsertQuotationItem, "quotationId">[] },
+  ): Promise<any>;
   deleteQuotation(id: number): Promise<void>;
 
   // Events
@@ -742,20 +745,41 @@ export class DatabaseStorage implements IStorage {
     return this.getQuotation(newQ.id);
   }
 
-  async updateQuotation(id: number, updates: Partial<InsertQuotation>) {
+  async updateQuotation(
+    id: number,
+    updates: Partial<InsertQuotation> & { items?: Omit<InsertQuotationItem, "quotationId">[] },
+  ) {
     const [existing] = await db.select({ organizationId: quotations.organizationId }).from(quotations).where(and(eq(quotations.id, id), eq(quotations.organizationId, this.organizationId())));
     if (!existing) return undefined;
-    if (updates.clientId != null && !(await this.clientInOrganization(updates.clientId))) return undefined;
-    if (updates.venueId != null && !(await this.venueInOrganization(updates.venueId))) return undefined;
-    const { organizationId: _organizationId, ...data } = updates as Partial<InsertQuotation> & { organizationId?: number };
+    if (updates.clientId !== undefined && updates.clientId !== null && !(await this.clientInOrganization(updates.clientId))) return undefined;
+    if (updates.venueId !== undefined && updates.venueId !== null && !(await this.venueInOrganization(updates.venueId))) return undefined;
+    const { organizationId: _organizationId, items, ...data } = updates as Partial<InsertQuotation> & {
+      organizationId?: number;
+      items?: Omit<InsertQuotationItem, "quotationId">[];
+    };
     if (data.totalCost !== undefined) data.totalCost = String(data.totalCost);
     if (data.markupPercentage !== undefined) data.markupPercentage = String(data.markupPercentage);
     if (data.discount !== undefined) data.discount = String(data.discount);
     if (data.tax !== undefined) data.tax = String(data.tax);
     if (data.finalPrice !== undefined) data.finalPrice = String(data.finalPrice);
-    const [updated] = await db.update(quotations).set(data).where(and(eq(quotations.id, id), eq(quotations.organizationId, this.organizationId()))).returning();
-    const items = await db.select().from(quotationItems).where(eq(quotationItems.quotationId, id));
-    return { ...updated, items };
+    return db.transaction(async (tx) => {
+      const [updated] = await tx.update(quotations)
+        .set(data)
+        .where(and(eq(quotations.id, id), eq(quotations.organizationId, this.organizationId())))
+        .returning();
+      if (items !== undefined) {
+        await tx.delete(quotationItems).where(eq(quotationItems.quotationId, id));
+        if (items.length > 0) {
+          await tx.insert(quotationItems).values(items.map((item) => ({
+            quotationId: id,
+            serviceName: item.serviceName,
+            cost: String(item.cost),
+          })));
+        }
+      }
+      const savedItems = await tx.select().from(quotationItems).where(eq(quotationItems.quotationId, id));
+      return { ...updated, items: savedItems };
+    });
   }
 
   async deleteQuotation(id: number) {

@@ -27,6 +27,7 @@ import {
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
+import { downloadQuotePdf } from "@/lib/quote-pdf";
 
 // ─── constants ────────────────────────────────────────────────────────────────
 
@@ -320,6 +321,16 @@ export default function Quotations() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const preClientId = params.get("clientId");
+    const preQuoteId = params.get("quoteId");
+    if (preQuoteId && (isLoading || !clients || (clients as any[]).length === 0)) return;
+    if (preQuoteId) {
+      const quote = (quotations as any[]).find((q) => String(q.id) === preQuoteId);
+      if (quote) {
+        loadQuote(quote);
+        window.history.replaceState({}, "", window.location.pathname);
+        return;
+      }
+    }
     if (!preClientId || !clients || (clients as any[]).length === 0) return;
     const c = (clients as any[]).find((x) => String(x.id) === preClientId);
     if (!c) return;
@@ -343,7 +354,7 @@ export default function Quotations() {
     setShowTemplateBanner(true);
     window.history.replaceState({}, "", window.location.pathname);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [clients]);
+  }, [clients, quotations, venues, isLoading]);
 
   // ── CLIENT AUTO-FILL ──────────────────────────────────────────────────────
   function handleClientChange(newId: string) {
@@ -450,8 +461,10 @@ export default function Quotations() {
   function loadQuote(q: any) {
     setSelectedQuoteId(q.id);
     setClientId(q.clientId ? String(q.clientId) : "");
+    const quoteClient = (clients as any[]).find((c) => c.id === q.clientId);
     setEventType(q.eventType || "Wedding");
     setGuestCount(q.guestCount ? String(q.guestCount) : "");
+    setEventDate(quoteClient?.eventDate ? format(new Date(quoteClient.eventDate), "yyyy-MM-dd") : "");
     setVenueId(q.venueId ? String(q.venueId) : "");
     setItems((q.items || []).length > 0
       ? q.items.map((i: any) => ({ id: uid(), serviceName: i.serviceName, cost: String(i.cost) }))
@@ -478,17 +491,37 @@ export default function Quotations() {
         serviceName: i.serviceName, cost: Number(i.cost) || 0,
       })),
     };
+    let savedQuote: any;
     try {
       if (selectedQuoteId) {
-        await updateQuotation.mutateAsync({ id: selectedQuoteId, ...payload });
-        toast({ title: "Quote updated successfully" });
+        savedQuote = await updateQuotation.mutateAsync({ id: selectedQuoteId, ...payload });
       } else {
-        const created = await createQuotation.mutateAsync(payload);
-        setSelectedQuoteId(created.id);
-        toast({ title: "Quote saved", description: "You can now mark it as sent or convert to event" });
+        savedQuote = await createQuotation.mutateAsync(payload);
+        setSelectedQuoteId(savedQuote.id);
       }
     } catch {
       toast({ title: "Failed to save", variant: "destructive" });
+      return;
+    }
+
+    try {
+      const quoteForPdf = {
+        ...payload,
+        ...savedQuote,
+        id: savedQuote?.id ?? selectedQuoteId,
+        createdAt: savedQuote?.createdAt ?? new Date().toISOString(),
+        items: savedQuote?.items ?? payload.items,
+      };
+      downloadQuotePdf(quoteForPdf, selectedClient, selectedVenue);
+      toast({
+        title: selectedQuoteId ? "Quote updated and PDF downloaded" : "Quote saved and PDF downloaded",
+        description: "The saved quote is also available from the client profile.",
+      });
+    } catch {
+      toast({
+        title: "Quote saved, but the PDF could not be downloaded",
+        variant: "destructive",
+      });
     }
   }
 

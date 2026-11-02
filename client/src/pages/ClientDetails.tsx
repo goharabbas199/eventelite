@@ -14,8 +14,10 @@ import {
   useTasks,
 } from "@/hooks/use-clients";
 import { useClientEvents } from "@/hooks/use-events";
+import { useQuotations } from "@/hooks/use-quotations";
 import { useVendors } from "@/hooks/use-vendors";
 import { useVenues } from "@/hooks/use-venues";
+import { downloadQuotePdf } from "@/lib/quote-pdf";
 import { Link, useRoute, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -71,6 +73,7 @@ import {
   ListChecks,
   CalendarDays,
   FileText,
+  Download,
   MoreHorizontal,
 } from "lucide-react";
 import { format } from "date-fns";
@@ -278,6 +281,7 @@ export default function ClientDetails() {
 
   const { data: venues } = useVenues();
   const { data: rawVendors } = useVendors();
+  const { data: quotations = [] } = useQuotations();
   const vendors = rawVendors as Vendor[] | undefined;
 
   const updateClient = useUpdateClient();
@@ -300,6 +304,11 @@ export default function ClientDetails() {
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [newTaskDueDate, setNewTaskDueDate] = useState("");
   const [expandedServiceIds, setExpandedServiceIds] = useState<Set<number>>(new Set());
+  const [quotesDialogOpen, setQuotesDialogOpen] = useState(false);
+  const clientQuotes = useMemo(
+    () => quotations.filter((quote: any) => Number(quote.clientId) === id),
+    [quotations, id],
+  );
 
   const toggleServiceExpand = (serviceId: number) =>
     setExpandedServiceIds((prev) => {
@@ -457,7 +466,20 @@ export default function ClientDetails() {
               </div>
             </div>
 
-            <div className="shrink-0">
+            <div className="flex flex-wrap items-center gap-2 shrink-0">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 rounded-xl text-xs gap-1.5"
+                onClick={() => setQuotesDialogOpen(true)}
+                data-testid="button-view-client-quotes"
+              >
+                <FileText className="w-3.5 h-3.5" />
+                Quotes
+                <Badge variant="secondary" className="h-5 min-w-5 px-1 text-[10px]">
+                  {clientQuotes.length}
+                </Badge>
+              </Button>
               <Select
                 value={client.venueId ? String(client.venueId) : ""}
                 onValueChange={(val) =>
@@ -478,6 +500,78 @@ export default function ClientDetails() {
             </div>
           </div>
         </div>
+
+        <Dialog open={quotesDialogOpen} onOpenChange={setQuotesDialogOpen}>
+          <DialogContent className="sm:max-w-xl">
+            <DialogHeader>
+              <DialogTitle>Saved quotes for {client.name}</DialogTitle>
+            </DialogHeader>
+            {clientQuotes.length === 0 ? (
+              <div className="py-8 text-center">
+                <FileText className="mx-auto mb-2 h-8 w-8 text-slate-300" />
+                <p className="text-sm font-medium text-slate-600 dark:text-zinc-300">No saved quotes yet</p>
+                <p className="mt-1 text-xs text-slate-400">Create a quote to keep it with this client.</p>
+                <Button
+                  className="mt-4 h-8 rounded-lg text-xs"
+                  onClick={() => navigate(`/quotations?clientId=${client.id}`)}
+                >
+                  <Plus className="mr-1.5 h-3.5 w-3.5" />
+                  Create quote
+                </Button>
+              </div>
+            ) : (
+              <div className="max-h-[60vh] space-y-2 overflow-y-auto pr-1">
+                {clientQuotes.map((quote: any) => {
+                  const quoteVenue = venues?.find((venue) => venue.id === quote.venueId);
+                  return (
+                    <div
+                      key={quote.id}
+                      className="flex flex-col gap-3 rounded-xl border border-slate-200 p-3 dark:border-zinc-700 sm:flex-row sm:items-center"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="text-sm font-semibold text-slate-800 dark:text-zinc-100">
+                            Quote #{String(quote.id).padStart(4, "0")}
+                          </p>
+                          <Badge variant="secondary" className="text-[10px]">{quote.status}</Badge>
+                        </div>
+                        <p className="mt-1 text-xs text-slate-500">
+                          {quote.eventType || "Event"} · {format(new Date(quote.createdAt), "MMM d, yyyy")} ·{" "}
+                          {`$${Number(quote.finalPrice || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                        </p>
+                        <p className="mt-0.5 text-[11px] text-slate-400">
+                          {(quote.items || []).length} line item{(quote.items || []).length === 1 ? "" : "s"}
+                        </p>
+                      </div>
+                      <div className="flex shrink-0 gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-8 rounded-lg text-xs"
+                          onClick={() => {
+                            setQuotesDialogOpen(false);
+                            navigate(`/quotations?clientId=${client.id}&quoteId=${quote.id}`);
+                          }}
+                        >
+                          Open
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-8 rounded-lg text-xs"
+                          onClick={() => downloadQuotePdf(quote, client, quoteVenue)}
+                        >
+                          <Download className="mr-1.5 h-3.5 w-3.5" />
+                          PDF
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
 
         {/* ── KPI strip ── */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
