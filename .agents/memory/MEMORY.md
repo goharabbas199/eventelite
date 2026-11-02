@@ -1,5 +1,4 @@
-- [Auth merge strategy](auth-merge.md) — Firebase Google Sign-In (popup) coexists with email OTP + forgot/reset password; passport-google-oauth20 must NOT be imported.
-- [Schema-to-DB migration gap](schema-migration-gap.md) — New Drizzle schema columns don't auto-apply to the live DB; must run ALTER TABLE manually or via drizzle-kit push.
+- [Schema-to-DB migration gap](schema-migration-gap.md) — Backfill populated tables before NOT NULL constraints; run db:push afterward to catch other schema drift.
 - [Zinc dark design system](zinc-design-system.md) — Full app uses zinc-950 palette (not slate); CSS tokens in index.css drive shadcn auto-cascade; bulk sed is the right tool for slate→zinc mass migration across page files.
 - [Service automation pattern](service-automation.md) — When a planned service is created with a vendorId, the backend auto-creates a vendor_payment and AI-generated tasks; tasks carry serviceId + aiGenerated=true columns added to tasks table.
-- [Organization tenancy boundary](organization-tenancy.md) — Derive scope from the authenticated server user; child records inherit ownership through validated aggregate-root parents.
+- [Organization tenancy boundary](organization-tenancy.md) — Tenant scope is server-owned; no-login access shares the default organization and is public, not isolated.
