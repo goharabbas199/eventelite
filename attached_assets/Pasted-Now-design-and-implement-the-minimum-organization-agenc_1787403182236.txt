@@ -1,0 +1,110 @@
+Now design and implement the minimum organization/agency ownership boundary for EventElite.
+
+IMPORTANT:
+This is a DATA ISOLATION FOUNDATION task.
+
+Do not:
+- Build CRM
+- Build Procurement
+- Build Inventory
+- Build HR
+- Build Logistics
+- Redesign the application
+- Change the Event/Client architecture yet
+- Delete existing data
+
+The audit found that business records currently have no consistent organization/agency ownership boundary.
+
+The long-term model is:
+
+Organization
+├── Users
+├── Clients
+├── Events
+├── Vendors
+├── Venues
+├── Quotations
+├── Invoices
+├── Payments
+├── Expenses
+└── Other business records
+
+For now, implement the minimum safe architecture.
+
+First inspect:
+- users table
+- all business tables
+- current authentication/session user identification
+- existing seed data
+- existing routes/storage methods
+
+Do NOT blindly add organizationId to every table without analyzing relationships.
+
+Create an Organization/Agency entity if one does not already exist.
+
+Create a relationship between users and their organization.
+
+Determine how existing records should be assigned to the initial organization.
+
+For existing data:
+- Create one default organization for the current application/company.
+- Assign existing users to it.
+- Assign existing business records to it.
+- Preserve all existing records.
+
+Then implement server-side organization scoping.
+
+Every authenticated business request must operate within the authenticated user's organization.
+
+For example:
+
+User A belongs to Organization 1.
+
+User A must NOT be able to:
+- Read Organization 2 clients
+- Update Organization 2 events
+- Delete Organization 2 vendors
+- View Organization 2 invoices
+- Access Organization 2 payments
+
+Do not rely on frontend filtering.
+
+The server/database query layer must enforce the organization boundary.
+
+Prefer implementing this centrally in storage/query helpers where practical instead of duplicating unsafe filtering logic across every route.
+
+Important:
+- Do not expose organization IDs in places where they can be manipulated to access another organization.
+- Never trust organizationId supplied by the frontend.
+- Derive organization ownership from the authenticated user/session.
+
+Before changing the database, inspect the current migration system.
+
+Use safe migrations.
+
+Do not drop existing tables.
+
+Do not delete existing data.
+
+After implementation:
+
+1. Build the application.
+2. Run TypeScript checks.
+3. Test existing user access.
+4. Test organization ownership.
+5. Test cross-organization access denial.
+6. Test creating new records.
+7. Test updating existing records.
+8. Test deleting records.
+9. Test login/session behavior.
+
+At the end report:
+- New tables/fields
+- Migration performed
+- How existing data was assigned
+- Which tables are organization-scoped
+- How server-side isolation is enforced
+- Tests performed
+- Any remaining tables that still need organization scoping
+
+Do not proceed into CRM or Event architecture changes.
