@@ -32,7 +32,7 @@ import {
   type InsertEvent,
   type InsertInvoice,
 } from "@shared/schema";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc, and, isNull } from "drizzle-orm";
 import { getOrganizationId } from "./organization-context";
 
 export interface IStorage {
