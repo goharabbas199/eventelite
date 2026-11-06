@@ -58,9 +58,16 @@ export function CreateClientForm({ onSuccess }: CreateClientFormProps) {
     }
     const finalEventType =
       formData.eventType === "Other" && customEventType ? customEventType : formData.eventType;
+    const { notes, guestCount, ...clientFormData } = formData;
 
     mutate(
-      { ...formData, eventType: finalEventType, eventDate: new Date(formData.eventDate) },
+      {
+        ...clientFormData,
+        clientNotes: notes,
+        guestCount: guestCount === "" ? null : Number(guestCount),
+        eventType: finalEventType,
+        eventDate: new Date(formData.eventDate),
+      },
       {
         onSuccess: async (newClient: { id: number }) => {
           if (applyTemplate && EVENT_TEMPLATES[finalEventType]) {
