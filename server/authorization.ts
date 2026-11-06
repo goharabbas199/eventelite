@@ -92,7 +92,12 @@ export function requirePermission(permission: Permission) {
       .then((user) => {
         if (!user) return res.status(401).json({ message: "Not authenticated" });
         (req as any).user = user;
-        if (!isKnownRole(user.role) || !ROLE_PERMISSIONS[user.role].includes(permission)) {
+        const role: unknown = user.role;
+        if (
+          typeof role !== "string" ||
+          !isKnownRole(role) ||
+          !ROLE_PERMISSIONS[role].includes(permission)
+        ) {
           return res.status(403).json({ message: "You do not have permission to perform this action" });
         }
         next();

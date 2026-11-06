@@ -18,6 +18,9 @@ export function registerImageRoutes(app: Express): void {
         size: size as "1024x1024" | "512x512" | "256x256",
       });
 
+      if (response.data === undefined) {
+        throw new Error("Image generation returned no data");
+      }
       const imageData = response.data[0];
       res.json({
         url: imageData.url,

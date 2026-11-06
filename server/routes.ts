@@ -859,10 +859,10 @@ export async function registerRoutes(
 
   app.put("/api/settings/:section", requireAuth, async (req, res) => {
     try {
-      const { section } = req.params;
+      const section = req.params.section;
 
       const allowed = Object.keys(DEFAULT_SETTINGS);
-      if (!allowed.includes(section)) {
+      if (typeof section !== "string" || !allowed.includes(section)) {
         return res.status(400).json({ message: "Unknown settings section" });
       }
       const canManageSettings =

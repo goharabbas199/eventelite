@@ -19,7 +19,7 @@ export function registerAudioRoutes(app: Express): void {
   });
 
   // Get single conversation with messages
-  app.get("/api/conversations/:id", async (req: Request, res: Response) => {
+  app.get("/api/conversations/:id", async (req: Request<{ id: string }>, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       const conversation = await chatStorage.getConversation(id);
@@ -47,7 +47,7 @@ export function registerAudioRoutes(app: Express): void {
   });
 
   // Delete conversation
-  app.delete("/api/conversations/:id", async (req: Request, res: Response) => {
+  app.delete("/api/conversations/:id", async (req: Request<{ id: string }>, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       await chatStorage.deleteConversation(id);
@@ -61,7 +61,7 @@ export function registerAudioRoutes(app: Express): void {
   // Send voice message and get streaming audio response
   // Auto-detects audio format and converts WebM/MP4/OGG to WAV
   // Uses gpt-4o-mini-transcribe for STT, gpt-audio for voice response
-  app.post("/api/conversations/:id/messages", audioBodyParser, async (req: Request, res: Response) => {
+  app.post("/api/conversations/:id/messages", audioBodyParser, async (req: Request<{ id: string }>, res: Response) => {
     try {
       const conversationId = parseInt(req.params.id);
       const { audio, voice = "alloy" } = req.body;
