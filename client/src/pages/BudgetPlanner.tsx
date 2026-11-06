@@ -965,12 +965,12 @@ const EXPENSE_CATEGORY_OPTIONS = [
 
 function CreateExpenseForm({ clientId, onSuccess }: { clientId: number; onSuccess: () => void }) {
   const { mutate, isPending } = useCreateExpense();
-  const form = useForm<Omit<InsertExpense, "clientId">>({
-    resolver: zodResolver(insertExpenseSchema.omit({ clientId: true })),
-    defaultValues: { category: "", item: "", cost: 0, isPaid: false },
+  const form = useForm<InsertExpense, undefined, InsertExpense>({
+    resolver: zodResolver(insertExpenseSchema),
+    defaultValues: { category: "", item: "", cost: "0", isPaid: false },
   });
 
-  function onSubmit(data: any) {
+  function onSubmit(data: InsertExpense) {
     mutate({ clientId, ...data }, { onSuccess: () => { form.reset(); onSuccess(); } });
   }
 

@@ -15,6 +15,7 @@ import {
   clients,
   plannedServices,
   expenses,
+  payments,
 } from "./schema";
 
 export const errorSchemas = {
@@ -184,6 +185,7 @@ export const api = {
           typeof clients.$inferSelect & {
             services: (typeof plannedServices.$inferSelect)[];
             expenses: (typeof expenses.$inferSelect)[];
+            payments: (typeof payments.$inferSelect)[];
           }
         >(),
         404: errorSchemas.notFound,
