@@ -57,6 +57,8 @@ const NAV_SECTIONS = [
   },
 ] as const;
 
+type NavItem = (typeof NAV_SECTIONS)[number]["items"][number];
+
 type TabId = "profile" | "business" | "security" | "notifications" | "appearance" | "support";
 
 export default function Settings() {
@@ -64,7 +66,9 @@ export default function Settings() {
   const { profile } = useSettings();
   const [tab, setTab] = useState<TabId | null>(null);
 
-  const activeItem = NAV_SECTIONS.flatMap((s) => s.items).find((i) => i.id === tab);
+  const activeItem = NAV_SECTIONS
+    .flatMap<NavItem>((section) => section.items)
+    .find((item) => item.id === tab);
 
   /* ── Sidebar panel ── */
   const sidebar = (
