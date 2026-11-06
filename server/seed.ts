@@ -120,6 +120,7 @@ export async function seedDatabase() {
       clientNotes: "Elegant garden-to-ballroom wedding. Bride prefers pastel color palette.",
       internalNotes: "Deposit received. Final balance due 2 weeks before event.",
     });
+    if (!c1) throw new Error("Failed to create seed client: Emily & James Carter");
     await storage.createPlannedService({ clientId: c1.id, vendorId: v1.id, serviceName: "Catering – Gold Wedding Package", cost: "18000.00", vendorCost: "15000.00", clientPrice: "18000.00", status: "Confirmed", notes: "120 guests × $150/person" });
     await storage.createPlannedService({ clientId: c1.id, vendorId: v3.id, serviceName: "Photography – Full Day Coverage", cost: "3500.00", vendorCost: "2800.00", clientPrice: "3500.00", status: "Confirmed", notes: "10-hour, 2 photographers" });
     await storage.createPlannedService({ clientId: c1.id, vendorId: v4.id, serviceName: "Floral & Decoration Package", cost: "5500.00", vendorCost: "4500.00", clientPrice: "5500.00", status: "Planned", notes: "Bridal bouquet + 15 centrepieces + arch" });
@@ -144,6 +145,7 @@ export async function seedDatabase() {
       clientNotes: "Annual tech conference. 3 keynote speakers, 10 breakout rooms.",
       internalNotes: "Largest client this quarter. All vendors confirmed.",
     });
+    if (!c2) throw new Error("Failed to create seed client: TechSummit Conference 2026");
     await storage.createPlannedService({ clientId: c2.id, vendorId: v2.id, serviceName: "Full AV & Streaming Setup", cost: "8000.00", vendorCost: "6000.00", clientPrice: "8000.00", status: "Confirmed", notes: "Main stage + 10 breakout rooms" });
     await storage.createPlannedService({ clientId: c2.id, vendorId: v1.id, serviceName: "Conference Catering", cost: "15000.00", vendorCost: "11000.00", clientPrice: "15000.00", status: "Confirmed", notes: "Breakfast, lunch & coffee for 300" });
     await storage.createPlannedService({ clientId: c2.id, vendorId: v3.id, serviceName: "Event Photography & Video", cost: "4500.00", vendorCost: "3500.00", clientPrice: "4500.00", status: "Confirmed", notes: "Full day photo + highlight reel" });
@@ -166,6 +168,7 @@ export async function seedDatabase() {
       clientNotes: "Annual employee recognition gala. CEO speech. Formal dress code.",
       internalNotes: "Client pays in 3 installments. Second installment pending.",
     });
+    if (!c3) throw new Error("Failed to create seed client: Acme Corp — Annual Gala");
     await storage.createPlannedService({ clientId: c3.id, vendorId: v1.id, serviceName: "Catering – Corporate Dinner", cost: "12000.00", vendorCost: "9500.00", clientPrice: "12000.00", status: "Confirmed", notes: "250 guests buffet" });
     await storage.createPlannedService({ clientId: c3.id, vendorId: v2.id, serviceName: "AV & Tech Setup", cost: "3000.00", vendorCost: "2200.00", clientPrice: "3000.00", status: "Confirmed" });
     await storage.createPlannedService({ clientId: c3.id, vendorId: v3.id, serviceName: "Event Photography", cost: "2000.00", vendorCost: "1500.00", clientPrice: "2000.00", status: "Planned" });
@@ -186,6 +189,7 @@ export async function seedDatabase() {
       clientNotes: "50th birthday celebration. Garden party feel. Live music preferred.",
       internalNotes: "Waiting on venue confirmation before moving forward.",
     });
+    if (!c4) throw new Error("Failed to create seed client: Sophia & Marcus Williams");
     await storage.createPlannedService({ clientId: c4.id, vendorId: v1.id, serviceName: "Catering – Silver Buffet", cost: "4800.00", vendorCost: "3800.00", clientPrice: "4800.00", status: "Planned", notes: "60 guests" });
     await storage.createPlannedService({ clientId: c4.id, vendorId: v4.id, serviceName: "Decoration & Balloons", cost: "1500.00", vendorCost: "1200.00", clientPrice: "1500.00", status: "Planned" });
 
@@ -203,6 +207,7 @@ export async function seedDatabase() {
       clientNotes: "Intimate garden engagement party.",
       internalNotes: "Fully paid. Great client — will refer others.",
     });
+    if (!c5) throw new Error("Failed to create seed client: Aisha & Derek Thompson");
     await storage.createPlannedService({ clientId: c5.id, vendorId: v1.id, serviceName: "Catering – Corporate Lunch Box", cost: "2100.00", vendorCost: "1700.00", clientPrice: "2100.00", status: "Confirmed" });
     await storage.createPlannedService({ clientId: c5.id, vendorId: v3.id, serviceName: "Photography – Half Day", cost: "1200.00", vendorCost: "900.00", clientPrice: "1200.00", status: "Confirmed" });
     await storage.createPlannedService({ clientId: c5.id, vendorId: v4.id, serviceName: "Floral Arrangements", cost: "900.00", vendorCost: "650.00", clientPrice: "900.00", status: "Confirmed" });
