@@ -4,7 +4,13 @@ import type {
   InsertClient,
   InsertPlannedService,
   InsertExpense,
+  Task,
 } from "@shared/schema";
+
+export type TaskApiResponse = Omit<Task, "createdAt" | "dueDate"> & {
+  createdAt: string | null;
+  dueDate: string | null;
+};
 
 export function useClients() {
   return useQuery({
@@ -561,7 +567,7 @@ export function useTasks(clientId: number) {
     queryFn: async () => {
       const res = await fetch(`/api/clients/${clientId}/tasks`);
       if (!res.ok) throw new Error("Failed to fetch tasks");
-      return res.json() as Promise<Array<{ id: number; clientId: number; title: string; status: string; dueDate: string | null; createdAt: string }>>;
+      return res.json() as Promise<TaskApiResponse[]>;
     },
     enabled: !!clientId,
   });

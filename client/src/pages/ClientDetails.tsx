@@ -12,6 +12,7 @@ import {
   useUpdateTask,
   useDeleteTask,
   useTasks,
+  type TaskApiResponse,
 } from "@/hooks/use-clients";
 import { useClientEvents } from "@/hooks/use-events";
 import { useQuotations } from "@/hooks/use-quotations";
@@ -83,7 +84,6 @@ import type {
   Payment,
   VendorPayment,
   Expense,
-  Task,
 } from "@shared/schema";
 import { ServiceForm } from "@/components/clients/service-form";
 import { PaymentForm } from "@/components/clients/payment-form";
@@ -108,7 +108,7 @@ interface Vendor {
 interface ServiceRowProps {
   service: PlannedService;
   vendor: Vendor | undefined;
-  serviceTasks: Task[];
+  serviceTasks: TaskApiResponse[];
   isExpanded: boolean;
   clientId: number;
   onEdit: () => void;
