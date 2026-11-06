@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { api, buildUrl } from "@shared/routes";
-import type { InsertVenue, InsertBookingOption } from "@shared/schema";
+import { api, buildUrl, type CreateVenueInput } from "@shared/routes";
+import type { InsertBookingOption, InsertVenue } from "@shared/schema";
 
 /* ================================
    GET ALL VENUES
@@ -45,7 +45,7 @@ export function useCreateVenue() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: InsertVenue) => {
+    mutationFn: async (data: CreateVenueInput) => {
       const payload = {
         ...data,
         basePrice: String(data.basePrice),

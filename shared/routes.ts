@@ -18,6 +18,16 @@ import {
   payments,
 } from "./schema";
 
+const createVenueInputSchema = insertVenueSchema.extend({
+  basePrice: z.union([
+    insertVenueSchema.shape.basePrice,
+    z.number().finite().nonnegative(),
+  ]),
+  images: z.array(z.string().url()).optional(),
+});
+
+export type CreateVenueInput = z.infer<typeof createVenueInputSchema>;
+
 export const errorSchemas = {
   validation: z.object({
     message: z.string(),
@@ -102,7 +112,7 @@ export const api = {
     create: {
       method: "POST" as const,
       path: "/api/venues" as const,
-      input: insertVenueSchema,
+      input: createVenueInputSchema,
       responses: {
         201: z.custom<typeof venues.$inferSelect>(),
         400: errorSchemas.validation,

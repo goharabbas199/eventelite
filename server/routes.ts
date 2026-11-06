@@ -108,12 +108,13 @@ export async function registerRoutes(
 
   app.post(api.venues.create.path, requirePermission("business:write"), async (req, res) => {
     try {
-      const { images = [], ...venueData } = req.body;
+      const { images = [], ...venueData } = api.venues.create.input.parse(req.body);
+      const venue = await storage.createVenue({
+        ...venueData,
+        basePrice: String(venueData.basePrice),
+      });
 
-      const input = api.venues.create.input.parse(venueData);
-      const venue = await storage.createVenue(input);
-
-      if (Array.isArray(images) && images.length > 0) {
+      if (images.length > 0) {
         await storage.addVenueImages(venue.id, images);
       }
 
