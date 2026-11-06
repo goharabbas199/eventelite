@@ -147,7 +147,7 @@ export default function Dashboard() {
   return (
     <Layout title="Dashboard">
       {/* ── Greeting strip ── */}
-      <div className="flex items-center justify-between reveal">
+      <div className="flex items-center justify-between">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-0.5">
             {format(new Date(), "EEEE, MMMM do")}
