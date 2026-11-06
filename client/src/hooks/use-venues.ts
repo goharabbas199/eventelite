@@ -12,7 +12,7 @@ export function useVenues() {
     queryFn: async () => {
       const res = await fetch(api.venues.list.path);
       if (!res.ok) throw new Error("Failed to fetch venues");
-      return await res.json();
+      return api.venues.list.responses[200].parse(await res.json());
     },
   });
 }
