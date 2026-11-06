@@ -87,7 +87,7 @@ export default function Dashboard() {
   const netProfit   = totalRevenue - totalExpenses;
   const invoiceList = invoices as any[];
   const overdueInvoices = invoiceList.filter((i) => i.status === "overdue");
-  const unpaidInvoiceAmount = invoiceList.filter((i) => i.status !== "paid").reduce((s, i) => s + Number(i.amount), 0);
+  const overdueInvoiceAmount = overdueInvoices.reduce((sum, invoice) => sum + Number(invoice.amount), 0);
   const activeClients = clients?.filter((c: any) => c.status === "Lead" || c.status === "Confirmed").length ?? 0;
   const completedClients = clients?.filter((c: any) => c.status === "Completed").length ?? 0;
   const winRate = (clients?.length ?? 0) > 0
@@ -196,7 +196,7 @@ export default function Dashboard() {
               {overdueInvoices.length} overdue invoice{overdueInvoices.length !== 1 ? "s" : ""}
             </p>
             <p className="text-xs text-red-500/70 dark:text-red-500">
-              ${unpaidInvoiceAmount.toLocaleString()} outstanding — click to review
+              ${overdueInvoiceAmount.toLocaleString()} outstanding — click to review
             </p>
           </div>
           <ArrowUpRight className="w-4 h-4 text-red-400 shrink-0" />
