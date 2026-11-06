@@ -31,23 +31,25 @@ interface ServiceFormProps {
   onSuccess: () => void;
 }
 
+type ServiceFormValues = Omit<InsertPlannedService, "clientId">;
+
 export function ServiceForm({ clientId, editingService, onSuccess }: ServiceFormProps) {
   const { mutate: create, isPending: isCreating } = useCreatePlannedService();
   const { mutate: update, isPending: isUpdating } = useUpdatePlannedService();
   const { mutate: createVendorPayment } = useCreateVendorPayment();
   const { data: vendors } = useVendors();
 
-  const form = useForm<Omit<InsertPlannedService, "clientId">>({
+  const form = useForm<ServiceFormValues, undefined, ServiceFormValues>({
     resolver: zodResolver(insertPlannedServiceSchema.omit({ clientId: true })),
     defaultValues: {
       serviceName: editingService?.serviceName ?? "",
-      cost: editingService?.cost ? Number(editingService.cost) : 0,
+      cost: editingService?.cost ?? "0",
       vendorId: editingService?.vendorId ?? undefined,
       notes: editingService?.notes ?? "",
     },
   });
 
-  function onSubmit(data: Omit<InsertPlannedService, "clientId">) {
+  function onSubmit(data: ServiceFormValues) {
     if (editingService) {
       update(
         { serviceId: editingService.id, clientId, ...data, cost: Number(data.cost) },

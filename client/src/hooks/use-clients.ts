@@ -294,8 +294,8 @@ export function useUpdatePlannedService() {
       serviceId: number;
       clientId: number;
       cost?: number;
-      notes?: string;
-      status?: string;
+      notes?: string | null;
+      status?: string | null;
     }) => {
       const payload: any = { ...data };
       if (payload.cost !== undefined) payload.cost = String(payload.cost);
