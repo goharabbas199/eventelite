@@ -634,6 +634,7 @@ function CreateOptionForm({
                 <FormControl>
                   <select
                     {...field}
+                    value={field.value ?? "AED"}
                     className="w-full border rounded-md h-10 px-3"
                   >
                     <option value="AED">AED</option>
@@ -655,7 +656,7 @@ function CreateOptionForm({
             <FormItem>
               <FormLabel>Description</FormLabel>
               <FormControl>
-                <Textarea rows={4} {...field} />
+                <Textarea rows={4} {...field} value={field.value ?? ""} />
               </FormControl>
               <FormMessage />
             </FormItem>

@@ -292,7 +292,7 @@ function CreateProductForm({
       {
         vendorId,
         name: data.name,
-        price: Number(data.price),
+        price: data.price,
         description: data.description,
       },
       {
