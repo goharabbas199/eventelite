@@ -229,8 +229,6 @@ export function useCreateExpense() {
       ...data
     }: { clientId: number } & Omit<InsertExpense, "clientId">) => {
       const url = buildUrl(api.expenses.create.path, { clientId });
-      console.log("Expense URL:", url);
-      console.log("ClientId being sent:", clientId);
 
       const payload = {
         ...data,

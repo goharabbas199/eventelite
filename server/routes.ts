@@ -7,6 +7,7 @@ import cloudinary, { cloudinaryConfigured } from "./cloudinary";
 import multer from "multer";
 import { runAI } from "./services/aiService";
 import { requireAuth, requirePermission } from "./authorization";
+import { logSafeException } from "./logging";
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -63,7 +64,7 @@ export async function registerRoutes(
 
       res.json(updated);
     } catch (err) {
-      console.error("Update vendor error:", err);
+      logSafeException("vendor_update", err, res.locals.requestId);
       res.status(500).json({ message: "Failed to update vendor" });
     }
   });
@@ -83,7 +84,7 @@ export async function registerRoutes(
 
       res.status(201).json(product);
     } catch (error) {
-      console.error("Create vendor product error:", error);
+      logSafeException("vendor_product_create", error, res.locals.requestId);
       res.status(500).json({ message: "Failed to create vendor product" });
     }
   });
@@ -93,7 +94,7 @@ export async function registerRoutes(
       await storage.deleteVendorProduct(Number(req.params.id));
       res.status(204).end();
     } catch (error) {
-      console.error("Delete vendor product error:", error);
+      logSafeException("vendor_product_delete", error, res.locals.requestId);
       res.status(500).json({ message: "Failed to delete vendor product" });
     }
   });
@@ -141,7 +142,7 @@ export async function registerRoutes(
 
       res.json(updated);
     } catch (err) {
-      console.error("Update venue error:", err);
+      logSafeException("venue_update", err, res.locals.requestId);
       res.status(500).json({ message: "Failed to update venue" });
     }
   });
@@ -160,7 +161,7 @@ export async function registerRoutes(
 
       res.json(updated);
     } catch (err) {
-      console.error("Update main image error:", err);
+      logSafeException("venue_main_image_update", err, res.locals.requestId);
       res.status(500).json({ message: "Failed to update main image" });
     }
   });
@@ -183,7 +184,7 @@ export async function registerRoutes(
 
       res.status(201).json({ success: true });
     } catch (err) {
-      console.error("Add gallery image error:", err);
+      logSafeException("venue_gallery_image_add", err, res.locals.requestId);
       res.status(500).json({ message: "Failed to add gallery image" });
     }
   });
@@ -193,7 +194,7 @@ export async function registerRoutes(
       await storage.deleteVenueImage(Number(req.params.id));
       res.status(204).end();
     } catch (err) {
-      console.error("Delete image error:", err);
+      logSafeException("venue_image_delete", err, res.locals.requestId);
       res.status(500).json({ message: "Failed to delete image" });
     }
   });
@@ -212,7 +213,7 @@ export async function registerRoutes(
       const payment = await storage.createPayment({ ...req.body, clientId });
       res.status(201).json(payment);
     } catch (err) {
-      console.error("Create payment error:", err);
+      logSafeException("payment_create", err, res.locals.requestId);
       res.status(500).json({ message: "Failed to create payment" });
     }
   });
@@ -236,7 +237,7 @@ export async function registerRoutes(
       const payment = await storage.createVendorPayment({ ...req.body, clientId });
       res.status(201).json(payment);
     } catch (err) {
-      console.error("Create vendor payment error:", err);
+      logSafeException("vendor_payment_create", err, res.locals.requestId);
       res.status(500).json({ message: "Failed to create vendor payment" });
     }
   });
@@ -247,7 +248,7 @@ export async function registerRoutes(
       const updated = await storage.updateVendorPayment(id, req.body);
       res.json(updated);
     } catch (err) {
-      console.error("Update vendor payment error:", err);
+      logSafeException("vendor_payment_update", err, res.locals.requestId);
       res.status(500).json({ message: "Failed to update vendor payment" });
     }
   });
@@ -277,7 +278,7 @@ export async function registerRoutes(
         return res.status(400).json({ message: err.errors[0].message });
       }
 
-      console.error("Create booking option error:", err);
+      logSafeException("booking_option_create", err, res.locals.requestId);
       res.status(500).json({ message: "Failed to create booking option" });
     }
   });
@@ -310,7 +311,7 @@ export async function registerRoutes(
       if (err instanceof z.ZodError) {
         return res.status(400).json({ message: err.errors[0].message });
       }
-      console.error("Create client error:", err);
+      logSafeException("client_create", err, res.locals.requestId);
       res.status(500).json({ message: "Failed to create client" });
     }
   });
@@ -351,7 +352,7 @@ export async function registerRoutes(
       if (err instanceof z.ZodError) {
         return res.status(400).json({ message: err.errors[0].message });
       }
-      console.error("Confirm budget error:", err);
+      logSafeException("client_budget_confirm", err, res.locals.requestId);
       res.status(500).json({ message: "Failed to confirm budget" });
     }
   });
@@ -399,6 +400,7 @@ export async function registerRoutes(
         runAI({
           feature: "service_checklist",
           prompt: `Generate a task checklist for a ${service.serviceName} service`,
+          requestId: res.locals.requestId,
         })
           .then(async (aiResult) => {
             const taskTitles: string[] = aiResult?.tasks || [];
@@ -412,7 +414,9 @@ export async function registerRoutes(
               });
             }
           })
-          .catch((e) => console.error("[AI checklist] Failed:", e))
+          .catch((e) =>
+            logSafeException("ai_checklist", e, res.locals.requestId),
+          )
       );
 
       await Promise.allSettled(automations);
@@ -424,7 +428,7 @@ export async function registerRoutes(
         return res.status(400).json({ message: err.errors[0].message });
       }
 
-      console.error("Create service error:", err);
+      logSafeException("service_create", err, res.locals.requestId);
 
       res.status(500).json({
         message:
@@ -444,7 +448,7 @@ export async function registerRoutes(
       const service = await storage.updatePlannedService(id, updates);
       res.json(service);
     } catch (err) {
-      console.error("Update service error:", err);
+      logSafeException("service_update", err, res.locals.requestId);
       res.status(500).json({ message: "Failed to update service" });
     }
   });
@@ -457,7 +461,7 @@ export async function registerRoutes(
       await storage.deletePlannedService(serviceId);
       res.status(204).end();
     } catch (err) {
-      console.error("Delete planned service error:", err);
+      logSafeException("planned_service_delete", err, res.locals.requestId);
       res.status(500).json({ message: "Failed to delete service" });
     }
   });
@@ -469,7 +473,7 @@ export async function registerRoutes(
       await storage.deletePlannedService(serviceId);
       res.status(204).end();
     } catch (err) {
-      console.error("Delete planned service error:", err);
+      logSafeException("planned_service_delete", err, res.locals.requestId);
       res.status(500).json({ message: "Failed to delete service" });
     }
   });
@@ -508,7 +512,7 @@ export async function registerRoutes(
 
       return res.status(201).json(expense);
     } catch (err) {
-      console.error("Create expense error:", err);
+      logSafeException("expense_create", err, res.locals.requestId);
 
       if (err instanceof z.ZodError) {
         return res.status(400).json({ message: err.errors[0].message });
@@ -556,7 +560,7 @@ export async function registerRoutes(
       const task = await storage.createTask({ ...req.body, clientId });
       res.status(201).json(task);
     } catch (err) {
-      console.error("Create task error:", err);
+      logSafeException("task_create", err, res.locals.requestId);
       res.status(500).json({ message: "Failed to create task" });
     }
   });
@@ -594,7 +598,7 @@ export async function registerRoutes(
 
       res.json({ url: uploaded.secure_url });
     } catch (error: any) {
-      console.error("Cloudinary upload error:", error);
+      logSafeException("cloudinary_upload", error, res.locals.requestId);
       res.status(500).json({
         message: "Upload failed",
         cloudinaryError: error?.message || error,
@@ -668,7 +672,7 @@ export async function registerRoutes(
       const event = await storage.createEvent(body);
       res.status(201).json(event);
     } catch (err: any) {
-      console.error("Create event error:", err);
+      logSafeException("event_create", err, res.locals.requestId);
       res.status(500).json({ message: err?.message || "Failed to create event" });
     }
   });
@@ -721,7 +725,7 @@ export async function registerRoutes(
       const invoice = await storage.createInvoice(req.body);
       res.status(201).json(invoice);
     } catch (err: any) {
-      console.error("Create invoice error:", err);
+      logSafeException("invoice_create", err, res.locals.requestId);
       res.status(500).json({ message: err?.message || "Failed to create invoice" });
     }
   });
@@ -775,10 +779,15 @@ export async function registerRoutes(
       if (!feature || !prompt) {
         return res.status(400).json({ message: "feature and prompt are required" });
       }
-      const result = await runAI({ feature, prompt, context });
+      const result = await runAI({
+        feature,
+        prompt,
+        context,
+        requestId: res.locals.requestId,
+      });
       res.json(result);
     } catch (err: any) {
-      console.error("AI error:", err);
+      logSafeException("ai_request", err, res.locals.requestId);
       res.status(500).json({ message: err?.message || "AI request failed" });
     }
   });

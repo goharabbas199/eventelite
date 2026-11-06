@@ -13,7 +13,6 @@ if (cloudinaryConfigured) {
     api_secret: apiSecret,
   });
   console.log("✅ Cloudinary configured successfully");
-  console.log("Cloud name:", cloudName);
 } else {
   console.warn("⚠️  Cloudinary environment variables missing. Image upload features will be unavailable.");
   console.warn("Set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET to enable image uploads.");

@@ -437,9 +437,6 @@ function EditVendorForm({
         onSuccess: () => {
           onClose();
         },
-        onError: (err) => {
-          console.error("Update failed:", err);
-        },
       },
     );
   }

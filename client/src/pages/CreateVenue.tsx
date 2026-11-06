@@ -82,7 +82,6 @@ export default function CreateVenue() {
 
       return data.url;
     } catch (error) {
-      console.error("Upload error:", error);
       alert("Upload failed");
       return null;
     }

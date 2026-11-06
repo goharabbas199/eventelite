@@ -1,4 +1,5 @@
 import { runCustomAI } from "./customAI";
+import { logSafeException } from "../logging";
 
 export type AIFeature =
   | "event_planner"
@@ -12,6 +13,7 @@ export type AIFeature =
 interface AIRequest {
   feature: AIFeature;
   prompt: string;
+  requestId?: string;
   context?: {
     clients?: any[];
     vendors?: any[];
@@ -160,7 +162,12 @@ export async function runAI(request: AIRequest): Promise<any> {
     try {
       return await runWithOpenAI(request);
     } catch (err: any) {
-      console.warn("[AI] OpenAI request failed, falling back to built-in engine:", err?.message);
+      logSafeException(
+        "ai_openai_fallback",
+        err,
+        request.requestId,
+        "warn",
+      );
     }
   }
 

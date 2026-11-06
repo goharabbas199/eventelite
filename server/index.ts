@@ -2,30 +2,15 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
+import { randomUUID } from "node:crypto";
 import { runWithOrganization } from "./organization-context";
+import { logSafeException } from "./logging";
 
 const app = express();
 const httpServer = createServer(app);
 
 // Trust Replit's reverse proxy so cookies and secure detection work correctly
 app.set("trust proxy", 1);
-
-declare module "http" {
-  interface IncomingMessage {
-    rawBody: unknown;
-  }
-}
-
-app.use(
-  express.json({
-    limit: "15mb",
-    verify: (req, _res, buf) => {
-      req.rawBody = buf;
-    },
-  }),
-);
-
-app.use(express.urlencoded({ extended: false, limit: "15mb" }));
 
 export function log(message: string, source = "express") {
   const formattedTime = new Date().toLocaleTimeString("en-US", {
@@ -39,30 +24,36 @@ export function log(message: string, source = "express") {
 }
 
 app.use((req, res, next) => {
+  const requestId = randomUUID();
+  res.locals.requestId = requestId;
   const start = Date.now();
-  const path = req.path;
-  let capturedJsonResponse: Record<string, any> | undefined = undefined;
-
-  const originalResJson = res.json;
-  res.json = function (bodyJson, ...args) {
-    capturedJsonResponse = bodyJson;
-    return originalResJson.apply(res, [bodyJson, ...args]);
-  };
 
   res.on("finish", () => {
-    const duration = Date.now() - start;
-    if (path.startsWith("/api")) {
-      let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
-      if (capturedJsonResponse) {
-        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
-      }
+    if (req.path.startsWith("/api")) {
+      const routePath = req.route?.path;
+      const route =
+        typeof routePath === "string" ? routePath : "<unmatched>";
+      const method = /^[A-Z]{1,10}$/.test(req.method) ? req.method : "OTHER";
 
-      log(logLine);
+      console.log(
+        JSON.stringify({
+          level: "info",
+          event: "http_request",
+          requestId,
+          method,
+          route,
+          statusCode: res.statusCode,
+          durationMs: Date.now() - start,
+        }),
+      );
     }
   });
 
   next();
 });
+
+app.use(express.json({ limit: "15mb" }));
+app.use(express.urlencoded({ extended: false, limit: "15mb" }));
 
 (async () => {
   try {
@@ -74,7 +65,7 @@ app.use((req, res, next) => {
         await runWithOrganization(1, () => seedModule.seedDatabase());
         log("Database seeded (development only)");
       } catch (err) {
-        console.warn("Seed skipped:", err);
+        logSafeException("database_seed", err, undefined, "warn");
       }
     }
 
@@ -82,11 +73,9 @@ app.use((req, res, next) => {
       const status = err.status || err.statusCode || 500;
       const message = err.message || "Internal Server Error";
 
-      console.error("Internal Server Error:", err);
+      logSafeException("http_error_handler", err, res.locals.requestId);
 
-      if (res.headersSent) {
-        return next(err);
-      }
+      if (res.headersSent) return res.destroy();
 
       return res.status(status).json({ message });
     });
@@ -110,7 +99,7 @@ app.use((req, res, next) => {
       },
     );
   } catch (err) {
-    console.error("Server startup failed:", err);
+    logSafeException("server_startup", err);
     process.exit(1);
   }
 })();

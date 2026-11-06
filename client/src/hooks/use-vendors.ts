@@ -116,8 +116,6 @@ export function useCreateVendorProduct() {
       });
 
       if (!res.ok) {
-        const errorText = await res.text();
-        console.error("Create product failed:", errorText);
         throw new Error("Failed to create product");
       }
 
